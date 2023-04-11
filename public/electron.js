@@ -235,11 +235,7 @@ app.whenReady().then(() => {
           // write it to the download folder
           fs.writeFileSync(`C:/Users/${os.userInfo().username}/AppData/Local/Temp/kocity-update.exe`, res.data)
 
-          // run the file
-          // exec("start update.bat", { cwd: __dirname }, (err, stdout, stderr) => {
-          //   if(err) return console.log(err)
-          //   console.log(stdout)
-          // })
+          // open the file
           spawn(`C:/Users/${os.userInfo().username}/AppData/Local/Temp/kocity-update.exe`, { detached: true, stdio: 'ignore' })
           
           setTimeout(() => {
