@@ -92,6 +92,7 @@ function createWindow () {
         writeStream.on('finish', () => {
           if(cancelled) return
           writeStream.close();
+          win.setProgressBar(-1)
           win.webContents.executeJavaScript(`window.postMessage({type: "download-progress", data: 100})`)
           console.log("Downloaded");
           // unzip the file
