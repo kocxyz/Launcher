@@ -1,21 +1,39 @@
 {
-  "name": "kocitylauncher",
+  "name": "knockoutcitylauncher",
+  "description": "Unofficial Knockout City Launcher",
   "version": "0.1.0",
   "private": true,
+  "homepage": "./",
+  "main": "public/electron.js",
+  "author": "IPGsystems",
   "dependencies": {
+    "@electron/remote": "^2.0.9",
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@fontsource/roboto": "^4.5.8",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.11.16",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.3.5",
+    "moment": "^2.29.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
+    "unzipper": "^0.10.11",
     "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "electron": "latest"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "electron-dev": "electron .",
+    "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {
     "extends": [
@@ -34,5 +52,17 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "build": {
+    "appId": "net.ipgg.knockoutcitylauncher",
+    "productName": "Knockout City Launcher",
+    "files": [
+      "build/**/*",
+      "node_modules/**/*"
+    ],
+    "win": {
+      "requestedExecutionLevel": "requireAdministrator",
+      "icon": "/public/icon.png"
+    }
   }
 }
