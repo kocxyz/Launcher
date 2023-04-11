@@ -69,6 +69,8 @@ function createWindow () {
       let cancelled = false
       event.returnValue = "downloading"
 
+      if(!fs.existsSync(arg.path)) fs.mkdirSync(arg.path, { recursive: true })
+
       let fileSize = 0;
       if (fs.existsSync(`${arg.path}/files-${arg.version}.zip`)) {
         const stats = fs.statSync(`${arg.path}/files-${arg.version}.zip`);

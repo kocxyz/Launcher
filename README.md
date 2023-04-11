@@ -1,8 +1,6 @@
 # Unofficial Knockout City Launcher
 by Ipmake // IPGsystems
 
-<!-- Add an image -->
-
 This is a launcher for the self hosted version of Knockout City, developed by Velan Studios.
 This launcher is developed by the community and is not affiliated with Velan Studios.
 
@@ -22,3 +20,5 @@ This launcher is developed by the community and is not affiliated with Velan Stu
 
 ## Installation
 1. Download the latest installer from the [releases](https://github.com/Ipmake/kocitylauncher/releases/) page
+2. Run the installer
+3. If the windows defender message pops up, click "More info" and then "Run anyway"
