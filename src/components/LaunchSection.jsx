@@ -45,7 +45,7 @@ function LaunchSection(props) {
                 }
             })(gameState)}
             {/* <p style={{ fontFamily: 'monospace', marginTop: '5px', fontSize: '15px' }}>VERSION 10.0-264847</p> */}
-            <Stack direction="row" style={{ marginTop: '2px'}}>
+            <Stack direction="row" style={{ marginTop: '2px', opacity: gameState === 'installing' ? 0 : 1}}>
                 <Typography style={{ fontFamily: 'monospace' }}>Server: </Typography>
                 <Typography title={props.currServer} style={{ marginLeft: '5px', fontFamily: 'monospace'  }}> {props.currServerName} </Typography>
             </Stack>

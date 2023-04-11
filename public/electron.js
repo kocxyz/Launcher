@@ -8,6 +8,7 @@ const unzipper = require("unzipper")
 const { spawn, exec } = require('child_process');
 const axios = require('axios')
 const os = require('os')
+const sudo = require('sudo-prompt');
 remote.initialize()
 
 function createWindow () {
@@ -22,7 +23,7 @@ function createWindow () {
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-            preload: __dirname + '/preload.js',
+            preload: path.join(__dirname, 'preload.js'),
             webSecurity: false
         }
     })
@@ -66,10 +67,52 @@ function createWindow () {
 
     ipcMain.on('download-game', async (event, arg) => {
       console.log("Starting download")
+
+      const sudoOptions = {
+        name: 'Knockout City Launcher'
+      }
+
       let cancelled = false
       event.returnValue = "downloading"
 
-      if(!fs.existsSync(arg.path)) fs.mkdirSync(arg.path, { recursive: true })
+      if(!fs.existsSync(arg.path)) {
+        // check if this process is allowed to write to the directory
+        try {
+          fs.mkdirSync(arg.path)
+        } catch (error) {
+          console.log(error.message)
+          // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
+
+          await new Promise((resolve, reject) => {
+            sudo.exec(`mkdir "${arg.path}" && icacls "${arg.path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
+              if(error) reject("Could not create directory")
+              else {
+                resolve()
+                // sudo.exec(`icacls "${arg.path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
+                //   if(error) reject("Could not raise permissions")
+                //   else resolve()
+                // })
+              }
+            })
+          })
+        }
+      } else {
+        // check if this process is allowed to write to the directory
+        try {
+          fs.writeFileSync(`${arg.path}/test.txt`, "test")
+        } catch (error) {
+          console.log(error.message)
+          // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
+          await new Promise((resolve, reject) => {
+            sudo.exec(`icacls "${arg.path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
+              if(error) reject("Could not raise permissions"), console.log(error)
+              else resolve()
+            })
+          })
+        } finally {
+          fs.existsSync(`${arg.path}/test.txt`) && fs.unlinkSync(`${arg.path}/test.txt`)
+        }
+      }
 
       let fileSize = 0;
       if (fs.existsSync(`${arg.path}/files-${arg.version}.zip`)) {
@@ -121,7 +164,6 @@ function createWindow () {
         });
 
         res.on('data', (chunk) => {
-          console.log((fileSize + writeStream.bytesWritten) / (parseFloat(res.headers['content-length']) + fileSize))
           win.webContents.executeJavaScript(`window.postMessage({type: "download-progress", data: ${roundToDecimalPlace(((fileSize + writeStream.bytesWritten) / (parseFloat(res.headers['content-length']) + fileSize)) * 100, 2)}})`)
           win.setProgressBar((fileSize + writeStream.bytesWritten) / (parseFloat(res.headers['content-length']) + fileSize))
         });

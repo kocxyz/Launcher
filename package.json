@@ -1,7 +1,7 @@
 {
   "name": "knockoutcitylauncher",
   "description": "Unofficial Knockout City Launcher",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "private": true,
   "homepage": "./",
   "main": "public/electron.js",
@@ -21,8 +21,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
-    "unzipper": "^0.10.11",
-    "web-vitals": "^2.1.4"
+    "sudo-prompt": "^9.2.1",
+    "unzipper": "^0.10.11"
   },
   "devDependencies": {
     "electron": "latest"
@@ -61,7 +61,6 @@
       "node_modules/**/*"
     ],
     "win": {
-      "requestedExecutionLevel": "requireAdministrator",
       "icon": "/public/icon.png"
     }
   }
