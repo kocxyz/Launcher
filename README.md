@@ -22,3 +22,4 @@ This launcher is developed by the community and is not affiliated with Velan Stu
 - [ ] Allow for users to enter secrets for private servers
 - [ ] Allow hosting of private servers through the launcher
 - [ ] Add a mod manager ???
+ -> and more
