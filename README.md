@@ -19,7 +19,7 @@ This launcher is developed by the community and is not affiliated with Velan Stu
 ## To-Do
 - [ ] Add a public server browser
 - [ ] Add an authentication system
+- [ ] Discord RPC
 - [ ] Allow for users to enter secrets for private servers
 - [ ] Allow hosting of private servers through the launcher
-- [ ] Add a mod manager ???
- -> and more
+- [ ] Some kind of account system with cloud sync (maybe)
