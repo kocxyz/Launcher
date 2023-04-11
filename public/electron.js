@@ -117,7 +117,7 @@ function createWindow () {
         });
 
         res.on('data', (chunk) => {
-          win.webContents.executeJavaScript(`window.postMessage({type: "download-progress", data: ${roundToDecimalPlace(((fileSize + writeStream.bytesWritten) / res.headers['content-length']) * 100, 2)}})`)
+          win.webContents.executeJavaScript(`window.postMessage({type: "download-progress", data: ${roundToDecimalPlace(((fileSize + writeStream.bytesWritten) / res.headers['content-length'] + fileSize) * 100, 2)}})`)
         });
 
         ipcMain.once('cancel-download', async (event, arg) => {
