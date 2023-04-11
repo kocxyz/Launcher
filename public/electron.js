@@ -121,8 +121,9 @@ function createWindow () {
         });
 
         res.on('data', (chunk) => {
-          win.webContents.executeJavaScript(`window.postMessage({type: "download-progress", data: ${roundToDecimalPlace(((fileSize + writeStream.bytesWritten) / (res.headers['content-length'] + fileSize)) * 100, 2)}})`)
-          win.setProgressBar((fileSize + writeStream.bytesWritten) / (res.headers['content-length'] + fileSize))
+          console.log((fileSize + writeStream.bytesWritten) / (parseFloat(res.headers['content-length']) + fileSize))
+          win.webContents.executeJavaScript(`window.postMessage({type: "download-progress", data: ${roundToDecimalPlace(((fileSize + writeStream.bytesWritten) / (parseFloat(res.headers['content-length']) + fileSize)) * 100, 2)}})`)
+          win.setProgressBar((fileSize + writeStream.bytesWritten) / (parseFloat(res.headers['content-length']) + fileSize))
         });
 
         ipcMain.once('cancel-download', async (event, arg) => {
