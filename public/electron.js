@@ -97,6 +97,7 @@ function createWindow () {
           console.log("Downloaded");
           // unzip the file
           try {
+            win.setProgressBar(5)
             if(fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}`)) fs.rmdirSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}`, { recursive: true })
             fs.mkdirSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}`)
 
@@ -106,9 +107,11 @@ function createWindow () {
               console.log("Files unzipped successfully");
               fs.rmSync(`${arg.path}/files-${arg.version}.zip`)
               win.reload()
+              win.setProgressBar(-1)
             });
           } catch (err) {
             console.log(err)
+            win.setProgressBar(-1)
             dialog.showMessageBox(win, {
               type: "error",
               title: "Unexpected Error",
@@ -118,8 +121,8 @@ function createWindow () {
         });
 
         res.on('data', (chunk) => {
-          win.webContents.executeJavaScript(`window.postMessage({type: "download-progress", data: ${roundToDecimalPlace(((fileSize + writeStream.bytesWritten) / res.headers['content-length'] + fileSize) * 100, 2)}})`)
-          win.setProgressBar((fileSize + writeStream.bytesWritten) / res.headers['content-length'] + fileSize)
+          win.webContents.executeJavaScript(`window.postMessage({type: "download-progress", data: ${roundToDecimalPlace(((fileSize + writeStream.bytesWritten) / (res.headers['content-length'] + fileSize)) * 100, 2)}})`)
+          win.setProgressBar((fileSize + writeStream.bytesWritten) / (res.headers['content-length'] + fileSize))
         });
 
         ipcMain.once('cancel-download', async (event, arg) => {
