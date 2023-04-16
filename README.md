@@ -23,5 +23,5 @@ This launcher is developed by the community and is not affiliated with Velan Stu
 - [ ] Add an authentication system
 - [ ] Discord RPC
 - [ ] Allow for users to enter secrets for private servers
-- [ ] Allow hosting of private servers through the launcher
+- [x] Allow hosting of private servers through the launcher
 - [ ] Some kind of account system with cloud sync (maybe)
