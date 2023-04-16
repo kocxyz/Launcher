@@ -234,7 +234,7 @@ function createWindow () {
       })
 
       game.once('close', (code) => {
-        console.log(`child process exited with code ${code}`);
+        console.log(`Game process exited with code ${code}`);
         win.webContents.executeJavaScript(`window.postMessage({type: "game-closed"})`)
       });
     })
@@ -256,12 +256,25 @@ function createWindow () {
 
       let cmd;
       if(arg.showTerminal) {
+
+        let winPosX = win.getPosition()[0] + win.getSize()[0] + 10
+        let winPosY = win.getPosition()[1]
+
+        // check if terminal window will spawn off screen, if so, spawn it above the main window, when that also doesn't work, spawn it in the middle of the screen
+        if(winPosX + 1100 > screen.getPrimaryDisplay().workAreaSize.width) {
+          winPosX = win.getPosition()[0] - 1100 - 10
+          if(winPosX < 0) {
+            winPosX = (screen.getPrimaryDisplay().workAreaSize.width / 2) - 550
+            winPosY = (screen.getPrimaryDisplay().workAreaSize.height / 2) - 275
+          }
+        }
+
         cmd = new BrowserWindow({
           width: 1100,
           height: 550,
           // spawn left next to main window
-          x: win.getPosition()[0] + win.getSize()[0] + 10,
-          y: win.getPosition()[1],
+          x: winPosX,
+          y: winPosY,
           autoHideMenuBar: true,
           webPreferences: {
             webSecurity: false,
@@ -280,7 +293,7 @@ function createWindow () {
       });
 
       server.stderr.on('data', (data) => {
-        if(cmd) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch((err) => {})
+        if(cmd && cmd.webContents) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch((err) => {})
       });
 
       console.log(server.spawnargs)
@@ -304,7 +317,7 @@ function createWindow () {
       ipcMain.once("stop-server", async (event, arg) => {
         event.returnValue = "stopping"
         console.log("Stopping server")
-        if(cmd) cmd.close()
+        if(cmd && cmd.webContents) cmd.close()
         setTimeout(() => {
           killProcess(server.pid, "SIGINT")
         }, 1000)

@@ -101,8 +101,8 @@ function HostingSection(props) {
                         )
                     default:
                         return (
-                            <Button variant="contained" style={{
-                                backgroundColor: '#6225e6',
+                            <Button variant="contained" disabled={!installed} style={{
+                                backgroundColor: installed ? '#6225e6' : "grey",
                                 color: '#ffffff',
                                 width: '100%',
                             }} onClick={async () => {

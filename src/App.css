@@ -27,6 +27,24 @@ html, body {
   justify-content: center;
 }
 
+@keyframes slideL {
+    0% {
+        transform: translateX(-20px);
+    }
+    100% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideR {
+    0% {
+        transform: translateX(-20px);
+    }
+    100% {
+        transform: translateX(-40px);
+    }
+}
+
 .cta {
     display: flex;
     padding: 10px 45px;

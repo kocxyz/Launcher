@@ -75,12 +75,18 @@ window.addEventListener("DOMContentLoaded", () => {
     })
     props.setGameState("running")
 
-    window.addEventListener('message', evt => {
-      if (evt.data.type === 'game-closed') {
-        console.log("Game closed")
-        props.setGameState("installed")
+    const listener = evt => {
+      switch (evt.data.type) {
+        case 'game-closed':
+          console.log("Game closed")
+          props.setGameState("installed")
+          // remove listener
+          window.removeEventListener('message', listener)
+          break;
       }
-    })
+    }
+
+    window.addEventListener('message', listener)
   }
 
 
@@ -129,3 +135,14 @@ window.addEventListener("DOMContentLoaded", () => {
     ipcRenderer.send('cancel-download')
   }
 });
+
+Array.prototype.scrable = function () {
+  var i = this.length;
+  while (i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = this[i];
+    this[i] = this[j];
+    this[j] = temp;
+  }
+  return this;
+};

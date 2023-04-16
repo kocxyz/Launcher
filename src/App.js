@@ -25,7 +25,7 @@ import bg8 from './images/backgrounds/8.jpg';
 const boxes = { height: '97vh' }
 const links = { fontSize: '20px', color: 'white', textDecoration: 'none', width: 'fit-content' }
 
-const backgrounds = [
+let backgrounds = [
   bg1,
   bg2,
   bg3,
@@ -47,6 +47,10 @@ function App() {
 
   const [currServer, setCurrServer] = useState(localStorage.getItem("currServer"))
   const [currServerName, setCurrServerName] = useState(localStorage.getItem("currServerName"))
+
+  useEffect(() => {
+    backgrounds = backgrounds.scrable()
+  }, [])
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -80,6 +84,7 @@ function App() {
           opacity: index === background ? 1 : 0,
           zIndex: index === background ? -2 : -1,
           transition: 'opacity ease-in-out 2s',
+          animation: index === background || (index === background-1 || (background === 0 && index === backgrounds.length-1)) ? (index % 2 === 0 ? 'slideL 25s ease-out infinite' : 'slideR 25s ease-out infinite') : 'none',
         }}
       />
     ))}

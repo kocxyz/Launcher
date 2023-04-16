@@ -30,12 +30,9 @@
     "electron": "latest"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "electron-dev": "electron .",
-    "electron:package:win": "npm run build && electron-builder -w -c.extraMetadata.main=build/electron.js"
+    "react:dev": "react-scripts start",
+    "electron:dev": "electron .",
+    "electron:build": "react-scripts build && electron-builder -w -c.extraMetadata.main=build/electron.js"
   },
   "eslintConfig": {
     "extends": [
