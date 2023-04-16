@@ -1,4 +1,4 @@
-import { Box, Select, Tab, Tabs } from '@mui/material';
+import { Box, MenuItem, Select, Tab, Tabs } from '@mui/material';
 import './App.css';
 import { useEffect, useState } from 'react';
 
@@ -41,6 +41,7 @@ function App() {
   const [version, setVersion] = useState(localStorage.getItem("gameVersion"))
 
   const [gameState, setGameState] = useState()
+  const [serverState, setServerState] = useState()
 
   const [background, setBackground] = useState(Math.floor(Math.random() * backgrounds.length))
 
@@ -87,7 +88,7 @@ function App() {
           <img src={logoImg} alt="logo" style={{ width: '250px', marginLeft: '40px' }}/>
         </Box>
         <Box style={{ marginTop: '20px', marginLeft: '50px', display: 'flex', flexDirection: 'column' }}>
-          <Select disabled={!['installed', 'notInstalled'].includes(gameState)} defaultValue={version} native style={{ 
+          <Select disabled={!['installed', 'notInstalled'].includes(gameState)} defaultValue={version} variant="outlined" style={{ 
             width: '350px', 
             height: '35px', 
             marginBottom: '20px', 
@@ -100,8 +101,8 @@ function App() {
             setVersion(e.target.value)
             localStorage.setItem("gameVersion", e.target.value)
           }}> 
-            <option value="1">High Res</option>
-            <option value="2">Low Res</option>
+            <MenuItem value="1">High Res</MenuItem>
+            <MenuItem value="2">Low Res</MenuItem>
           </Select>
           
           <a style={links} href='https://www.knockoutcity.com/' target='_blank'>Official Site</a> {/* eslint-disable-line */}
@@ -120,7 +121,7 @@ function App() {
         </Tabs>
         <Box style={{ marginTop: '10px' }}>
           {tab === 0 && <NewsMenu />}
-          {tab === 1 && <ServersMenu currServer={currServer} setCurrServer={setCurrServer} currServerName={currServerName} setCurrServerName={setCurrServerName} />}
+          {tab === 1 && <ServersMenu currServer={currServer} setCurrServer={setCurrServer} currServerName={currServerName} setCurrServerName={setCurrServerName} gameState={gameState} serverState={serverState}  setServerState={setServerState} />}
           {tab === 2 && <SettingsMenu />}
         </Box>
       </Box>

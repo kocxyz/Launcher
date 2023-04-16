@@ -83,6 +83,48 @@ window.addEventListener("DOMContentLoaded", () => {
     })
   }
 
+
+  window.startServer = async (props) => {
+    ipcRenderer.sendSync('start-server', {
+      path: localStorage.getItem("gameDirectory"),
+      version: localStorage.getItem("gameVersion"),
+      server: localStorage.getItem("currServer"),
+
+      port: props.port,
+      maxUsers: props.maxUsers,
+      secret: props.secret,
+      showTerminal: props.showTerminal,
+    })
+    props.setServerState("starting")
+    
+    const listener = evt => {
+      switch (evt.data.type) {
+        case 'server-closed':
+          console.log("Server closed")
+          props.setServerState("")
+          // remove listener
+          window.removeEventListener('message', listener)
+          break;
+        case 'server-ready':
+          console.log("Server ready")
+          props.setServerState("running")
+          break;
+      }
+    }
+
+    window.addEventListener('message', listener)
+  }
+
+  window.stopServer = async (props) => {
+    props.setServerState("stopping")
+    ipcRenderer.sendSync('stop-server', {
+      path: localStorage.getItem("gameDirectory"),
+      version: localStorage.getItem("gameVersion"),
+      server: localStorage.getItem("currServer"),
+    })
+    
+  }
+
   window.cancelInstall = async () => {
     ipcRenderer.send('cancel-download')
   }

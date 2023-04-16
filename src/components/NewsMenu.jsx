@@ -10,8 +10,12 @@ function SettingsMenu() {
   const [news, setNews] = useState([])
 
   useEffect(() => {
-    axios.get("https://cdn.ipgg.net/kocity/news").then((res) => {
-      console.log(res.data)
+    axios.get("https://cdn.ipgg.net/kocity/news", {
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
+      }
+    }).then((res) => {
       setNews(res.data)
     })
   }, [])
