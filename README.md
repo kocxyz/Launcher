@@ -19,9 +19,9 @@ This launcher is developed by the community and is not affiliated with Velan Stu
 - Automatically update the launcher when a new version is released
 
 ## To-Do
+- [x] Allow hosting of private servers through the launcher
 - [ ] Add a public server browser
-- [ ] Add an authentication system
 - [ ] Discord RPC
 - [ ] Allow for users to enter secrets for private servers
-- [x] Allow hosting of private servers through the launcher
+- [ ] Add an authentication system
 - [ ] Some kind of account system with cloud sync (maybe)
