@@ -2,6 +2,9 @@ import { ExitToAppOutlined, Add as AddIcon, CloseOutlined  } from "@mui/icons-ma
 import { Box, Divider, IconButton, Tab, Table, TableBody, TableCell, TableHead, TableRow, Tabs, TextField } from "@mui/material"
 import { useState } from "react"
 
+// Components
+import HostingSection from "./HostingSection"
+
 
 function ServersMenu(props) {
     const {currServer, setCurrServer, currServerName, setCurrServerName} = props // eslint-disable-line
@@ -88,7 +91,7 @@ function ServersMenu(props) {
                 </Table>
                 </>
             )}
-            {tab === 2 && <div>Coming soon</div>}
+            {tab === 2 && <HostingSection gameState={props.gameState} serverState={props.serverState} setServerState={props.setServerState} />}
         </Box>
     </Box>
   )

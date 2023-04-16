@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog } = require('electron')
+const { app, BrowserWindow, ipcMain, dialog, screen } = require('electron')
 const remote = require('@electron/remote/main')
 const https = require("https");
 const fs = require('fs')
@@ -9,6 +9,8 @@ const { spawn, exec } = require('child_process');
 const axios = require('axios')
 const os = require('os')
 const sudo = require('sudo-prompt');
+const killProcess = require('tree-kill');
+const pty = require('node-pty');
 remote.initialize()
 
 function createWindow () {
@@ -176,7 +178,7 @@ function createWindow () {
           win.setProgressBar(-1)
         })
 
-        win.on('close', () => {
+        win.once('close', () => {
           console.log("Canceling download")
           res.destroy()
           writeStream.close()
@@ -215,15 +217,14 @@ function createWindow () {
       console.log("Launching game")     
 
       const args = [`-lang=${arg.language || 'en'}`, `-username=${arg.username}`, `-backend=${arg.server}`];
-      const process = spawn(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity/KnockoutCity.exe`, args, { 
+      const game = spawn(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity/KnockoutCity.exe`, args, { 
         cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
         detached: true,
         stdio: 'ignore',
-        
       })
-      console.log(process.spawnargs)
+      console.log(game.spawnargs)
       event.returnValue = "launched"
-      process.on('error', (err) => {
+      game.on('error', (err) => {
         console.log(err)
         dialog.showMessageBox(win, {
           type: "error",
@@ -232,10 +233,82 @@ function createWindow () {
         })
       })
 
-      process.on('close', (code) => {
+      game.once('close', (code) => {
         console.log(`child process exited with code ${code}`);
         win.webContents.executeJavaScript(`window.postMessage({type: "game-closed"})`)
       });
+    })
+
+
+
+    ipcMain.on("start-server", async (event, arg) => {
+      console.log(arg)
+      console.log("Starting server")
+
+      let args = [];
+      if(arg.port != 0) args.push(`-backend_port=${arg.port}`)
+      if(arg.maxUsers && arg.maxUsers != 0) args.push(`-backend_tunable_user_connections_max_per_backend=${arg.maxUsers}`)
+      if(arg.secret.trim() != "") args.push(`-secret=${arg.secret}`)
+
+      const server = spawn(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCityServer/KnockoutCityServer.exe`, args, {
+        cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCityServer`
+      })
+
+      let cmd;
+      if(arg.showTerminal) {
+        cmd = new BrowserWindow({
+          width: 1100,
+          height: 550,
+          // spawn left next to main window
+          x: win.getPosition()[0] + win.getSize()[0] + 10,
+          y: win.getPosition()[1],
+          autoHideMenuBar: true,
+          webPreferences: {
+            webSecurity: false,
+            nodeIntegration: true,
+            contextIsolation: false,
+          }
+        })
+        cmd.loadFile(path.join(__dirname, "shell.html"), { cwd: __dirname })
+      }
+
+
+      server.stdout.on('data', (data) => {
+        if(data.includes("private_server: Ready to brawl")) win.webContents.executeJavaScript(`window.postMessage({type: "server-ready"})`)
+        data = data.toString().replace(/[^a-zA-Z0-9:_+#\/.\ ]/g, '')
+        if(cmd && cmd.webContents) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch((err) => {})
+      });
+
+      server.stderr.on('data', (data) => {
+        if(cmd) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch((err) => {})
+      });
+
+      console.log(server.spawnargs)
+      event.returnValue = "launched"
+      server.on('error', (err) => {
+        console.log(err)
+        dialog.showMessageBox(win, {
+          type: "error",
+          title: "Unexpected Error",
+          message: "An error occurred while launching the server. Error: " + err.message
+        })
+      })
+
+      server.once('close', (code) => {
+        console.log(`Server process exited with code ${code}`);
+        // remove all event listeners
+        server.removeAllListeners()
+        win.webContents.executeJavaScript(`window.postMessage({type: "server-closed"})`)
+      });
+
+      ipcMain.once("stop-server", async (event, arg) => {
+        event.returnValue = "stopping"
+        console.log("Stopping server")
+        if(cmd) cmd.close()
+        setTimeout(() => {
+          killProcess(server.pid, "SIGINT")
+        }, 1000)
+      })
     })
 }
 

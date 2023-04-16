@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knockout City Server</title>
+</head>
+<style>
+    #shell {
+        width: 100%;
+        height: 100%;
+        background-color: black;
+        color: white;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+</style>
+<body>
+    <div id="shell"></div>
+</body>
+<script>
+    const { JsShell } = require('./jsShell.js');
+
+    const shell = new JsShell('shell');
+    window.shell = shell;
+    shell
+    .setWidth('100%')
+    .setHeight('100vh')
+
+    // window.addEventListener('message', (evt) => {
+    //     const data = evt.data;
+    //     console.log(data.data);
+    //     if (data.type === 'server-input') {
+            
+    //         console.log(data.data);
+    //     }
+    // })
+</script>
+</html>
