@@ -289,11 +289,11 @@ function createWindow () {
       server.stdout.on('data', (data) => {
         if(data.includes("private_server: Ready to brawl")) win.webContents.executeJavaScript(`window.postMessage({type: "server-ready"})`)
         data = data.toString().replace(/[^a-zA-Z0-9:_+#\/.\ ]/g, '')
-        if(cmd && cmd.webContents) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch((err) => {})
+        if(cmd && !cmd.isDestroyed()) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch((err) => {})
       });
 
       server.stderr.on('data', (data) => {
-        if(cmd && cmd.webContents) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch((err) => {})
+        if(cmd && !cmd.isDestroyed()) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch((err) => {})
       });
 
       console.log(server.spawnargs)
@@ -317,7 +317,7 @@ function createWindow () {
       ipcMain.once("stop-server", async (event, arg) => {
         event.returnValue = "stopping"
         console.log("Stopping server")
-        if(cmd && cmd.webContents) cmd.close()
+        if(cmd && !cmd.isDestroyed()) cmd.close()
         setTimeout(() => {
           killProcess(server.pid, "SIGINT")
         }, 1000)
