@@ -1,5 +1,5 @@
 # Unofficial Knockout City Launcher
-by Ipmake // IPGsystems
+aka: the "Ip Man Launcher" ;)
 
 This is a launcher for the self hosted version of Knockout City, developed by Velan Studios.
 This launcher is developed by the community and is not affiliated with Velan Studios.
@@ -20,8 +20,15 @@ This launcher is developed by the community and is not affiliated with Velan Stu
 
 ## To-Do
 - [x] Allow hosting of private servers through the launcher
-- [ ] Add a public server browser
 - [ ] Discord RPC
+- [ ] Add support for discord game invites
+- [ ] Add a public server browser
 - [ ] Allow for users to enter secrets for private servers
 - [ ] Add an authentication system
 - [ ] Some kind of account system with cloud sync (maybe)
+
+## Building from Source
+0. Make sure you have nodejs installed (recommend the latest LTS version)
+1. Clone the Project and cd into the directory 
+2. Run `npm install` to install all dependencies
+3. Run `npm run electron:build`, this will build the react and electron project and output an installer exe into the `dist` directory
