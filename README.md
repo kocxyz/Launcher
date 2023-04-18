@@ -1,4 +1,5 @@
 # Unofficial Knockout City Launcher
+aka. the "Ip Man Launcher" :3
 by Ipmake // IPGsystems
 
 This is a launcher for the self hosted version of Knockout City, developed by Velan Studios.
