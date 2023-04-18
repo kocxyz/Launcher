@@ -25,3 +25,9 @@ This launcher is developed by the community and is not affiliated with Velan Stu
 - [ ] Allow for users to enter secrets for private servers
 - [ ] Add an authentication system
 - [ ] Some kind of account system with cloud sync (maybe)
+
+## Building from Source
+0. Make sure you have nodejs installed (recommend the latest LTS version)
+1. Clone the Project and cd into the directory 
+2. Run `npm install` to install all dependencies
+3. Run `npm run electron:build`, this will build the react and electron project and output an installer exe into the `dist` directory
