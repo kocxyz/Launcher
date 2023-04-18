@@ -55,6 +55,8 @@ function createWindow () {
         // send it back to the renderer
         // win.webContents.send('selected-dirs', result.filePaths[0].replaceAll("\\", "/"))
         event.returnValue = result
+      } else {
+        event.returnValue = null
       }
     })
 

@@ -42,7 +42,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   window.selectGameDir = async () => {
     const result = await ipcRenderer.sendSync('select-dirs')
-    if (!result.canceled) {
+    if (!result) {
       return Promise.resolve(result.filePaths[0].replaceAll("\\", "/"))
     }
   }
