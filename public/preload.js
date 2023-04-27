@@ -20,6 +20,9 @@ if(!localStorage.getItem("currServerName")) localStorage.setItem("currServerName
 if(!localStorage.getItem("currServer")) localStorage.setItem("currServer", "127.0.0.1")
 if(localStorage.getItem("servers") === null) localStorage.setItem("servers", '[{"name":"localhost","ip":"127.0.0.1"}]')
 
+if(localStorage.getItem("discordRPC:enabled") === null) localStorage.setItem("discordRPC:enabled", "true")
+if(localStorage.getItem("discordRPC:displayName") === null) localStorage.setItem("discordRPC:displayName", "true")
+
 // catch a STRG + R 
 document.addEventListener("keydown", (e) => {
   if (e.key === "r" && e.ctrlKey) {
@@ -30,6 +33,16 @@ document.addEventListener("keydown", (e) => {
     e.preventDefault();
   }
 });
+
+window.updateRPC = async () => {
+  ipcRenderer.sendSync('set-RPCstate', { 
+    enabled: localStorage.getItem("discordRPC:enabled") === "true",
+    displayName: localStorage.getItem("discordRPC:displayName") === "true",
+  })
+}
+
+window.updateRPC()
+
 
 window.addEventListener("DOMContentLoaded", () => {
   window.getCurrentWindow = getCurrentWindow;
@@ -72,6 +85,7 @@ window.addEventListener("DOMContentLoaded", () => {
       username: localStorage.getItem("username"),
       language: localStorage.getItem("language"),
       server: localStorage.getItem("currServer"),
+      serverName: localStorage.getItem("currServerName"),
     })
     props.setGameState("running")
 
@@ -132,7 +146,11 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   window.cancelInstall = async () => {
-    ipcRenderer.send('cancel-download')
+    ipcRenderer.send('cancel-download', { path: localStorage.getItem("gameDirectory"), version: localStorage.getItem("gameVersion") })
+  }
+
+  window.pauseInstall = async () => {
+    ipcRenderer.send('pause-download', { path: localStorage.getItem("gameDirectory"), version: localStorage.getItem("gameVersion") })
   }
 });
 

@@ -1,7 +1,7 @@
 import { Box, IconButton, LinearProgress, Stack, Typography } from '@mui/material'
 import React, { useState } from 'react'
 import FancyButton from './fancyButton';
-import { CloseOutlined } from '@mui/icons-material';
+import { CloseOutlined, PauseOutlined } from '@mui/icons-material';
 
 function LaunchSection(props) {
     
@@ -26,19 +26,35 @@ function LaunchSection(props) {
                     case 'installing':
                         return (
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', width: '100%' }}>
-                                <p style={{ marginTop: '5px', fontSize: '15px' }}>{installData === 100 ? 'UNPACKING' : 'INSTALLING' }</p>
+                                <p style={{ marginTop: '5px', fontSize: '15px' }}>{installData === 100 ? 'UNPACKING' : 'DOWNLOADING' }</p>
                                 <Box style={{ display: 'flex', flexDirection: 'row', width: '90%', justifyContent: 'center', alignItems: 'center' }}>
                                     <LinearProgress style={{ width: '450px', background: '#743a8d' }} variant={installData === 100 ? 'indeterminate' : 'determinate'} value={installData === 100 ? null : installData} />
-                                    <p style={{ fontSize: '15px', marginLeft: '20px', textAlign: 'start', width: '50px' }}>{installData}%</p>
+                                    <p style={{ fontSize: '15px', marginLeft: '20px', textAlign: 'start', width: '50px' }}>{parseFloat(installData).toFixed(2)}%</p>
+
+
+                                    <Stack direction={'row'} style={{ marginLeft: 'auto', marginRight: '10px' }}>
+                                    <IconButton disabled={installData === 100} style={{ display: `${installData === 100 ? 'none' : 'inline'}` }} onClick={() => {
+                                        window.pauseInstall()
+                                        setGameState('notInstalled')
+                                    }}>
+                                        <PauseOutlined style={{ color: '#ffffff' }} />
+                                    </IconButton>
+
                                     <IconButton disabled={installData === 100} style={{ display: `${installData === 100 ? 'none' : 'inline'}` }} onClick={() => {
                                         window.cancelInstall()
                                         setGameState('notInstalled')
                                     }}>
                                         <CloseOutlined style={{ color: '#ffffff' }} />
                                     </IconButton>
+                                    </Stack>
                                 </Box>
                             </div>
                         )
+
+                    case 'deprecated':
+                        return (<FancyButton text="UPDATE" onClick={() => {
+                            window.installGame({setInstallData, setGameState})
+                        }} />)
                     default:
                         return (<FancyButton text="ERROR" href="#" />)
                         

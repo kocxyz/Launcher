@@ -93,7 +93,7 @@ function App() {
           <img src={logoImg} alt="logo" style={{ width: '250px', marginLeft: '40px' }}/>
         </Box>
         <Box style={{ marginTop: '20px', marginLeft: '50px', display: 'flex', flexDirection: 'column' }}>
-          <Select disabled={!['installed', 'notInstalled'].includes(gameState)} defaultValue={version} variant="outlined" style={{ 
+          <Select disabled={!['installed', 'notInstalled', 'deprecated'].includes(gameState)} defaultValue={version} variant="outlined" style={{ 
             width: '350px', 
             height: '35px', 
             marginBottom: '20px', 
@@ -111,6 +111,7 @@ function App() {
           </Select>
           
           <a style={links} href='https://www.knockoutcity.com/' target='_blank'>Official Site</a> {/* eslint-disable-line */}
+          <a style={links} href='https://www.knockoutcity.com/private-server-edition' target='_blank'>About</a> {/* eslint-disable-line */}
           <a style={links} href='https://discord.gg/knockoutcity' target='_blank'>Discord</a> {/* eslint-disable-line */}
           <a style={links} href='https://thekoyostore.com/collections/knockout-city' target='_blank'>Store</a> {/* eslint-disable-line */}
         </Box>
@@ -118,7 +119,7 @@ function App() {
         <LaunchSection version={version} gameState={[gameState, setGameState]} currServer={currServer} currServerName={currServerName} />
       </Box>
       
-      <Box style={boxes && { background: 'rgba(53, 13, 100, 0.75)', padding: '20px', marginTop:'-3vh', paddingBottom: '0px'}}>
+      <Box style={{ background: 'rgba(53, 13, 100, 0.75)', padding: '20px', marginTop:'-3vh', paddingBottom: '0px'}}>
         <Tabs variant='fullWidth' centered value={tab} onChange={(e, val) => setTab(val)}>
           <Tab label="News" />
           <Tab label="Servers" />
@@ -127,7 +128,7 @@ function App() {
         <Box style={{ marginTop: '10px' }}>
           {tab === 0 && <NewsMenu />}
           {tab === 1 && <ServersMenu currServer={currServer} setCurrServer={setCurrServer} currServerName={currServerName} setCurrServerName={setCurrServerName} gameState={gameState} serverState={serverState}  setServerState={setServerState} />}
-          {tab === 2 && <SettingsMenu />}
+          {tab === 2 && <SettingsMenu gameState={gameState} />}
         </Box>
       </Box>
     </div>

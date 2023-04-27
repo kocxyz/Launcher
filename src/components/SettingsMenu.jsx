@@ -1,14 +1,14 @@
-import { Box, Button, Divider, MenuItem, Select, Stack, TextField, Typography } from '@mui/material'
+import { Box, Button, Divider, MenuItem, Select, Stack, Switch, TextField, Typography } from '@mui/material'
 import React from 'react'
 
-function SettingsMenu() {
+function SettingsMenu({ gameState }) {
 
     const [gameDirectory, setGameDirectory] = React.useState(localStorage.getItem('gameDirectory'))
     const [username, setUsername] = React.useState(localStorage.getItem('username'))
 
 
     return (
-        <Box>
+        <Box style={{ display: 'flex', flexDirection: 'column', gap: '20px', padding: '0 10px', height: '450px', maxHeight: '450px', overflowY: 'scroll' }}>
             <Stack spacing={1}>
                 <label>Username</label>
                 <TextField variant="outlined" defaultValue={username} onChange={(e) => {
@@ -16,10 +16,6 @@ function SettingsMenu() {
                     localStorage.setItem('username', e.target.value)
                 }} />
             </Stack>
-
-            <br />
-            <Divider />
-            <br />
 
             <Stack spacing={1}>
                 <label>Language</label>
@@ -40,9 +36,7 @@ function SettingsMenu() {
                 </Select>
             </Stack>
 
-            <br />
             <Divider />
-            <br />
 
             <Stack spacing={1}>
                 <label>Game Directory</label>
@@ -56,7 +50,42 @@ function SettingsMenu() {
                 }}>Change</Button>
             </Stack>
 
-            <Typography style={{ color: 'grey', position: 'absolute', bottom: '10px', fontFamily: 'monospace', fontSize: '12px'}}> Launcher Version: {window.version}  </Typography>
+            <Divider />
+
+            <Box style={{ display: 'flex', flexDirection: 'column' }}>
+                <label>Discord RPC</label>
+
+                <Stack direction="row" spacing={1} style={{ display: 'flex', alignItems: 'center'}}>
+                    <Switch color='secondary' defaultChecked={localStorage.getItem('discordRPC:enabled') === 'true'} onChange={(e) => {
+                        localStorage.setItem('discordRPC:enabled', e.target.checked)
+                    }} />
+                    
+                    <Typography fontWeight='light'>Enabled</Typography>
+                </Stack>
+
+                <Stack direction="row" spacing={1} style={{ display: 'flex', alignItems: 'center'}}>
+                    <Switch color='secondary' defaultChecked={localStorage.getItem('discordRPC:displayName') === 'true'} onChange={(e) => {
+                        localStorage.setItem('discordRPC:displayName', e.target.checked)
+                    }} />
+                    
+                    <Typography fontWeight='light'>Show Server Name</Typography>
+                </Stack>
+
+                <Stack direction="row" spacing={1} style={{ display: 'flex', alignItems: 'center'}}>
+                    <Switch color='secondary' defaultChecked={false} disabled onChange={(e) => {
+                        // localStorage.setItem('discordRPC', e.target.checked)
+                    }} />
+                    
+                    <Typography fontWeight='light'>Allow Joining</Typography>
+                </Stack>
+
+                <Button variant="contained" disabled={!['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)} style={{backgroundColor: !['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState) ? 'grey' : '#6225e6', color: '#ffffff'}} onClick={() => {
+                    window.updateRPC()
+                }}>Update RPC</Button>
+            </Box>
+
+
+            <Typography style={{ color: 'grey', position: 'absolute', bottom: '5px', right: '10px', fontFamily: 'monospace', fontSize: '12px'}}> Launcher Version: {window.version}  </Typography>
         </Box>
     )
 }

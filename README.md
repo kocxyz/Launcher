@@ -20,11 +20,11 @@ This launcher is developed by the community and is not affiliated with Velan Stu
 
 ## To-Do
 - [x] Allow hosting of private servers through the launcher
-- [ ] Discord RPC
-- [ ] Add support for discord game invites
-- [ ] Add a public server browser
+- [x] Discord RPC
 - [ ] Allow for users to enter secrets for private servers
 - [ ] Add an authentication system
+- [ ] Add a public server browser
+- [ ] Add support for discord game invites (Alongside the public server browser)
 - [ ] Some kind of account system with cloud sync (maybe)
 
 ## Building from Source

@@ -9,7 +9,7 @@ import HostingSection from "./HostingSection"
 function ServersMenu(props) {
     const {currServer, setCurrServer, currServerName, setCurrServerName} = props // eslint-disable-line
 
-    const [tab, setTab] = useState(0)
+    const [tab, setTab] = useState(1)
 
     const [addActive, setAddActive] = useState(false)
     const [addName, setAddName] = useState('')
@@ -23,7 +23,7 @@ function ServersMenu(props) {
         <Tabs variant='fullWidth' centered value={tab} onChange={(e, val) => setTab(val)} style={{
             padding: '0 20px',
         }}>
-            <Tab label="Public" />
+            <Tab label="Public" disabled />
             <Tab label="Favorites" />
             <Tab label="Host" />
         </Tabs>

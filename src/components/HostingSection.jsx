@@ -50,7 +50,7 @@ function HostingSection(props) {
             }} />
         </Stack>
 
-        <FormControlLabel control={<Switch disabled={running} color='secondary' defaultChecked={serverSettings.showTerminal} onChange={(e) => {
+        <FormControlLabel control={<Switch disabled={running} color='secondary' defaultChecked={serverSettings.showTerminal === "true"} onChange={(e) => {
             setServerSettings({
                 ...serverSettings,
                 showTerminal: e.target.checked
