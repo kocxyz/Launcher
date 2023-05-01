@@ -16,14 +16,21 @@ import logoImg from './images/logo.png';
 import bg1 from './images/backgrounds/1.jpg';
 import bg2 from './images/backgrounds/2.jpg';
 import bg3 from './images/backgrounds/3.jpg';
-import bg4 from './images/backgrounds/4.jpg';
+import bg4 from './images/backgrounds/4.png';
 import bg5 from './images/backgrounds/5.jpg';
 import bg6 from './images/backgrounds/6.jpg';
 import bg7 from './images/backgrounds/7.jpg';
 import bg8 from './images/backgrounds/8.jpg';
 
 const boxes = { height: '97vh' }
-const links = { fontSize: '20px', color: 'white', textDecoration: 'none', width: 'fit-content' }
+const links = { 
+  fontSize: '20px',
+  color: 'white', 
+  textDecoration: 'none', 
+  width: 'fit-content',
+  fontFamily: 'Azbuka',
+  fontWeight: 'bold',
+}
 
 let backgrounds = [
   bg1,
@@ -90,7 +97,7 @@ function App() {
     ))}
       <Box style={boxes}>
         <Box>
-          <img src={logoImg} alt="logo" style={{ width: '250px', marginLeft: '40px' }}/>
+          <img src={logoImg} alt="logo" style={{ width: '300px', marginLeft: '35px' }}/>
         </Box>
         <Box style={{ marginTop: '20px', marginLeft: '50px', display: 'flex', flexDirection: 'column' }}>
           <Select disabled={!['installed', 'notInstalled', 'deprecated'].includes(gameState)} defaultValue={version} variant="outlined" style={{ 
@@ -99,7 +106,7 @@ function App() {
             marginBottom: '20px', 
             marginLeft: '-50px', 
             paddingLeft: '35px',
-            background: 'rgba(53, 13, 72, 0.3)',
+            background: 'rgba(75, 0, 110, 0.3)',
             borderLeft: '4px solid #743a8d',
             borderRadius: '0',
           }} onChange={(e) => {
@@ -110,16 +117,16 @@ function App() {
             <MenuItem value="2">Low Res</MenuItem>
           </Select>
           
-          <a style={links} href='https://www.knockoutcity.com/' target='_blank'>Official Site</a> {/* eslint-disable-line */}
-          <a style={links} href='https://www.knockoutcity.com/private-server-edition' target='_blank'>About</a> {/* eslint-disable-line */}
-          <a style={links} href='https://discord.gg/knockoutcity' target='_blank'>Discord</a> {/* eslint-disable-line */}
-          <a style={links} href='https://thekoyostore.com/collections/knockout-city' target='_blank'>Store</a> {/* eslint-disable-line */}
+          <a style={links} className="hoverLink" href='https://www.knockoutcity.com/' target='_blank'>OFFICIAL SITE</a> {/* eslint-disable-line */}
+          <a style={links} className="hoverLink" href='https://www.knockoutcity.com/private-server-edition' target='_blank'>ABOUT</a> {/* eslint-disable-line */}
+          <a style={links} className="hoverLink" href='https://discord.gg/knockoutcity' target='_blank'>DISCORD</a> {/* eslint-disable-line */}
+          <a style={links} className="hoverLink" href='https://thekoyostore.com/collections/knockout-city' target='_blank'>STORE</a> {/* eslint-disable-line */}
         </Box>
 
         <LaunchSection version={version} gameState={[gameState, setGameState]} currServer={currServer} currServerName={currServerName} />
       </Box>
       
-      <Box style={{ background: 'rgba(53, 13, 100, 0.75)', padding: '20px', marginTop:'-3vh', paddingBottom: '0px'}}>
+      <Box style={{ background: 'rgba(50, 8, 83, 0.75)', padding: '20px', marginTop:'-3vh', paddingBottom: '0px'}}>
         <Tabs variant='fullWidth' centered value={tab} onChange={(e, val) => setTab(val)}>
           <Tab label="News" />
           <Tab label="Servers" />
@@ -128,7 +135,7 @@ function App() {
         <Box style={{ marginTop: '10px' }}>
           {tab === 0 && <NewsMenu />}
           {tab === 1 && <ServersMenu currServer={currServer} setCurrServer={setCurrServer} currServerName={currServerName} setCurrServerName={setCurrServerName} gameState={gameState} serverState={serverState}  setServerState={setServerState} />}
-          {tab === 2 && <SettingsMenu gameState={gameState} />}
+          {tab === 2 && <SettingsMenu gameState={gameState} setGameState={setGameState} />}
         </Box>
       </Box>
     </div>

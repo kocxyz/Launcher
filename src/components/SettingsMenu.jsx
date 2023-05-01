@@ -1,7 +1,7 @@
 import { Box, Button, Divider, MenuItem, Select, Stack, Switch, TextField, Typography } from '@mui/material'
 import React from 'react'
 
-function SettingsMenu({ gameState }) {
+function SettingsMenu({ gameState, setGameState }) {
 
     const [gameDirectory, setGameDirectory] = React.useState(localStorage.getItem('gameDirectory'))
     const [username, setUsername] = React.useState(localStorage.getItem('username'))
@@ -41,11 +41,12 @@ function SettingsMenu({ gameState }) {
             <Stack spacing={1}>
                 <label>Game Directory</label>
                 <TextField variant="outlined" disabled={true} value={gameDirectory} />
-                <Button variant="contained" style={{backgroundColor: '#6225e6', color: '#ffffff'}} onClick={async () => {
+                <Button variant="contained" className='hoverButton' disabled={!['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)} onClick={async () => {
                     const result = await window.selectGameDir()
                     if (result) {
                         setGameDirectory(result)
                         localStorage.setItem('gameDirectory', result)
+                        setGameState(await window.getGameState())
                     }
                 }}>Change</Button>
             </Stack>
@@ -79,7 +80,7 @@ function SettingsMenu({ gameState }) {
                     <Typography fontWeight='light'>Allow Joining</Typography>
                 </Stack>
 
-                <Button variant="contained" disabled={!['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)} style={{backgroundColor: !['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState) ? 'grey' : '#6225e6', color: '#ffffff'}} onClick={() => {
+                <Button variant="contained" className='hoverButton' disabled={!['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)} onClick={() => {
                     window.updateRPC()
                 }}>Update RPC</Button>
             </Box>

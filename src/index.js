@@ -9,6 +9,9 @@ const darkTheme = createTheme({
     mode: 'dark',
     primary: {
       main: '#ffffff', // #743a8d
+    },
+    secondary: {
+      main: '#9619FA',
     }
   },
 });

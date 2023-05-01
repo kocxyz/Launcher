@@ -65,9 +65,7 @@ function HostingSection(props) {
                     case 'starting':
                         return (
                             <>
-                                <Button variant="contained" disabled={true} style={{
-                                    backgroundColor: 'grey',
-                                    color: '#ffffff', 
+                                <Button variant="contained" className='hoverButton' disabled={true} style={{
                                     width: '100%',
                                 }}>Starting</Button>
                                 <LinearProgress color='secondary' style={{ width: '402px', marginTop: '41px', position: 'absolute', paddingLeft: '5px', paddingRight: '5px', borderRadius: '20px' }} />
@@ -91,9 +89,7 @@ function HostingSection(props) {
                     case 'stopping':
                         return (
                             <>
-                                <Button variant="contained" disabled={true} style={{
-                                    backgroundColor: 'grey',
-                                    color: '#ffffff',
+                                <Button variant="contained" className='hoverButton' disabled={true} style={{
                                     width: '100%',
                                 }}>Stopping</Button>
                                 <LinearProgress color='secondary' style={{ width: '402px', marginTop: '41px', position: 'absolute', paddingLeft: '5px', paddingRight: '5px', borderRadius: '20px' }} />
@@ -101,9 +97,7 @@ function HostingSection(props) {
                         )
                     default:
                         return (
-                            <Button variant="contained" disabled={!installed} style={{
-                                backgroundColor: installed ? '#6225e6' : "grey",
-                                color: '#ffffff',
+                            <Button variant="contained" className='hoverButton' disabled={!installed} style={{
                                 width: '100%',
                             }} onClick={async () => {
                                 window.startServer({

@@ -54,8 +54,11 @@ window.addEventListener("DOMContentLoaded", () => {
   window.closeWindow = closeWindow;
 
   window.selectGameDir = async () => {
-    const result = await ipcRenderer.sendSync('select-dirs')
-    if (!result) {
+    const result = await ipcRenderer.sendSync('select-dirs', {
+      path: localStorage.getItem("gameDirectory"),
+    })
+    console.log(result)
+    if (result && !result.error) {
       return Promise.resolve(result.filePaths[0].replaceAll("\\", "/"))
     }
   }

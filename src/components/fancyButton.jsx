@@ -5,14 +5,19 @@ function fancyButton(props) {
     <button className="cta" href={props.href} onClick={props.onClick} style={{
         width: '250px', 
         height: '55px', 
-        fontSize: '25px',
+        fontSize: '30px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        fontFamily: 'Roboto',
+        fontFamily: 'Brda',
+        fontStyle: 'italic',
+        lineHeight: '3px',
+        letterSpacing: '2px',
         ...props.style
     }}>
-        <span>{props.text}</span>
+        <span style={{
+            // color: '#FFF000',
+        }}>{props.text}</span>
     </button>
   )
 }

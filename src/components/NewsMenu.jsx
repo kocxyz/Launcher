@@ -26,7 +26,7 @@ function SettingsMenu() {
           if(news.length === 0) return <CircularProgress style={{ margin: 'auto', marginTop: '150px'}} />
           else return news.map((item, index) => {
             return (
-              <NewsArticle key={index} title={item.title} date={moment(parseInt(item.time)).fromNow()} content={item.description} />
+              <NewsArticle key={index} title={item.title.toUpperCase()} date={moment(parseInt(item.time)).fromNow()} content={item.description} />
             )
           })
         })()}

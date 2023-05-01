@@ -28,7 +28,7 @@ function LaunchSection(props) {
                             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', width: '100%' }}>
                                 <p style={{ marginTop: '5px', fontSize: '15px' }}>{installData === 100 ? 'UNPACKING' : 'DOWNLOADING' }</p>
                                 <Box style={{ display: 'flex', flexDirection: 'row', width: '90%', justifyContent: 'center', alignItems: 'center' }}>
-                                    <LinearProgress style={{ width: '450px', background: '#743a8d' }} variant={installData === 100 ? 'indeterminate' : 'determinate'} value={installData === 100 ? null : installData} />
+                                    <LinearProgress style={{ width: '450px', background: '#320853' }} color='secondary' variant={installData === 100 ? 'indeterminate' : 'determinate'} value={installData === 100 ? null : installData} />
                                     <p style={{ fontSize: '15px', marginLeft: '20px', textAlign: 'start', width: '50px' }}>{parseFloat(installData).toFixed(2)}%</p>
 
 

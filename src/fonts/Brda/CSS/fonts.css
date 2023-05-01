@@ -1,0 +1,13 @@
+@font-face {
+  font-family: 'Brda';
+  src: url('../Fonts/BrdaStd-ExtraBold.otf') format('opentype');
+  font-weight: "bold";
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Brda';
+  src: url('../Fonts/BrdaStd-ExtraBoldItalic.otf') format('opentype');
+  font-weight: "bold";
+  font-style: italic;
+}

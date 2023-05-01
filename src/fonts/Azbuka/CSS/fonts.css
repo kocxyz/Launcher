@@ -1,0 +1,23 @@
+@font-face {
+       font-family: 'Azbuka';
+       src: url('../Fonts/AzbukaPro-Bold.ttf') format('truetype');
+       font-weight: bold; 
+}
+
+@font-face {
+       font-family: 'Azbuka';
+       src: url('../Fonts/AzbukaPro-BoldItalic.ttf') format('truetype');
+       font-weight: bold;
+       font-style: italic;
+}
+
+@font-face {
+       font-family: 'Azbuka';
+       src: url('../Fonts/AzbukaPro-Italic.ttf') format('truetype');
+       font-style: italic;
+}
+
+@font-face {
+       font-family: 'Azbuka';
+       src: url('../Fonts/AzbukaPro.ttf') format('truetype');
+}

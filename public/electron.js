@@ -20,6 +20,8 @@ let rpcSettings = {}
 
 const gotTheLock = app.requestSingleInstanceLock()
 
+let mainWindow;
+
 function createWindow () {
     // Create the browser window.
     const win = new BrowserWindow({
@@ -28,6 +30,7 @@ function createWindow () {
         frame: false,
         resizable: false,
         movable: true,
+        icon: app.isPackaged ? undefined : 'public/icon.png',
         titleBarStyle: 'hidden',
         webPreferences: {
             nodeIntegration: true,
@@ -36,6 +39,8 @@ function createWindow () {
             webSecurity: false
         }
     })
+
+    mainWindow = win
 
     remote.enable(win.webContents)
 
@@ -109,15 +114,84 @@ function createWindow () {
       const result = await dialog.showOpenDialog(win, {
         properties: ['openDirectory']
       })
-      if (!result.canceled) {
-        // write it to localStorage
-        // win.webContents.executeJavaScript(`localStorage.setItem("gameDirectory", "${result.filePaths[0].replaceAll("\\", "/")}")`)
+      console.log(result)
+      if (!result.canceled) { 
 
-        // send it back to the renderer
-        // win.webContents.send('selected-dirs', result.filePaths[0].replaceAll("\\", "/"))
-        event.returnValue = result
+        if(result.filePaths[0].replaceAll("\\", "/") == arg.path) {
+          event.returnValue = null
+          return dialog.showErrorBox("Error", "Selected directory is identical.")
+        }
+
+        const files = fs.readdirSync(arg.path)
+
+        if(files.length != 0) {
+          let hasDownloadFiles = false;
+          for(let file of files) if(file.startsWith("files-") && file.endsWith(".zip")) hasDownloadFiles = true
+
+          if(files.includes("highRes") || files.includes("lowRes") || hasDownloadFiles) {
+
+            const action = await dialog.showMessageBox(win, {
+              type: "warning",
+              title: "Warning",
+              message: "The previous directory contains traces of a KOcity installation. What do you want to do with the previous installation?",
+              buttons: ["Keep", "Move", "Delete", "Cancel"]
+            })
+            console.log(action)
+            switch(action.response) {
+              case 0:
+                // Keep
+                event.returnValue = result
+              break;
+              case 1:
+                // Move
+                // Check for permissions
+                try {
+                  let res = await setUpPermission(result.filePaths[0])
+                  console.log(res)
+                } catch (error) {
+                  console.log(error)
+                  dialog.showErrorBox("Error", "Failed to set up permissions. Please try again.")
+                  return event.returnValue = null
+                }
+
+                try {
+                  await new Promise((resolve, reject) => {
+                    for(let file of files) {
+                      if(file.startsWith("files-") && file.endsWith(".zip") || file == "highRes" || file == "lowRes") {
+                        fs.renameSync(`${arg.path}/${file}`, `${result.filePaths[0]}/${file}`)
+                      }
+                    }
+                    resolve()
+                  })
+                } catch (error) {
+                  console.error(error)
+                  dialog.showErrorBox("Error", "Failed to copy files. " + error)
+                  return event.returnValue = null
+                }
+                event.returnValue = result
+              break;
+              case 2:
+                // Delete
+                await new Promise((resolve, reject) => {
+                  fs.rmSync(arg.path, { recursive: true })
+                  resolve()
+                })
+                event.returnValue = result
+              break;
+              case 3:
+                // Cancel
+                event.returnValue = null
+              break;
+            }
+
+          }
+        } else {
+          event.returnValue = result
+        }
+
       } else {
         event.returnValue = null
+        console.log("NotSent")
       }
     })
 
@@ -144,42 +218,40 @@ function createWindow () {
       event.returnValue = "downloading"
 
       // Check write permissions
-      if(!fs.existsSync(arg.path)) {
+      if (!fs.existsSync(arg.path)) {
         // check if this process is allowed to write to the directory
         try {
-          fs.mkdirSync(arg.path)
+          fs.mkdirSync(arg.path);
         } catch (error) {
-          console.log(error.message)
+          console.log(error.message);
           // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
-
           await new Promise((resolve, reject) => {
             sudo.exec(`mkdir "${arg.path}" && icacls "${arg.path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
-              if(error) reject("Could not create directory")
+              if (error)
+                reject("Could not create directory");
               else {
-                resolve()
-                // sudo.exec(`icacls "${arg.path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
-                //   if(error) reject("Could not raise permissions")
-                //   else resolve()
-                // })
+                resolve();
               }
-            })
-          })
+            });
+          });
         }
       } else {
         // check if this process is allowed to write to the directory
         try {
-          fs.writeFileSync(`${arg.path}/test.txt`, "test")
+          fs.writeFileSync(`${arg.path}/test.txt`, "test");
         } catch (error) {
-          console.log(error.message)
+          console.log(error.message);
           // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
           await new Promise((resolve, reject) => {
             sudo.exec(`icacls "${arg.path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
-              if(error) reject("Could not raise permissions"), console.log(error)
-              else resolve()
-            })
-          })
+              if (error)
+                reject("Could not raise permissions"), console.log(error);
+              else
+                resolve();
+            });
+          });
         } finally {
-          fs.existsSync(`${arg.path}/test.txt`) && fs.unlinkSync(`${arg.path}/test.txt`)
+          fs.existsSync(`${arg.path}/test.txt`) && fs.unlinkSync(`${arg.path}/test.txt`);
         }
       }
 
@@ -193,6 +265,10 @@ function createWindow () {
       // Check if there are redundant files
       (() => {
         console.log("Checking for redundant files")
+
+        if(fs.existsSync(`${arg.path}/files-1.zip`)) fs.rmSync(`${arg.path}/files-1.zip`)
+        if(fs.existsSync(`${arg.path}/files-2.zip`)) fs.rmSync(`${arg.path}/files-2.zip`)
+
         const files = fs.readdirSync(arg.path)
 
         for (const file of files) {
@@ -600,6 +676,29 @@ app.on('activate', () => {
   }
 })
 
+async function setUpPermission(path) {
+  // check if this process is allowed to write to the directory
+  try {
+    fs.writeFileSync(path + "/test.txt", "test")
+    console.log(`Writable ${fs.existsSync(path + "/test.txt")}`)
+    console.log("Has permissions")
+  } catch (error) {
+    console.log(error.message);
+    // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
+    await new Promise((resolve, reject) => {
+      sudo.exec(`icacls "${path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
+        if (error) reject("Could not raise permissions"), console.log(error);
+        else resolve();
+      });
+    }).catch((err) => {
+      return Promise.reject(err);
+    });
+  } finally {
+    if(fs.existsSync(path + "/test.txt")) fs.rmSync(path + "/test.txt")
+    return Promise.resolve();
+  }
+}
+
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
 
@@ -607,3 +706,21 @@ app.on('activate', () => {
 function roundToDecimalPlace(number, decimalPlaces) {
   return Math.round(number * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
 }
+
+process.on('uncaughtException', function (err) {
+  dialog.showMessageBox(mainWindow, {
+    type: "error",
+    title: "Unexpected Error",
+    message: "An unexpected error occurred. Error: " + err.message
+  })
+  console.log(err);
+});
+
+process.on('unhandledRejection', function (err) {
+  dialog.showMessageBox(mainWindow, {
+    type: "error",
+    title: "Unexpected Error",
+    message: "An unexpected error occurred. Error: " + err.message
+  })
+  console.log(err);
+});
