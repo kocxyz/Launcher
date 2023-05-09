@@ -122,7 +122,7 @@ function createWindow () {
           return dialog.showErrorBox("Error", "Selected directory is identical.")
         }
 
-        if(!fs.existsSync(arg.path)) event.returnValue = result
+        if(!fs.existsSync(arg.path)) return event.returnValue = result
 
         const files = fs.readdirSync(arg.path)
 
