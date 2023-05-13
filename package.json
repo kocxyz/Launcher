@@ -25,7 +25,7 @@
     "react-scripts": "5.0.1",
     "sudo-prompt": "^9.2.1",
     "tree-kill": "^1.2.2",
-    "unzipper": "^0.10.11"
+    "unzipper": "^0.10.14"
   },
   "devDependencies": {
     "electron": "latest"
