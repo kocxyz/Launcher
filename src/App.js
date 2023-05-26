@@ -10,6 +10,7 @@ import NewsMenu from './components/NewsMenu';
 import ServersMenu from './components/ServersMenu';
 import SettingsMenu from './components/SettingsMenu';
 import LaunchSection from './components/LaunchSection';
+import PopUp from './components/popUp';
 
 // Images
 import logoImg from './images/logo.png';
@@ -21,6 +22,7 @@ import bg5 from './images/backgrounds/5.jpg';
 import bg6 from './images/backgrounds/6.jpg';
 import bg7 from './images/backgrounds/7.jpg';
 import bg8 from './images/backgrounds/8.jpg';
+import axios from 'axios';
 
 const boxes = { height: '97vh' }
 const links = { 
@@ -54,6 +56,14 @@ function App() {
 
   const [currServer, setCurrServer] = useState(localStorage.getItem("currServer"))
   const [currServerName, setCurrServerName] = useState(localStorage.getItem("currServerName"))
+  const [currServerType, setCurrServerType] = useState(localStorage.getItem("currServerType") || 'private')
+
+  const [authState, setAuthState] = useState(localStorage.getItem("authState") === "true" ? true : false)
+
+  const [popUpState, setPopUpState] = useState(false)
+  const [username, setUsername] = useState(localStorage.getItem('username'))
+
+  const [publicServers, setPublicServers] = useState()
 
   useEffect(() => {
     backgrounds = backgrounds.scrable()
@@ -69,6 +79,7 @@ function App() {
   useEffect(() => {
     localStorage.setItem("currServer", currServer)
     localStorage.setItem("currServerName", currServerName)
+    localStorage.setItem("currServerType", currServerType)
   }, [currServer]) // eslint-disable-line 
 
   useEffect(() => {
@@ -79,8 +90,20 @@ function App() {
       })
   }, [version])
 
+  const fetchservers = async () => {
+    const response = await axios.get('https://api.kocity.xyz/stats/servers')
+    setPublicServers(response.data)
+  }
+  useEffect(() => {
+    setInterval(fetchservers, 1000 * 60 * 3)
+    fetchservers()
+  }, [])
+
   return (
     <div className="App">
+      <Box style={{ position: 'absolute' }}>
+        <PopUp popUpState={popUpState} setPopUpState={setPopUpState} setAuthState={setAuthState} setUsername={setUsername} />
+      </Box>
     {backgrounds.map((img, index) => (
       <img
         key={index}
@@ -95,6 +118,7 @@ function App() {
         }}
       />
     ))}
+
       <Box style={boxes}>
         <Box>
           <img src={logoImg} alt="logo" style={{ width: '300px', marginLeft: '35px' }}/>
@@ -134,8 +158,8 @@ function App() {
         </Tabs>
         <Box style={{ marginTop: '10px' }}>
           {tab === 0 && <NewsMenu />}
-          {tab === 1 && <ServersMenu currServer={currServer} setCurrServer={setCurrServer} currServerName={currServerName} setCurrServerName={setCurrServerName} gameState={gameState} serverState={serverState}  setServerState={setServerState} />}
-          {tab === 2 && <SettingsMenu gameState={gameState} setGameState={setGameState} />}
+          {tab === 1 && <ServersMenu currServer={currServer} setCurrServer={setCurrServer} currServerName={currServerName} setCurrServerName={setCurrServerName} gameState={gameState} serverState={serverState} setServerState={setServerState} currServerType={currServerType} setCurrServerType={setCurrServerType} authState={authState} publicServers={publicServers} setPublicServers={setPublicServers} fetchservers={fetchservers} />}
+          {tab === 2 && <SettingsMenu gameState={gameState} setGameState={setGameState} setPopUpState={setPopUpState} authState={authState} username={username} setUsername={setUsername} />}
         </Box>
       </Box>
     </div>

@@ -48,7 +48,11 @@ function createWindow () {
     if(app.isPackaged) win.loadFile(path.join(__dirname, "index.html"), { cwd: __dirname })
     else win.loadURL('http://localhost:3000');
 
-    if(!app.isPackaged) win.webContents.openDevTools()
+    if(!app.isPackaged) win.webContents.openDevTools({
+        mode: "detach",
+        x: 0,
+        y: 0,
+    })
 
     // get the version from package.json and send it to the renderer
     win.webContents.on('did-finish-load', () => {
@@ -230,7 +234,7 @@ function createWindow () {
           await new Promise((resolve, reject) => {
             sudo.exec(`mkdir "${arg.path}" && icacls "${arg.path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
               if (error)
-                reject("Could not create directory");
+                reject(new Error(error.message)), console.log(error);
               else {
                 resolve();
               }
@@ -247,7 +251,7 @@ function createWindow () {
           await new Promise((resolve, reject) => {
             sudo.exec(`icacls "${arg.path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
               if (error)
-                reject("Could not raise permissions"), console.log(error);
+              reject(new Error(error.message)), console.log(error);
               else
                 resolve();
             });
@@ -440,7 +444,9 @@ function createWindow () {
     ipcMain.on('launch-game', async (event, arg) => {
       console.log("Launching game")     
 
-      const args = [`-lang=${arg.language || 'en'}`, `-username=${arg.username}`, `-backend=${arg.server}`];
+      console.log(arg)
+
+      const args = [`-lang=${arg.language || 'en'}`, `-username=${arg.serverType === 'public' ? `${arg.username}/${arg.authToken}` : arg.username}`, `-backend=${arg.server}`];
       const game = spawn(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity/KnockoutCity.exe`, args, { 
         cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
         detached: true,
@@ -466,11 +472,11 @@ function createWindow () {
         // rpcSettings.partyMax = 16
 
         if(rpcSettings.enabled) rpc.setActivity({
-          details: "Playing on a private server",
+          details: `Playing on a ${arg.serverType} server`,
           state: rpcSettings.displayName ? `Server: ${arg.serverName}` : undefined,
           startTimestamp: Date.now(),
           largeImageKey: "logo",
-          largeImageText: "Running the Ipmake KO City Launcher",
+          largeImageText: "Running the Ip man launcher",
           instance: true,
 
           // partyId: rpcSettings.partyId,
@@ -577,6 +583,12 @@ function createWindow () {
           killProcess(server.pid, "SIGINT")
         }, 1000)
       })
+    })
+
+    ipcMain.on("launch-url", async (event, arg) => {
+      console.log("Launching URL")
+      event.returnValue = "launched"
+      exec(`start ${arg.url}`)
     })
 }
 

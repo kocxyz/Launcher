@@ -9,6 +9,17 @@ const {
   closeWindow,
 } = require("./menu-functions");
 
+Array.prototype.scrable = function () {
+  var i = this.length;
+  while (i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var temp = this[i];
+    this[i] = this[j];
+    this[j] = temp;
+  }
+  return this;
+};
+
 if(!localStorage.getItem("username")) {
   // get username from system
   const username = require("os").userInfo().username;
@@ -89,6 +100,8 @@ window.addEventListener("DOMContentLoaded", () => {
       language: localStorage.getItem("language"),
       server: localStorage.getItem("currServer"),
       serverName: localStorage.getItem("currServerName"),
+      serverType: localStorage.getItem("currServerType"),
+      authToken: localStorage.getItem("authToken")
     })
     props.setGameState("running")
 
@@ -155,15 +168,8 @@ window.addEventListener("DOMContentLoaded", () => {
   window.pauseInstall = async () => {
     ipcRenderer.send('pause-download', { path: localStorage.getItem("gameDirectory"), version: localStorage.getItem("gameVersion") })
   }
-});
 
-Array.prototype.scrable = function () {
-  var i = this.length;
-  while (i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var temp = this[i];
-    this[i] = this[j];
-    this[j] = temp;
+  window.launchURL = (url) => {
+    ipcRenderer.send('launch-url', { url })
   }
-  return this;
-};
+});

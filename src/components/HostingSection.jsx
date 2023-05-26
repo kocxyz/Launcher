@@ -9,7 +9,7 @@ function HostingSection(props) {
         port: localStorage.getItem('server:port') || '23600',
         secret: localStorage.getItem('server:secret') || '',
         maxUsers: parseInt(localStorage.getItem('server:maxUsers')) || 0,
-        showTerminal: localStorage.getItem('server:showTerminal') || false
+        showTerminal: (localStorage.getItem('server:showTerminal') === 'true' ? true : false) || false
     })
 
     const installed = ["installed", "running"].includes(gameState)

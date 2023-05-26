@@ -1,7 +1,7 @@
 {
   "name": "knockoutcitylauncher",
   "description": "Unofficial Knockout City Launcher",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "private": true,
   "homepage": "./",
   "main": "public/electron.js",
@@ -17,7 +17,7 @@
     "discord-rpc": "^4.0.1",
     "moment": "^2.29.4",
     "node-pty": "^0.10.1",
-    "react": "^18.2.0",
+    "react": "^18.2.0", 
     "react-dom": "^18.2.0",
     "react-scripts": "5.0.1",
     "sudo-prompt": "^9.2.1",
