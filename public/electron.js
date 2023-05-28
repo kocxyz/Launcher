@@ -15,6 +15,8 @@ const discordRPC = require('discord-rpc');
 const crypto = require('crypto')
 remote.initialize()
 
+const config = require(path.join(__dirname, 'config.json'))
+
 let rpc = null
 let rpcSettings = {}
 
@@ -446,7 +448,7 @@ function createWindow () {
 
       console.log(arg)
 
-      const args = [`-lang=${arg.language || 'en'}`, `-username=${arg.serverType === 'public' ? `${arg.username}/${arg.authToken}` : arg.username}`, `-backend=${arg.server}`];
+      const args = [`-lang=${arg.language || 'en'}`, `-username=${arg.authkey ? arg.authkey : arg.username}`, `-backend=${arg.server}`];
       const game = spawn(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity/KnockoutCity.exe`, args, { 
         cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
         detached: true,

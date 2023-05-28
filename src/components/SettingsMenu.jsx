@@ -51,7 +51,7 @@ function SettingsMenu({ gameState, setGameState, setPopUpState, authState, usern
                     if(authState) setPopUpState('confirmLogout')
                     else {
                         setPopUpState('login')
-                        window.launchURL("https://api.kocity.xyz/web/discord")
+                        window.launchURL(`${window.config.authServer}/web/discord`)
                     }
                 }}>{authState ? <ExitToApp /> : <Person /> }</Button>
                 </Stack>

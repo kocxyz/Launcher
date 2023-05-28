@@ -9,6 +9,8 @@ const {
   closeWindow,
 } = require("./menu-functions");
 
+window.config = require("./config.json");
+
 Array.prototype.scrable = function () {
   var i = this.length;
   while (i--) {
@@ -101,7 +103,7 @@ window.addEventListener("DOMContentLoaded", () => {
       server: localStorage.getItem("currServer"),
       serverName: localStorage.getItem("currServerName"),
       serverType: localStorage.getItem("currServerType"),
-      authToken: localStorage.getItem("authToken")
+      authkey: props.authkey ? props.authkey : undefined
     })
     props.setGameState("running")
 
