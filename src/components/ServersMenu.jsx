@@ -9,7 +9,7 @@ import HostingSection from "./HostingSection"
 function ServersMenu(props) {
     const {currServer, setCurrServer, currServerName, setCurrServerName, currServerType, setCurrServerType, authState, publicServers, setPublicServers, fetchservers } = props // eslint-disable-line
 
-    const [tab, setTab] = useState(1)
+    const [tab, setTab] = useState(0)
 
     const [addActive, setAddActive] = useState(false)
     const [addName, setAddName] = useState('')

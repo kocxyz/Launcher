@@ -2,6 +2,7 @@ import { Box, IconButton, LinearProgress, Stack, Typography } from '@mui/materia
 import React, { useState } from 'react'
 import FancyButton from './fancyButton';
 import { CloseOutlined, PauseOutlined } from '@mui/icons-material';
+import axios from 'axios';
 
 function LaunchSection(props) {
     
@@ -17,9 +18,37 @@ function LaunchSection(props) {
                             window.installGame({setInstallData, setGameState})
                         }} />)
                     case 'installed':
-                        return (<FancyButton text="LAUNCH" onClick={() => {
+                        return (<FancyButton text="LAUNCH" onClick={async () => {
                             console.log('launching')
-                            window.launchGame({setGameState})
+                            if(props.currServerType === "public") {
+                                props.setPopUpState("authenticating")
+                                if(localStorage.getItem("authState") !== "true" || !localStorage.getItem("authToken")) {
+                                    props.setPopUpState(false)
+                                    return alert("You must be logged in to use public servers!")
+                                }
+
+                                const res = await axios.post(`${window.config.authServer}/auth/getkey`, {
+                                    username: localStorage.getItem("username"),
+                                    authToken: localStorage.getItem("authToken"),
+                                    server: props.currServer,
+                                }).catch((err) => {
+                                    props.setPopUpState(false)
+                                    alert(err.response.data.message)
+                                    return null
+                                })
+                                if(!res) return
+
+                                if(res.status !== 200) {
+                                    props.setPopUpState(false)
+                                    return alert(res.data.message)
+                                }
+
+                                const authkey = res.data.authkey
+
+                                props.setPopUpState(false)
+                                return window.launchGame({setGameState, authkey})
+                            } 
+                            else return window.launchGame({setGameState})
                         }} />)
                     case 'running':
                         return (<FancyButton text="LAUNCH" disabled={true} style={{ filter: 'grayscale(1)', pointerEvents: 'none'}} />)

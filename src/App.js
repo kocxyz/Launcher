@@ -91,7 +91,19 @@ function App() {
   }, [version])
 
   const fetchservers = async () => {
-    const response = await axios.get('https://api.kocity.xyz/stats/servers')
+    const response = await axios.get(`${window.config.authServer}/stats/servers`).catch((err) => {
+      console.log(err)
+      return {
+        data: [{
+          status: "offline",
+          name: 'Stop Spamming',
+          ip: "127.0.0.1",
+          region: "I have your IP ;)",
+          connections: 100000,
+          maxConnections: 100000000,
+        }]
+      }
+    })
     setPublicServers(response.data)
   }
   useEffect(() => {
@@ -147,7 +159,7 @@ function App() {
           <a style={links} className="hoverLink" href='https://thekoyostore.com/collections/knockout-city' target='_blank'>STORE</a> {/* eslint-disable-line */}
         </Box>
 
-        <LaunchSection version={version} gameState={[gameState, setGameState]} currServer={currServer} currServerName={currServerName} />
+        <LaunchSection version={version} gameState={[gameState, setGameState]} currServer={currServer} currServerName={currServerName} currServerType={currServerType} setPopUpState={setPopUpState} />
       </Box>
       
       <Box style={{ background: 'rgba(50, 8, 83, 0.75)', padding: '20px', marginTop:'-3vh', paddingBottom: '0px'}}>

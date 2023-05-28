@@ -28,23 +28,13 @@ function PopUp({ popUpState, setPopUpState, setAuthState, setUsername }) {
                             event.target.value = value
                             if (value.length === 6) {
                                 setPopUpLoading(true)
-                                const data = await axios.get(`https://api.kocity.xyz/auth/login/${value}`).catch((err) => {
+                                const data = await axios.post(`${window.config.authServer}/auth/login/`, {
+                                    code: value
+                                }).catch((err) => {
                                     console.log(err)
-                                    event.target.value = ''
-                                    setPopUpLoading(false)
-                                    setInputIncorrect(true)
-                                    setWrongInputs(wrongInputs + 1)
-                                    event.target.focus()
-                                    if (wrongInputs >= 10) {
-                                        setPopUpState(false)
-                                        setInputIncorrect(false)
-                                        setPopUpLoading(false)
-                                        setWrongInputs(0)
-                                    }
-
-                                    return
+                                    return err.response
                                 })
-                                if (data.status === 200 && data.data.new) {
+                                if (data.status === 400 && data.data.type === 'no_account_found') {
                                     setPopUpState('register')
                                     setInputIncorrect(false)
                                     setPopUpLoading(false)
@@ -116,10 +106,10 @@ function PopUp({ popUpState, setPopUpState, setAuthState, setUsername }) {
                             <Button variant="contained" className='hoverButton' onClick={async () => {
                                 console.log("SAVE")
                                 setPopUpLoading(true)
-                                const data = await axios.post(`https://api.kocity.xyz/auth/register/${code}`, { username: document.getElementById('username').value.trim() }).catch((err) => {
+                                const data = await axios.post(`${window.config.authServer}/auth/register/`, { username: document.getElementById('username').value.trim(), code }).catch((err) => {
                                     console.log(err)
                                     setPopUpLoading(false)
-                                    setInputIncorrect(err.response.data)
+                                    setInputIncorrect(err.response.data.message)
                                     return
                                 })
 
@@ -176,6 +166,20 @@ function PopUp({ popUpState, setPopUpState, setAuthState, setUsername }) {
 
                     </Box>
                 </Backdrop>
+            )
+        case 'authenticating':
+            return (
+                <Backdrop open={true} style={{ zIndex: 1000 }}>
+                    <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#1a1a1a', width: '600px', height: '200px', borderRadius: '5px', padding: '10px', textAlign: 'center' }}>
+                        <Typography variant="h4" style={{ color: 'white', textAlign: 'center', marginTop: '20px', fontFamily: 'Brda', fontStyle: 'italic', letterSpacing: '2px'}}>Authenticating</Typography>
+                        <p>Hang on while we are trying to authenticate you</p>
+                        <LinearProgress color="secondary" style={{ opacity: 1, width: '200px' }} />
+                    </Box>
+                </Backdrop>
+            )
+        default:
+            return (
+                <></>
             )
    }
 }
