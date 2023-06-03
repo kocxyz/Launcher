@@ -98,7 +98,7 @@ function PopUp({ popUpState, setPopUpState, setAuthState, setUsername }) {
                             textAlign: 'center',
                             fontSize: '20px',
                         }} onChange={(async (event) => {
-                            if(event.target.value.length > 12) event.target.value = event.target.value.slice(0, 12)
+                            if(event.target.value.length > 16) event.target.value = event.target.value.slice(0, 16)
                         })} />
                         <LinearProgress color="secondary" style={{ opacity: popUpLoading ? 1 : 0, width: '200px' }} />
                         <p style={{ color: 'red', opacity: `${inputIncorrect ? 1 : 0}`, margin: 0 }}>{inputIncorrect}</p>
