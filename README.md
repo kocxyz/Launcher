@@ -22,14 +22,14 @@ This launcher is developed by the community and is not affiliated with Velan Stu
 4. Restart your launcher and click "Yes" when it asks you to create a version.txt
 
 This should be the folder strucutre:
-
+```
 Knockout City/
 ├─ highRes/
 │  ├─ KnockoutCity/
 │  ├─ KnockoutCityServer/
 │  ├─ eula.txt
 │  ├─ readme.txt
-
+```
 
 ## Features
 - Improve usability by providing basic settings instead of command line arguments
