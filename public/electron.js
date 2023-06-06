@@ -121,23 +121,45 @@ function createWindow () {
         properties: ['openDirectory']
       })
       console.log(result)
-      if (!result.canceled) { 
+      if (!result.canceled) {
+        console.log("Not canceled")
+
+        let path = result.filePaths[0].replaceAll("\\", "/")
 
         if(result.filePaths[0].replaceAll("\\", "/") == arg.path) {
+          console.log("Directory is identical")
           event.returnValue = null
           return dialog.showErrorBox("Error", "Selected directory is identical.")
+        } 
+        
+        console.log(path.endsWith("/highRes"), path.endsWith("/lowRes"))
+
+        if(path.endsWith("/highRes") || path.endsWith("/lowRes")) {
+          console.log(path)
+          path = path.split("/")
+          path.pop()
+          path = path.join("/")
+          result.filePaths[0] = path
         }
 
-        if(!fs.existsSync(arg.path)) return event.returnValue = result
+        if(!fs.existsSync(arg.path)) {
+          console.log("Doesn't exist")
+          return event.returnValue = result
+        }
 
+        console.log("Reading previous dir")
         const files = fs.readdirSync(arg.path)
 
         if(files.length != 0) {
+          console.log("Has files, checking content")
           let hasDownloadFiles = false;
-          for(let file of files) if(file.startsWith("files-") && file.endsWith(".zip")) hasDownloadFiles = true
+          for(let file of files) {
+            if(file.startsWith("files-") && file.endsWith(".zip")) hasDownloadFiles = true
+            console.log(file)
+          }
 
           if(files.includes("highRes") || files.includes("lowRes") || hasDownloadFiles) {
-
+            console.log("Detected install traces")
             const action = await dialog.showMessageBox(win, {
               type: "warning",
               title: "Warning",
@@ -192,12 +214,17 @@ function createWindow () {
               break;
             }
 
+          } else {
+            console.log("Changed directory, no traces")
+            event.returnValue = result
           }
         } else {
+          console.log("Changed directory, no traces")
           event.returnValue = result
         }
 
       } else {
+        console.log("Canceled")
         event.returnValue = null
         console.log("NotSent")
       }
@@ -208,7 +235,23 @@ function createWindow () {
       console.log(arg)
 
       const startFile = fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity/KnockoutCity.exe`)
-      const currentVersion = (await axios.get("https://cdn.ipgg.net/kocity/game/version")).data
+      const currentVersion = (await axios.get("https://cdn.ipgg.net/kocity/game/version")).data.trim()
+
+      let installValid = false;
+      if(fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`)) installValid = true;
+      if(fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/eula.txt`)) installValid = true;
+
+      if(installValid && !fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`)) {
+        const result = await dialog.showMessageBox(win, {
+          type: "warning",
+          title: "Installation faulty",
+          message: "The used directory contains a valid installation. But the version.txt file is missing. Do you want to create one? (NOT RECOMMENDED)",
+          buttons: ["Yes", "No"]
+        })
+
+        if(result.response === 0) fs.writeFileSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`, currentVersion)
+      }
+
       const installedVersion = fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`) ? fs.readFileSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`, 'utf8') : null
 
       if(startFile && currentVersion.trim() == installedVersion) return event.returnValue = "installed"
