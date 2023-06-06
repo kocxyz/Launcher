@@ -14,6 +14,13 @@ This launcher is developed by the community and is not affiliated with Velan Stu
 2. Run the installer
 3. If the windows defender message pops up, click "More info" and then "Run anyway"
 
+## Import an existing Private server installation
+
+1. Create a directory somewhere that will house everything
+2. Depending on the private server edition version you have downloaded, create a directory in the directory you just created called either `highRes` or `lowRes`
+3. Move the private server editions files into the highRes or lowRes folder
+4. Restart your launcher and click "Yes" when it asks you to create a version.txt
+
 ## Features
 - Improve usability by providing basic settings instead of command line arguments
 - A basic news feed and a server browser and favorites list
