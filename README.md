@@ -50,6 +50,7 @@ Launcher features:
 - See a list of public servers and their current player counts.
 - Connect to private or public servers.
 - Run a private server locally.
+- Secure server authentication.
 - Sign in via Discord.
 - Auto-update the launcher and the game.
 
@@ -84,7 +85,7 @@ Launcher TODO:
 
 The Low Res download is 17.0G. The High Res download is 22.4G.
 
-If you've already downloaded the game, you can use the existing files instead of redownloading it.
+If you've already downloaded the game, you can use the existing files instead of redownloading it (though this may be less reliable than letting the launcher download the files itself).
 
 1. Create a folder somewhere that will house everything
 1. Create either a folder either called `lowRes` or `highRes` depending on which version you downloaded.
@@ -102,6 +103,19 @@ Knockout City/
 │  ├─ readme.txt
 ```
 
+### Authentication, Discord, and usernames
+
+As released by Velan, a server can require a password to join the server, and when connecting you can choose whatever username you want. This is fine for private games, but for public servers, it would mean anyone can take your username and play with your account.
+
+The launcher and all the public community servers use a layer of authentication on top of this. In the launcher, you authenticate through Discord, and a community-run authentication server talks to the game server so that you can use your username and no one else can. (If you want more details on how it works, here's some [technical documentation][docs proxy].)
+
+This means:
+- Public servers can only be joined through the launcher, and only by signing into Discord.
+- If you're using the launcher, you can't authenticate to private servers using a password.
+- If you are hosting your own server (through the launcher or not), and you want people (including yourself) to be able to join through the launcher, then you should not set a password.
+
+We want to add a feature to authenticate to private servers. Until we get around to that, if you want any authentication on your private server, you should run the game client directly and pass the username and password as command line arguments.
+
 ### Connect to a private server
 
 To connect to a server that's not in the public tab:
@@ -114,19 +128,6 @@ To connect to a server that's not in the public tab:
 1. Click the big "LAUNCH" button.
 
 If the server uses a port besides the default (`23600`), then enter the port alongside the ip address, like `127.0.0.1:50000`.
-
-### Authentication, Discord, and usernames
-
-As released by Velan, a server can require a password to join the server, and when connecting you can choose whatever username you want. This is fine for private games, but for public servers, it would mean anyone can take your username and play with your account.
-
-The launcher and all the public community servers use a layer of authentication on top of this. In the launcher, you authenticate through Discord, and a community-run authentication server talks to the game server so that you can use your username and no one else can. (If you want more details on how it works, here's some [technical documentation][docs proxy].)
-
-This means:
-- You will need to sign in to a Discord account to use the launcher and join any game (including locally hosted games).
-- Public servers that are listed in the launcher can only be joined through the launcher with a Discord account.
-- If you are hosting your own server (through the launcher or not), and you want people (including yourself) to be able to join through the launcher, then you should not set a password.
-
-We want to add a feature to the launcher to give a username and password when connecting to private servers, instead of going through the Discord auth system. Until we get around to that, if you need that feature, you should run the game client directly and pass the username and password as command line arguments.
 
 ### Hosting a server
 
@@ -161,7 +162,7 @@ If you have questions, need help, or have other contributions, join us on the [K
 - [Discord for The City Never Sleeps (TCNS)][discord tcns].
     - A community of people who are still playing the game, and host one of the public servers.
 - [DummyCorps Website][dummycorps].
-    - Website for one of the public servers.
+    - Website for one of the public servers, with a list of everyone who has connected to the server.
 - [Official blog post releasing the private server edition][official blog].
     - Has lots of information about the game's features.
     - Has instructions for running the client and server (that you don't need if you use the launcher).
