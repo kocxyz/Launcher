@@ -4,7 +4,7 @@ This is a launcher for the [Knockout City Private Server Edition][official blog]
 
 This launcher is an unofficial community-run project and is not affiliated with Velan Studios.
 
-Our Website: https://kocity.xyz . : Our discord: https://discord.gg/4kNPb4cRxN
+Our Website: https://kocity.xyz Our discord: https://discord.gg/4kNPb4cRxN
 
 ![Screenshot of Knockout City Launcher](https://cdn.discordapp.com/attachments/798935892059488276/1102977194805964800/image.png)
 
