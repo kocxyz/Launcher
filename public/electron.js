@@ -104,7 +104,6 @@ function createWindow () {
           largeImageKey: 'logo',
           largeImageText: 'Knockout City',
           instance: false,
-
         }).catch(console.error);
         
 
@@ -277,7 +276,7 @@ function createWindow () {
           console.log(error.message);
           // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
           await new Promise((resolve, reject) => {
-            sudo.exec(`mkdir "${arg.path}" && icacls "${arg.path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
+            sudo.exec(`mkdir "${arg.path}" && icacls "${arg.path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
               if (error)
                 reject(new Error(error.message)), console.log(error);
               else {
@@ -294,7 +293,7 @@ function createWindow () {
           console.log(error.message);
           // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
           await new Promise((resolve, reject) => {
-            sudo.exec(`icacls "${arg.path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
+            sudo.exec(`icacls "${arg.path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
               if (error)
               reject(new Error(error.message)), console.log(error);
               else
@@ -521,14 +520,14 @@ function createWindow () {
           state: rpcSettings.displayName ? `Server: ${arg.serverName}` : undefined,
           startTimestamp: Date.now(),
           largeImageKey: "logo",
-          largeImageText: "Running the Ip man launcher",
+          largeImageText: gimmeEmoji().repeat(5),
           instance: true,
 
           // partyId: rpcSettings.partyId,
           // partySize: rpcSettings.partySize,
           // partyMax: rpcSettings.partyMax,
           // joinSecret: rpcSettings.joinSecret,
-        })
+        }).catch(console.error);
       })
 
       game.once('close', (code) => {
@@ -745,7 +744,7 @@ async function setUpPermission(path) {
     console.log(error.message);
     // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
     await new Promise((resolve, reject) => {
-      sudo.exec(`icacls "${path}" /grant ${os.userInfo().username}:(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
+      sudo.exec(`icacls "${path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
         if (error) reject("Could not raise permissions"), console.log(error);
         else resolve();
       });
@@ -783,3 +782,22 @@ process.on('unhandledRejection', function (err) {
   })
   console.log(err);
 });
+
+function gimmeEmoji() {
+  let i = Math.floor(Math.random() * 10)
+
+  let emojis = [
+    "💀",
+    "💯",
+    "🤓",
+    "🎈",
+    "🗿",
+    "👋",
+    "🏀",
+    "🎖️",
+    "🎉",
+    "🎊"
+  ];
+
+  return emojis[i]
+}

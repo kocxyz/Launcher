@@ -47,11 +47,15 @@ function ServersMenu(props) {
                     <Table>
                         <TableHead>
                             <TableRow style={{ position: 'sticky' }}>
-                                <TableCell></TableCell>
+                                <TableCell width='20px' style={{
+                                    paddingRight: '0px',
+                                }}></TableCell>
                                 <TableCell>Name</TableCell>
-                                <TableCell align="right">Region</TableCell>
+                                <TableCell align="right" style={{
+                                    paddingLeft: '0px',
+                                }}>Region</TableCell>
                                 <TableCell align="right">Players</TableCell>
-                                <TableCell align="right">
+                                <TableCell align="right" width='20px'>
                                 <IconButton onClick={() => {
                                     setPublicServers("loading")
                                     fetchservers()
@@ -63,7 +67,7 @@ function ServersMenu(props) {
                         <TableBody>
                             {publicServers.map((server, i) => (
                                 <TableRow key={i}>
-                                    <TableCell size="small" width='40px'><Avatar
+                                    <TableCell size="small" width='40px' style={{ paddingRight: '0px' }}><Avatar
                                         sx={{ bgcolor: server.status === 'online' ? 'green' : 'red', width: '20px', height: '20px', fontSize: '20px'}}
                                         sizes="small"
                                         >&#8203;
