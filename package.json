@@ -8,7 +8,7 @@
   "author": "IPGsystems",
   "dependencies": {
     "@electron/remote": "^2.0.9",
-    "@emotion/react": "^11.11.0",
+    "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.10.6",
     "@fontsource/roboto": "^5.0.2",
     "@mui/icons-material": "^5.11.16",
