@@ -1,3 +1,11 @@
+* {
+    /* disable selecting */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 .App {
     display: grid;
     grid-template-columns: 1.25fr 1fr;
@@ -116,9 +124,9 @@ html, body {
 
     box-shadow: 5px 4px 5px #320853;
     transform: skewX(-15deg);
+
     cursor: pointer;
 }
-
 
 .cta:focus {
    outline: none; 
@@ -127,6 +135,9 @@ html, body {
 .cta:hover {
     transition: 0.5s;
     box-shadow: 8px 7px 0 #FFF000;
+    transform: skewX(-15deg) translateY(-3px) translateX(-3px);
+    background-position: 0 0;
+    color: #FFF000;
 }
 
 .cta span:nth-child(2) {
@@ -151,11 +162,18 @@ html, body {
 }
 
 .cta:active {
-    transform: translateY(3px);
+    transform: translateY(3px) skewX(-15deg);
     transition: 0.15s;
     box-shadow: 7px 7px 7px #FFF000;
 }
-  
+
+.cta:disabled {
+    background-color: grey;
+    color: #ffffff;
+    transform: skewX(-15deg);
+    box-shadow: 5px 4px 5px #320853;
+    cursor: not-allowed;
+}
 /**************SVG****************/
 
 /* SVG animations */

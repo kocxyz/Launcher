@@ -15,6 +15,18 @@ const discordRPC = require('discord-rpc');
 const crypto = require('crypto')
 remote.initialize()
 
+try { 
+  if(!fs.existsSync(path.join(os.tmpdir(), "kocitylauncherlogs"))) fs.mkdirSync(path.join(os.tmpdir(), "kocitylauncherlogs"))
+  const logFileName = `log-${new Date().toLocaleDateString().replace(/\//g, "-")}.txt`
+  const logFile = fs.createWriteStream(path.join(os.tmpdir(), "kocitylauncherlogs", logFileName), { flags: 'a' })
+  console.log = function (d) { //
+    logFile.write(`[${new Date().toLocaleString()}] ${d} \n`)
+    process.stdout.write(`[${new Date().toLocaleString()}] ${d} \n`)
+  }
+}
+catch(e) { console.log(e) }
+
+
 const config = require(path.join(__dirname, 'config.json'))
 
 let rpc = null
@@ -495,6 +507,7 @@ function createWindow () {
         cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
         detached: true,
         stdio: 'ignore',
+        env: {}
       })
       console.log(game.spawnargs)
       event.returnValue = "launched"
@@ -530,9 +543,15 @@ function createWindow () {
         }).catch(console.error);
       })
 
-      game.once('close', (code) => {
-        console.log(`Game process exited with code ${code}`);
+      game.once('close', (code, message) => {
+        console.log(`Game process exited with code ${code} and message ${message}`);
         win.webContents.executeJavaScript(`window.postMessage({type: "game-closed"})`)
+
+        if(code != 0) dialog.showMessageBox(win, {
+          type: "error",
+          title: "Game Crashed",
+          message: "The game crashed with code " + code
+        })
 
         if(rpcSettings.enabled) rpc.setActivity({
           state: "In Launcher",
@@ -653,7 +672,7 @@ if(gotTheLock) {
     }
   
     axios.get("http://cdn.ipgg.net/kocity/version").then(async (res) => {
-      console.log("Checking update")
+      console.log("Checking for update")
       // get the version of the app from electron
       let version = app.getVersion().trim()
       console.log(`${version} => ${res.data}`)
