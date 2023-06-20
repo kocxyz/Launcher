@@ -1,7 +1,7 @@
 {
   "name": "knockoutcitylauncher",
   "description": "Unofficial Knockout City Launcher",
-  "version": "0.4.5",
+  "version": "1.0.0",
   "private": true,
   "homepage": "./",
   "main": "public/electron.js",
