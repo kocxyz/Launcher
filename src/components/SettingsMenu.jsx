@@ -81,14 +81,22 @@ function SettingsMenu({ gameState, setGameState, setPopUpState, authState, usern
             <Stack spacing={1}>
                 <label>Game Directory</label>
                 <TextField variant="outlined" disabled={true} value={gameDirectory} />
-                <Button variant="contained" className='hoverButton' disabled={!['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)} onClick={async () => {
-                    const result = await window.selectGameDir()
-                    if (result) {
-                        setGameDirectory(result)
-                        localStorage.setItem('gameDirectory', result)
-                        setGameState(await window.getGameState())
-                    }
-                }}>Change</Button>
+                <Stack direction="row" spacing={1}>
+                    <Button variant="contained" className='hoverButton' disabled={!['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)} style={{width: '100%'}} onClick={async () => {
+                        const result = await window.selectGameDir()
+                        if (result) {
+                            setGameDirectory(result)
+                            localStorage.setItem('gameDirectory', result)
+                            setGameState(await window.getGameState())
+                        }
+                    }}>Change</Button>
+                    <Button variant="contained" className='hoverButton' style={{width: '100%'}} onClick={() => {
+                        window.launchURL(`"" "${gameDirectory}"`)
+                    }}>Open</Button>
+                    <Button variant="contained" className='hoverButton' disabled={!['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)} style={{width: '100%'}} onClick={() => {
+                        setPopUpState('selectUninstall')
+                    }}>Uninstall</Button>
+                </Stack>
             </Stack>
 
             <Divider />
@@ -113,8 +121,8 @@ function SettingsMenu({ gameState, setGameState, setPopUpState, authState, usern
                 </Stack>
 
                 <Stack direction="row" spacing={1} style={{ display: 'flex', alignItems: 'center'}}>
-                    <Switch color='secondary' defaultChecked={false} disabled onChange={(e) => {
-                        // localStorage.setItem('discordRPC', e.target.checked)
+                    <Switch color='secondary' defaultChecked={localStorage.getItem('discordRPC:allowJoining') === 'true'} onChange={(e) => {
+                        localStorage.setItem('discordRPC:allowJoining', e.target.checked)
                     }} />
                     
                     <Typography fontWeight='light'>Allow Joining</Typography>
