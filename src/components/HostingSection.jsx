@@ -30,7 +30,7 @@ function HostingSection(props) {
 
         <Stack spacing={1}>
             <label>Secret</label>
-            <TextField disabled={running} variant="outlined" defaultValue={serverSettings.secret} onChange={(e) => {
+            <TextField disabled={true} variant="outlined" defaultValue={"disabled"} onChange={(e) => {
                 setServerSettings({
                     ...serverSettings,
                     secret: e.target.value
@@ -102,7 +102,7 @@ function HostingSection(props) {
                             }} onClick={async () => {
                                 window.startServer({
                                     port: serverSettings.port,
-                                    secret: serverSettings.secret,
+                                    secret: "", //serverSettings.secret
                                     maxUsers: serverSettings.maxUsers,
                                     showTerminal: serverSettings.showTerminal,
                                     serverState,
