@@ -10,7 +10,7 @@ import NewsMenu from './components/NewsMenu';
 import ServersMenu from './components/ServersMenu';
 import SettingsMenu from './components/SettingsMenu';
 import LaunchSection from './components/LaunchSection';
-import PopUp from './components/popUp';
+import PopUp from './components/popUp/index';
 
 // Images
 import logoImg from './images/logo.png';
@@ -32,6 +32,7 @@ const links = {
   width: 'fit-content',
   fontFamily: 'Azbuka',
   fontWeight: 'bold',
+  cursor: 'pointer',
 }
 
 let backgrounds = [
@@ -153,13 +154,13 @@ function App() {
             <MenuItem value="2">Low Res</MenuItem>
           </Select>
           
-          <a style={links} className="hoverLink" href='https://www.knockoutcity.com/' target='_blank'>OFFICIAL SITE</a> {/* eslint-disable-line */}
-          <a style={links} className="hoverLink" href='https://www.knockoutcity.com/private-server-edition' target='_blank'>ABOUT</a> {/* eslint-disable-line */}
-          <a style={links} className="hoverLink" href='https://discord.gg/knockoutcity' target='_blank'>DISCORD</a> {/* eslint-disable-line */}
-          <a style={links} className="hoverLink" href='https://thekoyostore.com/collections/knockout-city' target='_blank'>STORE</a> {/* eslint-disable-line */}
+          <a style={links} className="hoverLink" onClick={() => {window.launchURL('https://www.knockoutcity.com/')}}>OFFICIAL SITE</a> {/* eslint-disable-line */}
+          <a style={links} className="hoverLink" onClick={() => {window.launchURL('https://www.knockoutcity.com/private-server-edition')}}>ABOUT</a> {/* eslint-disable-line */}
+          <a style={links} className="hoverLink" onClick={() => {window.launchURL('https://discord.gg/knockoutcity')}}>DISCORD</a> {/* eslint-disable-line */}
+          <a style={links} className="hoverLink" onClick={() => {window.launchURL('https://thekoyostore.com/collections/knockout-city')}}>STORE</a>
         </Box>
 
-        <LaunchSection version={version} gameState={[gameState, setGameState]} currServer={currServer} currServerName={currServerName} currServerType={currServerType} setPopUpState={setPopUpState} />
+        <LaunchSection version={version} gameState={[gameState, setGameState]} currServer={[currServer, setCurrServer]} currServerName={[currServerName, setCurrServerName]} currServerType={[currServerType, setCurrServerType]} setPopUpState={setPopUpState} />
       </Box>
       
       <Box style={{ background: 'rgba(50, 8, 83, 0.75)', padding: '20px', marginTop:'-3vh', paddingBottom: '0px'}}>

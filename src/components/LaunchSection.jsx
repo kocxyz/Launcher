@@ -7,6 +7,9 @@ import axios from 'axios';
 function LaunchSection(props) {
     
     const [gameState, setGameState] = props.gameState
+    const [currServer, setCurrServer] = props.currServer
+    const [currServerName, setCurrServerName] = props.currServerName
+    const [currServerType, setCurrServerType] = props.currServerType
     const [installData, setInstallData] = useState() // eslint-disable-line
 
     return (
@@ -18,9 +21,15 @@ function LaunchSection(props) {
                             window.installGame({setInstallData, setGameState})
                         }} />)
                     case 'installed':
-                        return (<FancyButton text="LAUNCH" onClick={async () => {
+                        return (<FancyButton id="LaunchButton" text="LAUNCH" onClick={async () => {
                             console.log('launching')
-                            if(props.currServerType === "public") {
+
+                            setCurrServer(localStorage.getItem("currServer") || "127.0.0.1")
+                            setCurrServerName(localStorage.getItem("currServerName") || "localhost")
+                            setCurrServerType(localStorage.getItem("currServerType") || "private")
+
+
+                            if(localStorage.getItem("currServerType") === "public") {
                                 props.setPopUpState("authenticating")
                                 if(localStorage.getItem("authState") !== "true" || !localStorage.getItem("authToken")) {
                                     props.setPopUpState(false)
@@ -30,7 +39,7 @@ function LaunchSection(props) {
                                 const res = await axios.post(`${window.config.authServer}/auth/getkey`, {
                                     username: localStorage.getItem("username"),
                                     authToken: localStorage.getItem("authToken"),
-                                    server: props.currServer,
+                                    server: localStorage.getItem("currServer"),
                                 }).catch((err) => {
                                     props.setPopUpState(false)
                                     alert(err.response.data.message)
@@ -92,7 +101,7 @@ function LaunchSection(props) {
             {/* <p style={{ fontFamily: 'monospace', marginTop: '5px', fontSize: '15px' }}>VERSION 10.0-264847</p> */}
             <Stack direction="row" style={{ marginTop: '2px', opacity: gameState === 'installing' ? 0 : 1}}>
                 <Typography style={{ fontFamily: 'monospace' }}>Server: </Typography>
-                <Typography title={props.currServer} style={{ marginLeft: '5px', fontFamily: 'monospace'  }}> {props.currServerName} </Typography>
+                <Typography title={currServer} style={{ marginLeft: '5px', fontFamily: 'monospace'  }}> {currServerName} </Typography>
             </Stack>
         </Box>
     )

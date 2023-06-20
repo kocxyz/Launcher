@@ -1,3 +1,7 @@
 {
-    "authServer": "https://api.kocity.xyz"
+    "authServer": "https://api.kocity.xyz",
+    "validGameVersions": [
+        "highRes",
+        "lowRes"
+    ]
 }

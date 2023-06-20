@@ -35,6 +35,7 @@ if(localStorage.getItem("servers") === null) localStorage.setItem("servers", '[{
 
 if(localStorage.getItem("discordRPC:enabled") === null) localStorage.setItem("discordRPC:enabled", "true")
 if(localStorage.getItem("discordRPC:displayName") === null) localStorage.setItem("discordRPC:displayName", "true")
+if(localStorage.getItem("discordRPC:allowJoining") === null) localStorage.setItem("discordRPC:allowJoining", "true")
 
 // catch a STRG + R 
 document.addEventListener("keydown", (e) => {
@@ -51,6 +52,7 @@ window.updateRPC = async () => {
   ipcRenderer.sendSync('set-RPCstate', { 
     enabled: localStorage.getItem("discordRPC:enabled") === "true",
     displayName: localStorage.getItem("discordRPC:displayName") === "true",
+    allowJoining: localStorage.getItem("discordRPC:allowJoining") === "true",
   })
 }
 
@@ -81,8 +83,13 @@ window.addEventListener("DOMContentLoaded", () => {
     return Promise.resolve(result)
   }
 
-  window.installGame = async (props) => {
-    const result = await ipcRenderer.sendSync('download-game', { path: localStorage.getItem("gameDirectory"), version: localStorage.getItem("gameVersion") })
+  window.getGameInstalls = () => {
+    const result = ipcRenderer.sendSync('get-game-installs', { path: localStorage.getItem("gameDirectory")})
+    return result
+  }
+
+  window.installGame = (props) => {
+    const result = ipcRenderer.sendSync('download-game', { path: localStorage.getItem("gameDirectory"), version: localStorage.getItem("gameVersion") })
     props.setGameState("installing")
     window.addEventListener('message', evt => {
       if (evt.data.type === 'download-progress') {
@@ -173,5 +180,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
   window.launchURL = (url) => {
     ipcRenderer.send('launch-url', { url })
+  }
+
+  window.removeFiles = async (files) => {
+    await ipcRenderer.sendSync('remove-files', { files, path: localStorage.getItem("gameDirectory") })
+    return Promise.resolve()
   }
 });

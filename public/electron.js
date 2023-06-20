@@ -3,16 +3,13 @@ const remote = require('@electron/remote/main')
 const https = require("https");
 const fs = require('fs')
 const path = require('path')
-const url = require("url");
 const unzipper = require("unzipper")
 const { spawn, exec } = require('child_process');
 const axios = require('axios')
 const os = require('os')
 const sudo = require('sudo-prompt');
 const killProcess = require('tree-kill');
-const pty = require('node-pty');
 const discordRPC = require('discord-rpc');
-const crypto = require('crypto')
 remote.initialize()
 
 try { 
@@ -21,18 +18,35 @@ try {
   const logFile = fs.createWriteStream(path.join(os.tmpdir(), "kocitylauncherlogs", logFileName), { flags: 'a' })
   console.log = function (d) { //
     logFile.write(`[${new Date().toLocaleString()}] ${d} \n`)
-    process.stdout.write(`[${new Date().toLocaleString()}] ${d} \n`)
+    process.stdout.write(`[${new Date().toLocaleString()}] ${(typeof d === 'string') ? d : JSON.stringify(d, null, 2)} \n`)
   }
 }
 catch(e) { console.log(e) }
 
-
+/**
+ * Configuration file for the KOCity Launcher.
+ * 
+ * @property {string} authServer - The URL of the authentication server.
+ * @property {string[]} validGameVersions - An array of valid game versions.
+ */
 const config = require(path.join(__dirname, 'config.json'))
 
 let rpc = null
 let rpcSettings = {}
 
+let serverList = [];
+
 const gotTheLock = app.requestSingleInstanceLock()
+
+const discordRPCS = {
+  idle: {
+    state: "In Launcher",
+    details: "Idle",
+    largeImageKey: 'logo',
+    largeImageText: `v${app.getVersion()}${app.isPackaged ? "" : "-dev"}`,
+    instance: false,
+  },
+}
 
 let mainWindow;
 
@@ -68,12 +82,20 @@ function createWindow () {
         y: 0,
     })
 
+    async function updateServerList() {
+      serverList = (await axios.get(`${config.authServer}/stats/servers`, {
+        timeout: 5000
+      })).data
+    }
+    setInterval(updateServerList, 1000 * 60 * 3)
+    updateServerList()
+
     // get the version from package.json and send it to the renderer
     win.webContents.on('did-finish-load', () => {
         win.webContents.executeJavaScript(`window.version = "${app.getVersion()}"`)
     });
 
-    app.on("second-instance", (event, commandLine, workingDirectory) => {
+    app.on("second-instance", () => {
       if (win.isMinimized()) win.restore()
       win.focus()
     })
@@ -84,39 +106,34 @@ function createWindow () {
       rpcSettings = arg
 
       if(arg.enabled) {
-        if(rpc == null) await new Promise((resolve, reject) => {
+        if(rpc == null) await new Promise((resolve) => {
           rpc = new discordRPC.Client({ transport: 'ipc' });
           rpc.login({ clientId: '1006272349999472720' }).catch(console.error);
           // log every event
           rpc.on('ready', () => {
             console.log('RPC ready');
+
+            rpc.on("ACTIVITY_JOIN", (data) => {
+              console.log(data)
+              let server = data.secret.split("//")[0];
+              let serverName = data.secret.split("//")[1];
+              let serverType = data.secret.split("//")[2];
+              win.webContents.executeJavaScript(`localStorage.setItem("currServer", "${server}")`)
+              win.webContents.executeJavaScript(`localStorage.setItem("currServerName", "${serverName}")`)
+              win.webContents.executeJavaScript(`localStorage.setItem("currServerType", "${serverType}")`)
+
+              setTimeout(() => {
+              }, 100)
+            })
+
+            rpc.subscribe('ACTIVITY_JOIN', ({ secret }) => {
+              console.log('ACTIVITY_JOIN', secret);
+            });
             resolve()
-
-            // rpc.subscribe('ACTIVITY_JOIN', ({ secret }) => {
-            //   console.log('ACTIVITY_JOIN', secret);
-            // });
-
-            // rpc.subscribe('ACTIVITY_JOIN_REQUEST', ({ secret }) => {
-            //   console.log('ACTIVITY_JOIN_REQUEST', secret);
-            // });
-
-            // rpc.subscribe('ACTIVITY_SPECTATE', ({ secret }) => {
-            //   console.log('ACTIVITY_SPECTATE', secret);
-            // });
-
-            // rpc.subscribe('ACTIVITY_INVITE', ({ user, type }) => {
-            //   console.log('ACTIVITY_INVITE', user, type);
-            // });
           });
       })
 
-        rpc.setActivity({
-          state: "In Launcher",
-          details: "Idle",
-          largeImageKey: 'logo',
-          largeImageText: 'Knockout City',
-          instance: false,
-        }).catch(console.error);
+        rpc.setActivity(discordRPCS.idle).catch(console.error);
         
 
         
@@ -196,7 +213,7 @@ function createWindow () {
                 }
 
                 try {
-                  await new Promise((resolve, reject) => {
+                  await new Promise((resolve) => {
                     for(let file of files) {
                       if(file.startsWith("files-") && file.endsWith(".zip") || file == "highRes" || file == "lowRes") {
                         fs.renameSync(`${arg.path}/${file}`, `${result.filePaths[0]}/${file}`)
@@ -213,7 +230,7 @@ function createWindow () {
               break;
               case 2:
                 // Delete
-                await new Promise((resolve, reject) => {
+                await new Promise((resolve) => {
                   fs.rmSync(arg.path, { recursive: true })
                   resolve()
                 })
@@ -270,6 +287,17 @@ function createWindow () {
       else return event.returnValue = "notInstalled"
     })
 
+    ipcMain.on('get-game-installs', async (event, arg) => {
+      const installs = []
+      const folders = fs.readdirSync(arg.path)
+      for(let folder of folders.filter(folder => config.validGameVersions.includes(folder))) {
+        if(fs.existsSync(`${arg.path}/${folder}/KnockoutCity/KnockoutCity.exe`)) {
+          installs.push(folder)
+        }
+      }
+      event.returnValue = installs
+    })
+
     ipcMain.on('download-game', async (event, arg) => {
       console.log("Starting download")
       console.log("Requesting version...")
@@ -288,7 +316,7 @@ function createWindow () {
           console.log(error.message);
           // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
           await new Promise((resolve, reject) => {
-            sudo.exec(`mkdir "${arg.path}" && icacls "${arg.path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
+            sudo.exec(`mkdir "${arg.path}" && icacls "${arg.path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error) => {
               if (error)
                 reject(new Error(error.message)), console.log(error);
               else {
@@ -305,7 +333,7 @@ function createWindow () {
           console.log(error.message);
           // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
           await new Promise((resolve, reject) => {
-            sudo.exec(`icacls "${arg.path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
+            sudo.exec(`icacls "${arg.path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error) => {
               if (error)
               reject(new Error(error.message)), console.log(error);
               else
@@ -359,7 +387,7 @@ function createWindow () {
 
         let lastPercentage = 0;
 
-        res.on('data', (chunk) => {
+        res.on('data', () => {
           win.webContents.executeJavaScript(`window.postMessage({type: "download-progress", data: ${roundToDecimalPlace(((fileSize + writeStream.bytesWritten) / (parseFloat(res.headers['content-length']) + fileSize)) * 100, 2)}})`)
           win.setProgressBar((fileSize + writeStream.bytesWritten) / (parseFloat(res.headers['content-length']) + fileSize))
           
@@ -388,32 +416,20 @@ function createWindow () {
           fs.rmSync(`${arg.path}/files-${arg.version}-${version}.zip`)
 
           if(updateRPCInterval && rpcSettings.enabled) clearInterval(updateRPCInterval)
-          if(rpcSettings.enabled)  rpc.setActivity({
-            state: "In Launcher",
-            details: "Idle",
-            largeImageKey: 'logo',
-            largeImageText: 'Knockout City',
-            instance: false,
-          }).catch(console.error);
+          if(rpcSettings.enabled)  rpc.setActivity(discordRPCS.idle).catch(console.error);
             
 
           win.setProgressBar(-1)
         })
 
-        ipcMain.once('pause-download', async (event, arg) => {
+        ipcMain.once('pause-download', async () => {
           if(cancelled) return
           console.log("Pausing download")
           cancelled = true
           res.destroy()
 
           if(updateRPCInterval && rpcSettings.enabled) clearInterval(updateRPCInterval)
-          if(rpcSettings.enabled)  rpc.setActivity({
-            state: "In Launcher",
-            details: "Idle",
-            largeImageKey: 'logo',
-            largeImageText: 'Knockout City',
-            instance: false,
-          }).catch(console.error);
+          if(rpcSettings.enabled)  rpc.setActivity(discordRPCS.idle).catch(console.error);
 
           writeStream.close()
           win.setProgressBar(-1)
@@ -426,13 +442,7 @@ function createWindow () {
           res.destroy()
 
           if(updateRPCInterval && rpcSettings.enabled) clearInterval(updateRPCInterval)
-          if(rpcSettings.enabled)  rpc.setActivity({
-            state: "In Launcher",
-            details: "Idle",
-            largeImageKey: 'logo',
-            largeImageText: 'Knockout City',
-            instance: false,
-          }).catch(console.error);
+          if(rpcSettings.enabled)  rpc.setActivity(discordRPCS.idle).catch(console.error);
 
           writeStream.close()
         })
@@ -467,13 +477,7 @@ function createWindow () {
               fs.rmSync(`${arg.path}/files-${arg.version}-${version}.zip`)
               win.reload()
 
-              if(rpcSettings.enabled) rpc.setActivity({
-                state: "In Launcher",
-                details: "Idle",
-                largeImageKey: 'logo',
-                largeImageText: 'Knockout City',
-                instance: false,
-              }).catch(console.error);
+              if(rpcSettings.enabled) rpc.setActivity(discordRPCS.idle).catch(console.error);
 
               win.setProgressBar(-1)
             });
@@ -499,6 +503,9 @@ function createWindow () {
 
     ipcMain.on('launch-game', async (event, arg) => {
       console.log("Launching game")     
+      
+      let statusUpdateInterval;
+      let startTime = Date.now();
 
       console.log(arg)
 
@@ -523,24 +530,45 @@ function createWindow () {
       game.once('spawn', () => {
         console.log("Game launched")
 
-        // rpcSettings.partyId = arg.serverName + crypto.randomBytes(16).toString("hex")
-        // rpcSettings.joinSecret = arg.serverName + "secret"
-        // rpcSettings.partySize = 1
-        // rpcSettings.partyMax = 16
+        rpcSettings.partyId = `${arg.server}`
+        rpcSettings.joinSecret = `${arg.server}//${arg.serverName}//${arg.serverType}` 
+        rpcSettings.partySize = arg.serverType == 'public' ? serverList.find(server => server.ip == arg.server).players+1 : 1
+        rpcSettings.partyMax = arg.serverType == 'public' ? serverList.find(server => server.ip == arg.server).maxPlayers : 8
 
         if(rpcSettings.enabled) rpc.setActivity({
           details: `Playing on a ${arg.serverType} server`,
           state: rpcSettings.displayName ? `Server: ${arg.serverName}` : undefined,
-          startTimestamp: Date.now(),
+          startTimestamp: startTime,
           largeImageKey: "logo",
-          largeImageText: gimmeEmoji().repeat(5),
+          largeImageText: gimmeEmoji(),
           instance: true,
 
-          // partyId: rpcSettings.partyId,
-          // partySize: rpcSettings.partySize,
-          // partyMax: rpcSettings.partyMax,
-          // joinSecret: rpcSettings.joinSecret,
+          partyId: rpcSettings.allowJoining ? rpcSettings.partyId : undefined,
+          partySize: rpcSettings.allowJoining ? rpcSettings.partySize : undefined,
+          partyMax: rpcSettings.allowJoining ? rpcSettings.partyMax : undefined,
+          joinSecret: rpcSettings.allowJoining ? rpcSettings.joinSecret : undefined,
         }).catch(console.error);
+
+        if(arg.serverType == "public" && rpcSettings.allowJoining && rpcSettings.enabled) {
+          statusUpdateInterval = setInterval(() => {
+            rpcSettings.partySize = serverList.find(server => server.ip == arg.server).players > 0 ? serverList.find(server => server.ip == arg.server).players+1 : 1
+            rpcSettings.partyMax = serverList.find(server => server.ip == arg.server).maxPlayers
+
+            rpc.setActivity({
+              details: `Playing on a ${arg.serverType} server`,
+              state: rpcSettings.displayName ? `Server: ${arg.serverName}` : undefined,
+              startTimestamp: startTime,
+              largeImageKey: "logo",
+              largeImageText: gimmeEmoji(),
+              instance: true,
+
+              partyId: rpcSettings.partyId,
+              partySize: rpcSettings.partySize,
+              partyMax: rpcSettings.partyMax,
+              joinSecret: rpcSettings.joinSecret,
+            }).catch(console.error);
+          }, 15000)
+        }
       })
 
       game.once('close', (code, message) => {
@@ -553,17 +581,27 @@ function createWindow () {
           message: "The game crashed with code " + code
         })
 
-        if(rpcSettings.enabled) rpc.setActivity({
-          state: "In Launcher",
-          details: "Idle",
-          largeImageKey: 'logo',
-          largeImageText: 'Knockout City',
-          instance: false,
-        }).catch(console.error);
+        if(statusUpdateInterval) clearInterval(statusUpdateInterval)
+
+        if(rpcSettings.enabled) rpc.setActivity(discordRPCS.idle).catch(console.error);
       });
     })
 
+    ipcMain.on('remove-files' , async (event, arg) => {
+      console.log(`File Remove triggered with files: "${arg.files.join(", ")}"`)
+      await new Promise((resolve, reject) => {
+        setTimeout(resolve, 2000)
+      })
 
+      console.log("Removing files")
+      for(let file of arg.files) {
+        console.log(`Removing file ${file}`)
+        await new Promise((resolve, reject) => setTimeout(resolve, 1000))
+        fs.rmSync(`${arg.path}/${file}`, { recursive: true, force: true })
+      }
+
+      event.returnValue = "removed"
+    })
 
     ipcMain.on("start-server", async (event, arg) => {
       console.log(arg)
@@ -613,11 +651,11 @@ function createWindow () {
       server.stdout.on('data', (data) => {
         if(data.includes("private_server: Ready to brawl")) win.webContents.executeJavaScript(`window.postMessage({type: "server-ready"})`)
         data = data.toString().replace(/[^a-zA-Z0-9:_+#\/.\ ]/g, '')
-        if(cmd && !cmd.isDestroyed()) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch((err) => {})
+        if(cmd && !cmd.isDestroyed()) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch(() => {})
       });
 
       server.stderr.on('data', (data) => {
-        if(cmd && !cmd.isDestroyed()) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch((err) => {})
+        if(cmd && !cmd.isDestroyed()) cmd.webContents.executeJavaScript(`window.shell.print("${data}").catch((err) => {})`).catch(() => {})
       });
 
       console.log(server.spawnargs)
@@ -638,7 +676,7 @@ function createWindow () {
         win.webContents.executeJavaScript(`window.postMessage({type: "server-closed"})`)
       });
 
-      ipcMain.once("stop-server", async (event, arg) => {
+      ipcMain.once("stop-server", async (event) => {
         event.returnValue = "stopping"
         console.log("Stopping server")
         if(cmd && !cmd.isDestroyed()) cmd.close()
@@ -649,7 +687,7 @@ function createWindow () {
     })
 
     ipcMain.on("launch-url", async (event, arg) => {
-      console.log("Launching URL")
+      console.log("Launching URL: " + arg.url)
       event.returnValue = "launched"
       exec(`start ${arg.url}`)
     })
@@ -671,7 +709,9 @@ if(gotTheLock) {
       app.quit()
     }
   
-    axios.get("http://cdn.ipgg.net/kocity/version").then(async (res) => {
+    axios.get("http://cdn.ipgg.net/kocity/version", {
+      timeout: 5000
+    }).then(async (res) => {
       console.log("Checking for update")
       // get the version of the app from electron
       let version = app.getVersion().trim()
@@ -709,10 +749,10 @@ if(gotTheLock) {
   
   
             // write it to the download folder
-            fs.writeFileSync(`C:/Users/${os.userInfo().username}/AppData/Local/Temp/kocity-update.exe`, res.data)
+            fs.writeFileSync(`${os.tmpdir()}/kocity-update.exe`, res.data)
   
             // open the file
-            spawn(`C:/Users/${os.userInfo().username}/AppData/Local/Temp/kocity-update.exe`, { detached: true, stdio: 'ignore' })
+            spawn(`${os.tmpdir()}/kocity-update.exe`, { detached: true, stdio: 'ignore' })
             
             setTimeout(() => {
               app.quit()
@@ -763,7 +803,7 @@ async function setUpPermission(path) {
     console.log(error.message);
     // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
     await new Promise((resolve, reject) => {
-      sudo.exec(`icacls "${path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error, stdout, stderr) => {
+      sudo.exec(`icacls "${path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`, { name: 'Knockout City Launcher' }, (error) => {
         if (error) reject("Could not raise permissions"), console.log(error);
         else resolve();
       });
@@ -803,8 +843,6 @@ process.on('unhandledRejection', function (err) {
 });
 
 function gimmeEmoji() {
-  let i = Math.floor(Math.random() * 10)
-
   let emojis = [
     "💀",
     "💯",
@@ -818,5 +856,13 @@ function gimmeEmoji() {
     "🎊"
   ];
 
-  return emojis[i]
+  let finalString = ""
+
+  for(let i = 0; i < 5; i++) {
+    let i = Math.floor(Math.random() * 10)
+  
+    finalString += emojis[i]
+  }
+
+  return finalString
 }

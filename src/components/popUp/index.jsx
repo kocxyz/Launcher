@@ -1,6 +1,11 @@
-import { Backdrop, Box, Button, Input, LinearProgress, Stack, Typography } from '@mui/material'
+import { Backdrop, Box, Button, Input, LinearProgress, MenuItem, Select, Stack, Typography } from '@mui/material'
 import axios from 'axios'
 import { useState } from 'react'
+
+// Views
+import Authenticating from './views/Authenticating'
+import ConfirmLogout from './views/ConfirmLogout'
+import SelectUninstall from './views/SelectUninstall'
 
 function PopUp({ popUpState, setPopUpState, setAuthState, setUsername }) {
     const [popUpLoading, setPopUpLoading] = useState(false)
@@ -138,45 +143,11 @@ function PopUp({ popUpState, setPopUpState, setAuthState, setUsername }) {
                 </Backdrop>
             )
         case 'confirmLogout':
-            return (
-                <Backdrop open={true} style={{ zIndex: 1000 }}>
-                    <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#1a1a1a', width: '600px', height: '200px', borderRadius: '5px', padding: '10px', textAlign: 'center' }}>
-                        <Typography variant="h4" style={{ color: 'white', textAlign: 'center', marginTop: '20px', fontFamily: 'Brda', fontStyle: 'italic', letterSpacing: '2px'}}>Logout</Typography>
-                        <p>Are you sure you want to logout?</p>
-
-                        <Stack direction='row' spacing={2}>
-                            <Button variant="contained" className='hoverButton' onClick={() => {
-                                setPopUpState(false)
-                                setInputIncorrect(false)
-                                setPopUpLoading(false)
-                                setWrongInputs(0)
-                                
-                                setAuthState(false)
-                                localStorage.setItem('authState', false)
-                                localStorage.removeItem('authToken')
-                            } } style={{ marginTop: '10px' }}>Confirm</Button>
-                            <Button variant="contained" className='hoverButton' onClick={() => {
-                                setPopUpState(false)
-                                setInputIncorrect(false)
-                                setPopUpLoading(false)
-                                setWrongInputs(0)
-
-                            } } style={{ marginTop: '10px' }}>Cancel</Button>
-                        </Stack>
-
-                    </Box>
-                </Backdrop>
-            )
+            return <ConfirmLogout setPopUpState={setPopUpState} setAuthState={setAuthState} />
         case 'authenticating':
-            return (
-                <Backdrop open={true} style={{ zIndex: 1000 }}>
-                    <Box style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: '#1a1a1a', width: '600px', height: '200px', borderRadius: '5px', padding: '10px', textAlign: 'center' }}>
-                        <Typography variant="h4" style={{ color: 'white', textAlign: 'center', marginTop: '20px', fontFamily: 'Brda', fontStyle: 'italic', letterSpacing: '2px'}}>Authenticating</Typography>
-                        <p>Hang on while we are trying to authenticate you</p>
-                        <LinearProgress color="secondary" style={{ opacity: 1, width: '200px' }} />
-                    </Box>
-                </Backdrop>
-            )
+            return <Authenticating />
+        case 'selectUninstall':
+            return <SelectUninstall setPopUpState={setPopUpState} />
         default:
             return (
                 <></>
