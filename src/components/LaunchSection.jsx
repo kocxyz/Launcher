@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import FancyButton from './fancyButton';
 import { CloseOutlined, PauseOutlined } from '@mui/icons-material';
 import axios from 'axios';
+import { generateSessionToken } from 'knockoutcity-auth-client';
 
 function LaunchSection(props) {
     
@@ -36,11 +37,12 @@ function LaunchSection(props) {
                                     return alert("You must be logged in to use public servers!")
                                 }
 
-                                const res = await axios.post(`${window.config.authServer}/auth/getkey`, {
-                                    username: localStorage.getItem("username"),
-                                    authToken: localStorage.getItem("authToken"),
-                                    server: localStorage.getItem("currServer"),
-                                }).catch((err) => {
+                                const res = await generateSessionToken(
+                                    window.config.authServer,
+                                    localStorage.getItem("username"),
+                                    localStorage.getItem("authToken"),
+                                    localStorage.getItem("currServer"),
+                                ).catch((err) => {
                                     props.setPopUpState(false)
                                     alert(err.response.data.message)
                                     return null

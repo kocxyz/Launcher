@@ -6,6 +6,7 @@ import { useState } from 'react'
 import Authenticating from './views/Authenticating'
 import ConfirmLogout from './views/ConfirmLogout'
 import SelectUninstall from './views/SelectUninstall'
+import { login, register } from 'knockoutcity-auth-client'
 
 function PopUp({ popUpState, setPopUpState, setAuthState, setUsername }) {
     const [popUpLoading, setPopUpLoading] = useState(false)
@@ -33,9 +34,10 @@ function PopUp({ popUpState, setPopUpState, setAuthState, setUsername }) {
                             event.target.value = value
                             if (value.length === 6) {
                                 setPopUpLoading(true)
-                                const data = await axios.post(`${window.config.authServer}/auth/login/`, {
-                                    code: value
-                                }).catch((err) => {
+                                const data = await login(
+                                    window.config.authServer,
+                                    value
+                                ).catch((err) => {
                                     console.log(err)
                                     return err.response
                                 })
@@ -111,7 +113,11 @@ function PopUp({ popUpState, setPopUpState, setAuthState, setUsername }) {
                             <Button variant="contained" className='hoverButton' onClick={async () => {
                                 console.log("SAVE")
                                 setPopUpLoading(true)
-                                const data = await axios.post(`${window.config.authServer}/auth/register/`, { username: document.getElementById('username').value.trim(), code }).catch((err) => {
+                                const data = await register(
+                                    window.config.authServer,
+                                    document.getElementById('username').value.trim(),
+                                    code
+                                ).catch((err) => {
                                     console.log(err)
                                     setPopUpLoading(false)
                                     setInputIncorrect(err.response.data.message)

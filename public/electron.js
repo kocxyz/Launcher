@@ -10,6 +10,7 @@ const os = require('os')
 const sudo = require('sudo-prompt');
 const killProcess = require('tree-kill');
 const discordRPC = require('discord-rpc');
+const kocityAuthClient = require('knockoutcity-auth-client')
 remote.initialize()
 
 try { 
@@ -83,9 +84,7 @@ function createWindow () {
     })
 
     async function updateServerList() {
-      serverList = (await axios.get(`${config.authServer}/stats/servers`, {
-        timeout: 5000
-      })).data
+      serverList = (await kocityAuthClient.getServers(config.authServer)).data
     }
     setInterval(updateServerList, 1000 * 60 * 3)
     updateServerList()

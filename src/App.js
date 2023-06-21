@@ -1,6 +1,7 @@
 import { Box, MenuItem, Select, Tab, Tabs } from '@mui/material';
 import './App.css';
 import { useEffect, useState } from 'react';
+import { getServers } from 'knockoutcity-auth-client';
 
 // Fonts
 import '@fontsource/roboto/500.css';
@@ -22,7 +23,6 @@ import bg5 from './images/backgrounds/5.jpg';
 import bg6 from './images/backgrounds/6.jpg';
 import bg7 from './images/backgrounds/7.jpg';
 import bg8 from './images/backgrounds/8.jpg';
-import axios from 'axios';
 
 const boxes = { height: '97vh' }
 const links = { 
@@ -92,7 +92,8 @@ function App() {
   }, [version])
 
   const fetchservers = async () => {
-    const response = await axios.get(`${window.config.authServer}/stats/servers`).catch((err) => {
+    const response = await getServers(window.config.authServer)
+      .catch((err) => {
       console.log(err)
       return {
         data: [{
