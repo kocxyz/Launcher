@@ -46,12 +46,15 @@ Platforms:
 
 Launcher features:
 - Download and launch the game.
+- Manage your game installation aswell as non
 - An easy to use UI, no command line arguments required.
 - See a list of public servers and their current player counts.
 - Connect to private or public servers.
 - Run a private server locally.
 - Secure server authentication.
 - Sign in via Discord.
+    - Discord game invites
+    - Join Public and Private servers
 - Auto-update the launcher and the game.
 
 Game features (whether or not you run through the launcher):
@@ -76,8 +79,7 @@ Not in game:
 
 Launcher TODO:
 - [ ] enter private server secrets instead of discord
-- [ ] Discord game invites
-- [ ] Some kind of account system with cloud sync (maybe)
+- [ ] ~~Some kind of account system~~ with cloud sync (maybe)
 
 ## The Details
 
