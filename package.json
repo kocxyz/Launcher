@@ -10,7 +10,7 @@
     "@electron/remote": "^2.0.9",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.10.6",
-    "@fontsource/roboto": "^5.0.2",
+    "@fontsource/roboto": "^5.0.5",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.3",
     "axios": "^1.4.0",
