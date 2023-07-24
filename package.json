@@ -12,7 +12,7 @@
     "@emotion/styled": "^11.10.6",
     "@fontsource/roboto": "^5.0.2",
     "@mui/icons-material": "^5.11.16",
-    "@mui/material": "^5.13.3",
+    "@mui/material": "^5.14.1",
     "axios": "^1.4.0",
     "discord-rpc": "^4.0.1",
     "moment": "^2.29.4",
