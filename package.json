@@ -11,7 +11,7 @@
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.10.6",
     "@fontsource/roboto": "^5.0.2",
-    "@mui/icons-material": "^5.11.16",
+    "@mui/icons-material": "^5.14.3",
     "@mui/material": "^5.13.3",
     "axios": "^1.4.0",
     "discord-rpc": "^4.0.1",
