@@ -302,11 +302,11 @@ export default function AccountSettings(): JSX.Element {
                     token: localStorage.getItem('authToken')
                   }
                 )
-                .then((res) => {
+                .then(() => {
                   setLoaderPopUpActive(false)
                   setPopUpState(false)
                 })
-                .catch((err) => {
+                .catch(() => {
                   setLoaderPopUpActive(false)
                   setUpgradePopUpActive(true)
                 })
