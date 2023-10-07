@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cyberpunk 2077</title>
+  </head>
+  <style>
+    body {
+      background-color: #000;
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+
+      overflow: hidden;
+
+      user-select: none;
+      pointer-events: none;
+    }
+
+    #player {
+      opacity: 0;
+      transition: all 0.5s ease-in-out;
+      position: absolute;
+      top: -100px;
+      left: -100px;
+    }
+  </style>
+  <body>
+    <div id="player"></div>
+  </body>
+  <script>
+    // 2. This code loads the IFrame Player API code asynchronously.
+    var tag = document.createElement('script')
+
+    tag.src = 'https://www.youtube.com/iframe_api'
+    var firstScriptTag = document.getElementsByTagName('script')[0]
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag)
+
+    // 3. This function creates an <iframe> (and YouTube player)
+    //    after the API code downloads.
+    var player
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('player', {
+        height: document.body.clientHeight + 200,
+        width: document.body.clientWidth + 200,
+        videoId: '2XA7_V6cA2k',
+        suggestedQuality: 'hd1080',
+        events: {
+          onReady: onPlayerReady,
+          onStateChange: onPlayerStateChange
+        }
+      })
+    }
+
+    // 4. The API will call this function when the video player is ready.
+    function onPlayerReady(event) {
+      event.target.playVideo()
+      setTimeout(() => {
+        document.getElementById('player').style.opacity = 1
+      }, 1000)
+    }
+
+    // 5. The API calls this function when the player's state changes.
+    //    The function indicates that when playing a video (state=1),
+    //    the player should play for six seconds and then stop.
+    var done = false
+    function onPlayerStateChange(event) {
+      if (event.data == YT.PlayerState.PLAYING && !done) {
+      }
+      if (event.data == YT.PlayerState.ENDED) {
+        stopVideo()
+      }
+    }
+    function stopVideo() {
+      player.stopVideo()
+      window.close()
+    }
+  </script>
+</html>

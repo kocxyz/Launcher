@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>KnockoutCityLauncher Update</title>
+    <link rel="stylesheet" href="./fonts/Brda/CSS/fonts.css" />
+    <link rel="stylesheet" href="./fonts/Azbuka/CSS/fonts.css" />
+  </head>
+  <style>
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    body {
+      background: #1e1e1e;
+      color: #fff;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+
+      font-family: Azbuka;
+
+      text-align: center;
+
+      overflow: hidden;
+    }
+
+    .content {
+      background: #00000055;
+      z-index: 2;
+
+      width: 100vw;
+      height: 150px;
+
+      position: absolute;
+      top: calc(50vh - 75px);
+      left: 0;
+
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    h3 {
+      margin-top: 10px;
+      text-align: center;
+      font-size: 40px;
+      margin-bottom: 5px;
+
+      font-family: Brda;
+      font-weight: bold;
+      font-style: italic;
+
+      letter-spacing: 2px;
+      z-index: 2;
+    }
+
+    p {
+      margin-top: 0;
+      z-index: 2;
+    }
+
+    .loader {
+      position: absolute;
+      top: 0;
+      left: 0;
+
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .item {
+      position: absolute;
+      top: -50px;
+      background-color: #9619fa;
+      transition: all 5s ease-in-out;
+
+      width: 20px;
+      height: 20px;
+
+      border-radius: 50%;
+    }
+  </style>
+  <body>
+    <div class="content">
+      <h3>KnockoutCity Launcher</h3>
+      <p>Downloading Updates...</p>
+    </div>
+
+    <div class="spawner" id="spawner"></div>
+  </body>
+  <script>
+    const spawner = document.getElementById('spawner')
+
+    {
+      ;(async () => {
+        while (true) {
+          await delay(50)
+          const item = document.createElement('div')
+          item.classList.add('item')
+
+          spawner.appendChild(item)
+          item.style.left = `${Math.random() * 200 - 125}vw`
+
+          const size = Math.random() * 10 + 5
+          item.style.width = `${size}px`
+          item.style.height = `${size}px`
+
+          const tintR = Math.random() * 30
+          const tintG = Math.random() * 80
+          const tintB = Math.random() * 5
+
+          item.style.backgroundColor = `rgb(${tintR + 150}, ${tintG + 25}, ${tintB + 250})`
+
+          setTimeout(() => {
+            item.style.top = `120vh`
+            item.style.left = `${
+              Math.random() * 100 + parseFloat(item.style.left.replace('vw', ''))
+            }vw`
+          }, 20)
+
+          setTimeout(() => {
+            item.remove()
+          }, 5200)
+        }
+      })()
+    }
+
+    async function delay(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms))
+    }
+  </script>
+</html>

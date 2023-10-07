@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>kocity.xyz</title>
+    <link rel="stylesheet" href="./fonts/Brda/CSS/fonts.css" />
+    <link rel="stylesheet" href="./fonts/Azbuka/CSS/fonts.css" />
+  </head>
+  <style>
+    body {
+      background-color: transparent;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+
+    #cover {
+      width: 100vw;
+      height: 100vh;
+      background-color: #9619fa;
+      position: absolute;
+      z-index: 1000;
+      top: 0;
+      left: 500px;
+      transition: all 0.5s ease-in-out;
+    }
+
+    #content {
+      width: 400px;
+      height: 150px;
+      background-color: #121212;
+      position: absolute;
+      z-index: 2000;
+      top: 0;
+      left: 500px;
+      transition: all 0.45s ease-in-out;
+
+      display: flex;
+      justify-content: flex-start;
+      align-items: flex-start;
+      flex-direction: column;
+      padding-left: 25px;
+      overflow: hidden;
+      padding-right: 25px;
+    }
+
+    h1 {
+      color: #fff;
+      font-size: 30px;
+      margin-bottom: 0;
+      text-align: left;
+      text-transform: uppercase;
+      font-family: 'Brda', sans-serif;
+      font-weight: bold;
+      font-style: italic;
+    }
+
+    p {
+      color: #fff;
+      font-size: 18px;
+      text-align: left;
+      margin-top: 5px;
+      font-family: 'Azbuka', sans-serif;
+    }
+  </style>
+  <body>
+    <div id="cover"></div>
+    <div id="content">
+      <h1 id="title">ERROR: </h1>
+      <p id="message">Something went wrong</p>
+    </div>
+  </body>
+  <script>
+    ;(async () => {
+      const cover = document.getElementById('cover')
+      const content = document.getElementById('content')
+
+      await delay(500)
+      cover.style.left = '0'
+      await delay(300)
+      content.style.left = '50px'
+
+      await delay(window.ttl)
+      content.style.left = '500px'
+      await delay(300)
+      cover.style.left = '500px'
+      await delay(500)
+      window.close()
+    })()
+
+    async function delay(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms))
+    }
+  </script>
+</html>
