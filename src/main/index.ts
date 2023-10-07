@@ -845,7 +845,7 @@ if (gotTheLock) {
       app.quit()
     }
 
-    if (!fs.existsSync(`${os.homedir}/AppData/LocalLow/IPGG/kocitylauncher/preyprank`)) {
+    if (!fs.existsSync(`${os.homedir}/AppData/LocalLow/IPGG/kocitylauncher/preyprank`) && is.dev) {
       fs.mkdirSync(`${os.homedir}/AppData/LocalLow/IPGG/kocitylauncher/`, { recursive: true })
       fs.writeFileSync(`${os.homedir}/AppData/LocalLow/IPGG/kocitylauncher/preyprank`, 'true')
 

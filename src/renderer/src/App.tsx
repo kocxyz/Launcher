@@ -146,7 +146,8 @@ function App(): JSX.Element {
               paddingLeft: '35px',
               background: 'rgba(75, 0, 110, 0.3)',
               borderLeft: '4px solid #743a8d',
-              borderRadius: '0'
+              borderRadius: '0',
+              textTransform: 'uppercase'
             }}
             onChange={(e): void => {
               setGameVersion(e.target.value as 'highRes' | 'lowRes')
@@ -160,27 +161,27 @@ function App(): JSX.Element {
             style={links}
             className="hoverLink"
             onClick={(): void => {
-              window.launchURL('https://www.knockoutcity.com/')
+              window.launchURL('https://kocity.xyz')
             }}
           >
-            OFFICIAL SITE
+            XYZ WEBSITE
           </a>{' '}
           {/* eslint-disable-line */}
           <a
             style={links}
             className="hoverLink"
             onClick={(): void => {
-              window.launchURL('https://www.knockoutcity.com/private-server-edition')
+              window.launchURL('https://github.com/Ipmake/kocitylauncher')
             }}
           >
-            ABOUT
+            GITHUB
           </a>{' '}
           {/* eslint-disable-line */}
           <a
             style={links}
             className="hoverLink"
             onClick={(): void => {
-              window.launchURL('https://discord.gg/knockoutcity')
+              window.launchURL('https://discord.gg/4kNPb4cRxN')
             }}
           >
             DISCORD
@@ -190,10 +191,10 @@ function App(): JSX.Element {
             style={links}
             className="hoverLink"
             onClick={(): void => {
-              window.launchURL('https://thekoyostore.com/collections/knockout-city')
+              window.launchURL('https://www.patreon.com/kocxyz')
             }}
           >
-            STORE
+            PATREON
           </a>
         </Box>
 

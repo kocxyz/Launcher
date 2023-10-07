@@ -6,6 +6,7 @@ import { useState } from 'react'
 import Authenticating from './views/Authenticating'
 import ConfirmLogout from './views/ConfirmLogout'
 import SelectUninstall from './views/SelectUninstall'
+import AccountSettings from './views/AccountSettings'
 
 // States
 import { useUIState } from '@renderer/states/uiState'
@@ -106,6 +107,7 @@ function PopUp(): JSX.Element {
                     ;(document.getElementById('usernameField') as HTMLInputElement).value =
                       data.data.username
                     localStorage.setItem('authToken', data.data.authToken)
+                    localStorage.setItem('premium', data.data.premium)
                   } else {
                     event.target.value = ''
                     setWrongInputs(wrongInputs + 1)
@@ -237,6 +239,7 @@ function PopUp(): JSX.Element {
                     ;(document.getElementById('usernameField') as HTMLInputElement).value =
                       data.data.username
                     localStorage.setItem('authToken', data.data.authToken)
+                    localStorage.setItem('premium', data.data.premium)
                   }
                 }}
                 style={{ marginTop: '10px' }}
@@ -266,6 +269,8 @@ function PopUp(): JSX.Element {
       return <Authenticating />
     case 'selectUninstall':
       return <SelectUninstall />
+    case 'accountSettings':
+      return <AccountSettings />
     default:
       return <></>
   }

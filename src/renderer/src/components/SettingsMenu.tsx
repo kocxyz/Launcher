@@ -1,10 +1,9 @@
-import { ExitToApp, Person } from '@mui/icons-material'
+import { ExitToApp, Login, Settings } from '@mui/icons-material'
 import {
   Box,
   Button,
   Divider,
   MenuItem,
-  Popover,
   Select,
   Stack,
   Switch,
@@ -25,16 +24,6 @@ function SettingsMenu(): JSX.Element {
   const { setPopUpState } = useUIState()
   const { authState, username, setUsername } = useAuthState()
 
-  const [anchorEl, setAnchorEl] = React.useState(null)
-  const handlePopoverOpen = (event): void => {
-    setAnchorEl(event.currentTarget)
-  }
-  const handlePopoverClose = (): void => {
-    setAnchorEl(null)
-  }
-
-  const open = Boolean(anchorEl)
-
   return (
     <Box
       style={{
@@ -49,45 +38,35 @@ function SettingsMenu(): JSX.Element {
     >
       <Stack spacing={1}>
         <label>Username</label>
+        <TextField
+          disabled={authState}
+          variant="outlined"
+          id="usernameField"
+          defaultValue={username}
+          style={{ width: '100%' }}
+          onChange={(e): void => {
+            setUsername(e.target.value)
+            localStorage.setItem('username', e.target.value)
+          }}
+        />
         <Stack direction="row" spacing={1}>
-          <TextField
-            disabled={authState}
-            variant="outlined"
-            id="usernameField"
-            defaultValue={username}
-            style={{ width: '100%' }}
-            onChange={(e): void => {
-              setUsername(e.target.value)
-              localStorage.setItem('username', e.target.value)
-            }}
-          />
-          <Popover
-            id="mouse-over-popover"
-            sx={{
-              pointerEvents: 'none'
-            }}
-            open={open}
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'center'
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'center'
-            }}
-            onClose={handlePopoverClose}
-            disableRestoreFocus
-          >
-            <Typography sx={{ p: 1 }}>{authState ? 'Logout' : 'Login'}</Typography>
-          </Popover>
           <Button
             variant="contained"
             className="hoverButton"
-            aria-owns={open ? 'mouse-over-popover' : undefined}
-            aria-haspopup="true"
-            onMouseEnter={handlePopoverOpen}
-            onMouseLeave={handlePopoverClose}
+            sx={{ width: '100%' }}
+            disabled={!authState}
+            onClick={(): void => {
+              if (authState) setPopUpState('accountSettings')
+            }}
+          >
+            <Stack direction="row" spacing="10px">
+              <Settings /> <span>Settings</span>
+            </Stack>
+          </Button>
+          <Button
+            variant="contained"
+            className="hoverButton"
+            sx={{ width: '100%' }}
             disabled={
               !['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)
             }
@@ -99,7 +78,15 @@ function SettingsMenu(): JSX.Element {
               }
             }}
           >
-            {authState ? <ExitToApp /> : <Person />}
+            {authState ? (
+              <Stack direction="row" spacing="10px">
+                <ExitToApp /> <span>Logout</span>
+              </Stack>
+            ) : (
+              <Stack direction="row" spacing="10px">
+                <Login /> <span>Login</span>
+              </Stack>
+            )}
           </Button>
         </Stack>
       </Stack>

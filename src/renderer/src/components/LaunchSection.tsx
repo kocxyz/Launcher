@@ -23,7 +23,7 @@ function LaunchSection(): JSX.Element {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: '65px',
+        marginTop: '75px',
         flexDirection: 'column'
       }}
     >
@@ -177,12 +177,26 @@ function LaunchSection(): JSX.Element {
       {/* <p style={{ fontFamily: 'monospace', marginTop: '5px', fontSize: '15px' }}>VERSION 10.0-264847</p> */}
       <Stack
         direction="row"
-        style={{ marginTop: '2px', opacity: gameState === 'installing' ? 0 : 1 }}
+        sx={{
+          opacity: ['installing', 'deprecated', 'notInstalled'].includes(gameState) ? 0 : 1,
+          transition: 'all 0.25s ease-in-out',
+          zIndex: -1,
+
+          ...(gameState === 'installed' && {
+            position: 'absolute',
+            bottom: '40px',
+            '#LaunchButton:hover ~ &': {
+              bottom: '15px'
+            }
+          })
+        }}
       >
-        <Typography style={{ fontFamily: 'monospace' }}>Server: </Typography>
-        <Typography title={currServer} style={{ marginLeft: '5px', fontFamily: 'monospace' }}>
-          {' '}
-          {currServerName}{' '}
+        <Typography sx={{ fontFamily: 'Loew' }}>Server: </Typography>
+        <Typography
+          title={currServer}
+          sx={{ marginLeft: '5px', fontFamily: 'Azbuka', fontWeight: '400' }}
+        >
+          {currServerName}
         </Typography>
       </Stack>
     </Box>
