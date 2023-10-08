@@ -18,14 +18,7 @@ import { useSelectedServerState } from './states/selectedServerState'
 
 // Images
 import LogoImage from './images/logo.png'
-import Background1 from './images/backgrounds/1.jpg'
-import Background2 from './images/backgrounds/2.jpg'
-import Background3 from './images/backgrounds/3.jpg'
-import Background4 from './images/backgrounds/4.png'
-import Background5 from './images/backgrounds/5.jpg'
-import Background6 from './images/backgrounds/6.jpg'
-import Background7 from './images/backgrounds/7.jpg'
-import Background8 from './images/backgrounds/8.jpg'
+import axios from 'axios'
 
 const boxes = { height: '97vh' }
 const links = {
@@ -38,37 +31,53 @@ const links = {
   cursor: 'pointer'
 }
 
-let backgrounds: string[] = [
-  Background1,
-  Background2,
-  Background3,
-  Background4,
-  Background5,
-  Background6,
-  Background7,
-  Background8
-]
-
 function App(): JSX.Element {
   const [tab, setTab] = useState(0)
-  const [background, setBackground] = useState(Math.floor(Math.random() * backgrounds.length))
+  const [background, setBackground] = useState(0)
+  const [backgrounds, setBackgrounds] = useState<string[]>([])
 
   const { fetchPublicServers, gameState, setGameState, gameVersion, setGameVersion } =
     useGameState()
   const { currServer, currServerName, currServerType } = useSelectedServerState()
 
   useEffect(() => {
-    backgrounds = ((): string[] => {
-      const array: string[] = []
-      // randomize backgrounds array
-      while (backgrounds.length > 0) {
-        const index = Math.floor(Math.random() * backgrounds.length)
-        array.push(backgrounds[index])
-        backgrounds.splice(index, 1)
+    axios.get('https://cdn.kocity.xyz/launcher/assets/options.json').then((res) => {
+      console.log(res.data)
+      const data = res.data as {
+        activeBackgrounds: string[]
       }
 
-      return array
-    })()
+      axios
+        .get(`${data.activeBackgrounds[localStorage.getItem('premium') || '0']}/manifest`)
+        .then((res) => {
+          const backgroundList = res.data.split('\n')
+          let backgrounds: string[] = []
+
+          console.log(backgroundList)
+
+          backgroundList.forEach((background: string) => {
+            backgrounds.push(
+              `${data.activeBackgrounds[localStorage.getItem('premium') || '0']}/${background}`
+            )
+          })
+
+          backgrounds = ((): string[] => {
+            const array: string[] = []
+            // randomize backgrounds array
+            while (backgrounds.length > 0) {
+              const index = Math.floor(Math.random() * backgrounds.length)
+              array.push(backgrounds[index])
+              backgrounds.splice(index, 1)
+            }
+
+            return array
+          })()
+
+          console.log(backgrounds)
+
+          setBackgrounds(backgrounds)
+        })
+    })
   }, [])
 
   useEffect(() => {
