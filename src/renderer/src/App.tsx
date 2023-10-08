@@ -11,6 +11,7 @@ import PopUp from './components/popUp'
 import NewsMenu from './components/NewsMenu'
 import ServersMenu from './components/ServersMenu'
 import SettingsMenu from './components/SettingsMenu'
+import Playtime from './components/Playtime'
 
 // states
 import { useGameState } from './states/gameState'
@@ -106,6 +107,7 @@ function App(): JSX.Element {
 
   return (
     <div className="App">
+      <Playtime />
       <Box style={{ position: 'absolute' }}>
         <PopUp />
       </Box>

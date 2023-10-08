@@ -605,7 +605,24 @@ function createWindow(): void {
   ipcMain.on('launch-game', async (event, arg) => {
     console.log('Launching game')
 
+    let accToken: string | undefined
+
     let statusUpdateInterval
+    const playtimeInterval = setInterval(() => {
+      if (!accToken) return
+      axios
+        .post(
+          `http://localhost:23501/stats/user/username/${arg.username}/playtime`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${accToken}`
+            }
+          }
+        )
+        .then(() => {})
+        .catch(() => {})
+    }, 1000 * 60)
     const startTime = Date.now()
 
     console.log(arg)
@@ -636,8 +653,10 @@ function createWindow(): void {
       })
     })
 
-    game.once('spawn', () => {
+    game.once('spawn', async () => {
       console.log('Game launched')
+
+      accToken = await win.webContents.executeJavaScript(`localStorage.getItem("authToken")`)
 
       rpcSettings.partyId = `${arg.server}`
       rpcSettings.joinSecret = `${arg.server}//${arg.serverName}//${arg.serverType}`
@@ -702,6 +721,7 @@ function createWindow(): void {
           message: 'The game crashed with code ' + code
         })
 
+      clearInterval(playtimeInterval)
       if (statusUpdateInterval) clearInterval(statusUpdateInterval)
 
       if (rpcSettings.enabled) rpc.setActivity(discordRPCS.idle).catch(console.error)

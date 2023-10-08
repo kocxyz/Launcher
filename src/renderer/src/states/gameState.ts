@@ -15,6 +15,9 @@ interface GameState {
   publicServers: Types.Server[]
   setPublicServers: (publicServers: Types.Server[]) => void
   fetchPublicServers: () => void
+
+  playtime: number | null
+  fetchPlaytime: () => Promise<void>
 }
 
 export const useGameState = create<GameState>((set) => ({
@@ -52,5 +55,22 @@ export const useGameState = create<GameState>((set) => ({
       }
     })
     set(() => ({ publicServers: response.data }))
+  },
+
+  playtime: null,
+  fetchPlaytime: async (): Promise<void> => {
+    const response = await axios
+      .get(`http://localhost:23501/stats/user/username/${localStorage.getItem('username')}`)
+      .catch((err) => {
+        console.log(err)
+        return {
+          data: {
+            user: {
+              playtime: 0
+            }
+          }
+        }
+      })
+    set(() => ({ playtime: response.data.user.playtime }))
   }
 }))
