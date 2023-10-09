@@ -79,7 +79,7 @@ function PopUp(): JSX.Element {
                 if (value.length === 6) {
                   setPopUpLoading(true)
                   const data = await axios
-                    .post(`http://localhost:23501/auth/login/`, {
+                    .post(`https://api.kocity.xyz/auth/login/`, {
                       code: value
                     })
                     .catch((err) => {
@@ -212,7 +212,7 @@ function PopUp(): JSX.Element {
                   console.log('SAVE')
                   setPopUpLoading(true)
                   const data = await axios
-                    .post(`http://localhost:23501/auth/register/`, {
+                    .post(`https://api.kocity.xyz/auth/register/`, {
                       username: (
                         document.getElementById('username') as HTMLInputElement
                       ).value.trim(),

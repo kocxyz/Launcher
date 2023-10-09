@@ -119,11 +119,15 @@ function createWindow(): void {
     })
 
   async function updateServerList(): Promise<void> {
-    serverList = (
-      await axios.get(`http://localhost:23501/stats/servers`, {
-        timeout: 5000
-      })
-    ).data
+    try {
+      serverList = (
+        await axios.get(`https://api.kocity.xyz/stats/servers`, {
+          timeout: 5000
+        })
+      ).data
+    } catch (error) {
+      console.log(error)
+    }
   }
   setInterval(updateServerList, 1000 * 60 * 3)
   updateServerList()
@@ -378,9 +382,11 @@ function createWindow(): void {
         // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
         await new Promise((resolve, reject) => {
           sudo.exec(
-            `mkdir "${arg.path}" && icacls "${arg.path}" /grant "${
-              os.userInfo().username
-            }":(OI)(CI)F /T`,
+            os.platform() === 'win32'
+              ? `mkdir "${arg.path}" && icacls "${arg.path}" /grant "${
+                  os.userInfo().username
+                }":(OI)(CI)F /T`
+              : `mkdir "${arg.path}" && chown -R ${os.userInfo().username} "${arg.path}"`,
             { name: 'Knockout City Launcher' },
             (error) => {
               if (error) reject(new Error(error.message)), console.log(error)
@@ -400,7 +406,9 @@ function createWindow(): void {
         // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
         await new Promise((resolve, reject) => {
           sudo.exec(
-            `icacls "${arg.path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`,
+            os.platform() === 'win32'
+              ? `icacls "${arg.path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`
+              : `chown -R ${os.userInfo().username} "${arg.path}"`,
             { name: 'Knockout City Launcher' },
             (error) => {
               if (error) reject(new Error(error.message)), console.log(error)
@@ -612,7 +620,7 @@ function createWindow(): void {
       if (!accToken) return
       axios
         .post(
-          `http://localhost:23501/stats/user/username/${arg.username}/playtime`,
+          `https://api.kocity.xyz/stats/user/username/${arg.username}/playtime`,
           {},
           {
             headers: {
@@ -632,16 +640,12 @@ function createWindow(): void {
       `-username=${arg.authkey ? arg.authkey : arg.username}`,
       `-backend=${arg.server}`
     ]
-    const game = spawn(
-      `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity/KnockoutCity.exe`,
-      args,
-      {
-        cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
-        detached: true,
-        stdio: 'ignore',
-        env: {}
-      }
-    )
+    const game = spawn(`${os.platform() === 'linux' ? 'wine ' : ''}KnockoutCity.exe`, args, {
+      cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
+      detached: true,
+      stdio: 'ignore',
+      env: {}
+    })
     console.log(game.spawnargs)
     event.returnValue = 'launched'
     game.on('error', (err) => {
@@ -748,6 +752,12 @@ function createWindow(): void {
     console.log(arg)
     console.log('Starting server')
 
+    if (os.platform() === 'linux') {
+      win.webContents.executeJavaScript(`window.postMessage({type: "server-closed"})`)
+      event.returnValue = 'stopping'
+      return dialog.showErrorBox('Error', 'Hosting a server is currently not supported on Linux.')
+    }
+
     const args: string[] = []
     if (arg.port != 0) args.push(`-backend_port=${arg.port}`)
     if (arg.maxUsers && arg.maxUsers != 0)
@@ -755,9 +765,7 @@ function createWindow(): void {
     if (arg.secret.trim() != '') args.push(`-secret=${arg.secret}`)
 
     const server = spawn(
-      `${arg.path}/${
-        arg.version == 1 ? 'highRes' : 'lowRes'
-      }/KnockoutCityServer/KnockoutCityServer.exe`,
+      `${os.platform() === 'linux' ? 'wine ' : ''}KnockoutCityServer.exe`,
       args,
       {
         cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCityServer`
@@ -865,95 +873,79 @@ if (gotTheLock) {
       app.quit()
     }
 
-    if (!fs.existsSync(`${os.homedir}/AppData/LocalLow/IPGG/kocitylauncher/preyprank`) && is.dev) {
-      fs.mkdirSync(`${os.homedir}/AppData/LocalLow/IPGG/kocitylauncher/`, { recursive: true })
-      fs.writeFileSync(`${os.homedir}/AppData/LocalLow/IPGG/kocitylauncher/preyprank`, 'true')
+    axios
+      .get('http://cdn.ipgg.net/kocity/version', {
+        timeout: 5000
+      })
+      .then(async (res) => {
+        console.log('Checking for update')
+        // get the version of the app from electron
+        const version = app.getVersion().trim()
+        console.log(`${version} => ${res.data}`)
+        if (`${res.data}`.trim() == `${version}`.trim()) {
+          createWindow()
+        } else {
+          if (!(os.platform() === 'win32')) {
+            dialog.showErrorBox(
+              'Update Available',
+              'There is an update available but auto updating is currently only supported on Windows. Please download the latest version from https://kocity.xyz'
+            )
+            createWindow()
+            return
+          }
+          const { response } = await dialog.showMessageBox({
+            type: 'info',
+            title: 'Update Available',
+            message: `An update is available for the Knockout City Launcher! Would you like to download it?`,
+            buttons: ['Yes', 'No']
+          })
+          if (response === 0) {
+            // open a small update window
+            const updateWindow = new BrowserWindow({
+              width: 500,
+              height: 250,
+              frame: false,
+              resizable: false,
+              icon: './www/logo.png',
+              webPreferences: {
+                nodeIntegration: true
+              }
+            })
+            console.log('Update window opened!')
 
-      const window = new BrowserWindow({
-        fullscreen: true,
-        frame: false,
-        webPreferences: {
-          nodeIntegration: true
+            if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+              updateWindow.loadFile(
+                path.join(process.env['ELECTRON_RENDERER_URL'], '../../resources/update.html')
+              )
+            } else {
+              updateWindow.loadFile(path.join(__dirname, '../../resources/update.html'))
+            }
+
+            // download the exe file using axios
+            console.log('Downloading update...')
+            axios
+              .get('http://cdn.ipgg.net/kocity/kocitylauncher.exe', {
+                responseType: 'arraybuffer'
+              })
+              .then(async (res) => {
+                console.log('Update complete!')
+
+                // write it to the download folder
+                fs.writeFileSync(`${os.tmpdir()}/kocity-update.exe`, res.data)
+
+                // open the file
+                spawn(`${os.tmpdir()}/kocity-update.exe`, { detached: true, stdio: 'ignore' })
+
+                setTimeout(() => {
+                  app.quit()
+                  process.exit(0)
+                }, 1000)
+              })
+          } else {
+            createWindow()
+          }
         }
       })
-
-      if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-        window.loadFile(
-          path.join(process.env['ELECTRON_RENDERER_URL'], '../../resources/joke.html')
-        )
-      } else {
-        window.loadFile(path.join(__dirname, '../../resources/joke.html'))
-      }
-
-      window.once('close', () => {
-        app.quit()
-      })
-    } else
-      axios
-        .get('http://cdn.ipgg.net/kocity/version', {
-          timeout: 5000
-        })
-        .then(async (res) => {
-          console.log('Checking for update')
-          // get the version of the app from electron
-          const version = app.getVersion().trim()
-          console.log(`${version} => ${res.data}`)
-          if (`${res.data}`.trim() == `${version}`.trim()) {
-            createWindow()
-          } else {
-            const { response } = await dialog.showMessageBox({
-              type: 'info',
-              title: 'Update Available',
-              message: `An update is available for the Knockout City Launcher! Would you like to download it?`,
-              buttons: ['Yes', 'No']
-            })
-            if (response === 0) {
-              // open a small update window
-              const updateWindow = new BrowserWindow({
-                width: 500,
-                height: 250,
-                frame: false,
-                resizable: false,
-                icon: './www/logo.png',
-                webPreferences: {
-                  nodeIntegration: true
-                }
-              })
-              console.log('Update window opened!')
-
-              if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-                updateWindow.loadFile(
-                  path.join(process.env['ELECTRON_RENDERER_URL'], '../../resources/update.html')
-                )
-              } else {
-                updateWindow.loadFile(path.join(__dirname, '../../resources/update.html'))
-              }
-
-              // download the exe file using axios
-              console.log('Downloading update...')
-              axios
-                .get('http://cdn.ipgg.net/kocity/kocitylauncher.exe', {
-                  responseType: 'arraybuffer'
-                })
-                .then(async (res) => {
-                  console.log('Update complete!')
-
-                  // write it to the download folder
-                  fs.writeFileSync(`${os.tmpdir()}/kocity-update.exe`, res.data)
-
-                  // open the file
-                  spawn(`${os.tmpdir()}/kocity-update.exe`, { detached: true, stdio: 'ignore' })
-
-                  setTimeout(() => {
-                    app.quit()
-                    process.exit(0)
-                  }, 1000)
-                })
-            } else {
-              createWindow()
-            }
-          }
-        })
   })
 } else {
   app.quit()

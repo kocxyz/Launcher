@@ -1,4 +1,4 @@
-import { ExitToApp, Login, Settings } from '@mui/icons-material'
+import { ExitToApp, Login, Settings, Star } from '@mui/icons-material'
 import {
   Box,
   Button,
@@ -8,14 +8,16 @@ import {
   Stack,
   Switch,
   TextField,
+  Tooltip,
   Typography
 } from '@mui/material'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 // states
 import { useGameState } from '../states/gameState'
 import { useUIState } from '../states/uiState'
 import { useAuthState } from '../states/authState'
+import axios from 'axios'
 
 function SettingsMenu(): JSX.Element {
   const [gameDirectory, setGameDirectory] = React.useState(localStorage.getItem('gameDirectory'))
@@ -23,6 +25,20 @@ function SettingsMenu(): JSX.Element {
   const { gameState, setGameState } = useGameState()
   const { setPopUpState } = useUIState()
   const { authState, username, setUsername } = useAuthState()
+
+  const [premium, setPremium] = useState<number>(parseInt(localStorage.getItem('premium') ?? '0'))
+
+  useEffect(() => {
+    axios
+      .get(`https://api.kocity.xyz/stats/user/username/${localStorage.getItem('username')}`)
+      .then((res) => {
+        if (!res.data?.user) return
+
+        setPremium(res.data.user.premium)
+        localStorage.setItem('premium', `${res.data.user.premium}`)
+        localStorage.setItem('username', res.data.user.username)
+      })
+  }, [])
 
   return (
     <Box
@@ -38,17 +54,41 @@ function SettingsMenu(): JSX.Element {
     >
       <Stack spacing={1}>
         <label>Username</label>
-        <TextField
-          disabled={authState}
-          variant="outlined"
-          id="usernameField"
-          defaultValue={username}
-          style={{ width: '100%' }}
-          onChange={(e): void => {
-            setUsername(e.target.value)
-            localStorage.setItem('username', e.target.value)
-          }}
-        />
+        <Stack direction="row" spacing={1} alignItems="center">
+          <TextField
+            disabled={authState}
+            variant="outlined"
+            id="usernameField"
+            defaultValue={username}
+            style={{ width: '100%' }}
+            onChange={(e): void => {
+              setUsername(e.target.value)
+              localStorage.setItem('username', e.target.value)
+            }}
+          />
+          <Tooltip
+            title={`Level ${premium} premium account`}
+            placement="left"
+            arrow
+            sx={{
+              display: premium > 0 ? 'inital' : 'none'
+            }}
+          >
+            <Star
+              fontSize="large"
+              sx={{
+                display: premium > 0 ? 'inital' : 'none',
+                color: '#FFFF00',
+
+                transition: 'all 0.2s ease-in-out',
+                '&:hover': {
+                  color: '#FFAA00',
+                  transform: 'scale(1.1)'
+                }
+              }}
+            />
+          </Tooltip>
+        </Stack>
         <Stack direction="row" spacing={1}>
           <Button
             variant="contained"
@@ -74,7 +114,7 @@ function SettingsMenu(): JSX.Element {
               if (authState) setPopUpState('confirmLogout')
               else {
                 setPopUpState('login')
-                window.launchURL(`http://localhost:23501/web/discord`)
+                window.launchURL(`https://api.kocity.xyz/web/discord`)
               }
             }}
           >
@@ -159,6 +199,7 @@ function SettingsMenu(): JSX.Element {
           >
             Uninstall
           </Button>
+          S
         </Stack>
       </Stack>
 

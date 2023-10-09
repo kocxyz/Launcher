@@ -39,7 +39,7 @@ export const useGameState = create<GameState>((set) => ({
     set(() => ({ publicServers: publicServers }))
   },
   fetchPublicServers: async (): Promise<void> => {
-    const response = await axios.get(`http://localhost:23501/stats/servers`).catch((err) => {
+    const response = await axios.get(`https://api.kocity.xyz/stats/servers`).catch((err) => {
       console.log(err)
       return {
         data: [
@@ -60,7 +60,7 @@ export const useGameState = create<GameState>((set) => ({
   playtime: null,
   fetchPlaytime: async (): Promise<void> => {
     const response = await axios
-      .get(`http://localhost:23501/stats/user/username/${localStorage.getItem('username')}`)
+      .get(`https://api.kocity.xyz/stats/user/username/${localStorage.getItem('username')}`)
       .catch((err) => {
         console.log(err)
         return {

@@ -48,7 +48,7 @@ export default function AccountSettings(): JSX.Element {
   useEffect(() => {
     setTimeout(() => {
       axios
-        .get(`http://localhost:23501/stats/user/username/${localStorage.getItem('username')}`)
+        .get(`https://api.kocity.xyz/stats/user/username/${localStorage.getItem('username')}`)
         .then((res) => {
           console.log(res.data.user.color)
           setSelectedColor(colors.findIndex((color) => color === res.data.user.color))
@@ -294,7 +294,7 @@ export default function AccountSettings(): JSX.Element {
               setLoaderPopUpActive(true)
               axios
                 .post(
-                  `http://localhost:23501/stats/user/username/${localStorage.getItem(
+                  `https://api.kocity.xyz/stats/user/username/${localStorage.getItem(
                     'username'
                   )}/setColor`,
                   {

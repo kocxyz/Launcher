@@ -61,7 +61,7 @@ function LaunchSection(): JSX.Element {
                     }
 
                     const res = await axios
-                      .post(`http://localhost:23501/auth/getkey`, {
+                      .post(`https://api.kocity.xyz/auth/getkey`, {
                         username: localStorage.getItem('username'),
                         authToken: localStorage.getItem('authToken'),
                         server: localStorage.getItem('currServer')
