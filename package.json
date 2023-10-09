@@ -7,7 +7,7 @@
   "main": "public/electron.js",
   "author": "IPGsystems",
   "dependencies": {
-    "@electron/remote": "^2.0.9",
+    "@electron/remote": "^2.0.12",
     "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.10.6",
     "@fontsource/roboto": "^5.0.2",
