@@ -199,7 +199,6 @@ function SettingsMenu(): JSX.Element {
           >
             Uninstall
           </Button>
-          S
         </Stack>
       </Stack>
 
