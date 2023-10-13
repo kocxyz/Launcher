@@ -24,10 +24,10 @@ dmg:
 linux:
   target:
     - AppImage
-    - snap
-    - deb
-  maintainer: electronjs.org
-  category: Utility
+    # - snap
+    # - deb
+  maintainer: kocity.xyz
+  category: Game
 appImage:
   artifactName: ${name}-${version}.${ext}
-npmRebuild: false
+npmRebuild: true
