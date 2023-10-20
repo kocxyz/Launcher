@@ -21,6 +21,15 @@ declare global {
     selectGameDir: () => string | null
     getGameState: () => 'installed' | 'deprecated' | 'notInstalled'
     getGameInstalls: () => string[]
+    getDownloadedServerMods: () => Record<string, string>
+    downloadMissingServerMods: (
+      missingMods: {
+        name: string
+        version: string
+        downloadUri: string
+      }[]
+    ) => void
+    loadMods: (enabledServerMods: Record<string, string>) => void
 
     installGame: (props: {
       setGameState: (state: 'installed' | 'deprecated' | 'notInstalled' | 'installing') => void

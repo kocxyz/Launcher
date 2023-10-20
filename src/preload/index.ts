@@ -111,6 +111,36 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // @ts-ignore (define in dts)
+  window.getDownloadedServerMods = (): string[] => {
+    return ipcRenderer.sendSync('get-downloaded-server-mods', {
+      path: localStorage.getItem('gameDirectory')
+    })
+  }
+
+  // @ts-ignore (define in dts)
+  window.downloadMissingServerMods = (
+    missingMods: {
+      name: string
+      version: string
+      downloadUri: string
+    }[]
+  ): void => {
+    return ipcRenderer.sendSync('download-missing-server-mods', {
+      path: localStorage.getItem('gameDirectory'),
+      missingMods
+    })
+  }
+
+  // @ts-ignore (define in dts)
+  window.loadMods = (enabledServerMods: Record<string, string>): void => {
+    return ipcRenderer.sendSync('load-mods', {
+      path: localStorage.getItem('gameDirectory'),
+      version: localStorage.getItem('gameVersion'),
+      enabledServerMods
+    })
+  }
+
+  // @ts-ignore (define in dts)
   window.installGame = (props: {
     setGameState: (state: 'installed' | 'deprecated' | 'notInstalled' | 'installing') => void
     setInstallData: (data: { progress: number; speed: number }) => void

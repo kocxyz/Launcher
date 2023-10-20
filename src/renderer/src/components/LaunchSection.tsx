@@ -51,6 +51,47 @@ function LaunchSection(): JSX.Element {
                   setCurrServerType(localStorage.getItem('currServerType') || 'private')
 
                   if (localStorage.getItem('currServerType') === 'public') {
+                    setPopUpState('downloadingServerMods')
+                    const server = localStorage.getItem('currServer')
+                    const protocol = server === '127.0.0.1:23600' ? 'http' : 'https'
+                    const modsResponse = await axios
+                      .get(`${protocol}://${localStorage.getItem('currServer')}/mods`)
+                      .catch((_) => {
+                        setPopUpState(false)
+                        alert('An error occured while fetching the server mods')
+                        return null
+                      })
+
+                    if (!modsResponse) return
+                    const serverMods: { name: string; version: string; downloadUri: string }[] =
+                      modsResponse.data
+                    const downloadedServerMods = window.getDownloadedServerMods()
+                    const missingMods = serverMods.reduce((acc, cur) => {
+                      if (!(cur.name in downloadedServerMods)) {
+                        acc.add(cur)
+                      }
+
+                      if (downloadedServerMods[cur.name] !== cur.version) {
+                        acc.add(cur)
+                      }
+
+                      return acc
+                    }, new Set<{ name: string; version: string; downloadUri: string }>())
+
+                    window.downloadMissingServerMods([...missingMods])
+
+                    setPopUpState('loadingMods')
+
+                    window.loadMods(
+                      serverMods.reduce(
+                        (acc, cur) => ({
+                          ...acc,
+                          [cur.name]: cur.version
+                        }),
+                        {}
+                      )
+                    )
+
                     setPopUpState('authenticating')
                     if (
                       localStorage.getItem('authState') !== 'true' ||

@@ -12,6 +12,9 @@ import killProcess from 'tree-kill'
 import discordRPC from 'discord-rpc'
 import { is } from '@electron-toolkit/utils'
 import { IncomingMessage } from 'http'
+import JSZip from 'jszip'
+import { EvaluationResult, ModEvaluator, ModLoader, OutGenerator } from 'knockoutcity-mod-loader'
+
 remote.initialize()
 
 try {
@@ -135,10 +138,10 @@ function createWindow(): void {
             ] satisfies Server[])
           : []),
         ...(
-        await axios.get(`https://api.kocity.xyz/stats/servers`, {
-          timeout: 5000
-        })
-      ).data
+          await axios.get(`https://api.kocity.xyz/stats/servers`, {
+            timeout: 5000
+          })
+        ).data
       ]
     } catch (error) {
       console.log(error)
@@ -366,6 +369,99 @@ function createWindow(): void {
       return (event.returnValue = 'deprecated')
     else return (event.returnValue = 'notInstalled')
   })
+
+  ipcMain.on('get-downloaded-server-mods', async (event, args) => {
+    const serverModsPath = path.join(args.path, 'downloaded', 'mods')
+    fs.mkdirSync(serverModsPath, { recursive: true })
+    const modFolders = fs
+      .readdirSync(serverModsPath, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+
+    event.returnValue = modFolders.reduce((acc, cur) => {
+      const [name, version] = cur.name.split('@')
+
+      return {
+        ...acc,
+        [name]: version
+      }
+    }, {})
+  })
+
+  ipcMain.on(
+    'download-missing-server-mods',
+    async (
+      event,
+      args: { path: string; missingMods: { name: string; version: string; downloadUri: string }[] }
+    ) => {
+      const serverModsPath = path.join(args.path, 'downloaded', 'mods')
+      fs.mkdirSync(serverModsPath, { recursive: true })
+
+      for (const mod of args.missingMods) {
+        const protocol = mod.downloadUri.startsWith('127.0.0.1:23600') ? 'http' : 'https'
+        const content = await (await fetch(`${protocol}://${mod.downloadUri}`)).arrayBuffer()
+
+        const modDir = path.join(serverModsPath, `${mod.name}@${mod.version}`)
+        fs.mkdirSync(modDir, { recursive: true })
+
+        const zip = new JSZip()
+        await zip.loadAsync(content).then(async (contents) => {
+          for (const filename of Object.keys(contents.files)) {
+            await zip
+              .file(filename)
+              ?.async('nodebuffer')
+              .then((content) => {
+                const filePath = path.join(modDir, filename)
+                fs.mkdirSync(path.dirname(filePath), { recursive: true })
+                fs.writeFileSync(filePath, content)
+              })
+          }
+        })
+      }
+
+      event.returnValue = undefined
+    }
+  )
+
+  ipcMain.on(
+    'load-mods',
+    async (
+      event,
+      args: {
+        path: string
+        version: number
+        enabledServerMods: Record<string, string>
+      }
+    ) => {
+      const serverModsPath = path.join(args.path, 'downloaded', 'mods')
+      fs.mkdirSync(serverModsPath, { recursive: true })
+
+      const clientModsPath = path.join(args.path, 'mods')
+      fs.mkdirSync(clientModsPath, { recursive: true })
+
+      const serverModLoader = new ModLoader({ modDir: serverModsPath })
+      const serverMods = serverModLoader.loadMods(args.enabledServerMods)
+      console.log(serverMods.map((mod) => mod.manifest.name))
+
+      const clientModLoader = new ModLoader({ modDir: clientModsPath })
+      const clientMods = clientModLoader.loadMods()
+      console.log(clientMods.map((mod) => mod.manifest.name))
+
+      const evaluationResults: EvaluationResult[] = []
+      for (const mod of [...serverMods, ...clientMods]) {
+        const evaluator = new ModEvaluator(mod, {
+          modsConfigDir: 'generated/configs',
+          permissionsFilePath: 'generated/permissions.yaml'
+        })
+        evaluationResults.push(await evaluator.evaulate())
+      }
+
+      const gameDir = path.join(args.path, args.version == 1 ? 'highRes' : 'lowRes', 'KnockoutCity')
+      const outGenerator = new OutGenerator({ baseDir: gameDir })
+      await outGenerator.generate(evaluationResults)
+
+      event.returnValue = undefined
+    }
+  )
 
   ipcMain.on('get-game-installs', async (event, arg) => {
     const installs: string[] = []

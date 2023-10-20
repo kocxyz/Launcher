@@ -7,6 +7,8 @@ import Authenticating from './views/Authenticating'
 import ConfirmLogout from './views/ConfirmLogout'
 import SelectUninstall from './views/SelectUninstall'
 import AccountSettings from './views/AccountSettings'
+import DownloadingServerMods from './views/DownloadingServerMods'
+import LoadingMods from './views/LoadingMods'
 
 // States
 import { useUIState } from '@renderer/states/uiState'
@@ -267,6 +269,10 @@ function PopUp(): JSX.Element {
       return <ConfirmLogout />
     case 'authenticating':
       return <Authenticating />
+    case 'downloadingServerMods':
+      return <DownloadingServerMods />
+    case 'loadingMods':
+      return <LoadingMods />
     case 'selectUninstall':
       return <SelectUninstall />
     case 'accountSettings':
