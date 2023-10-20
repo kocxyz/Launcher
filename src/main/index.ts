@@ -120,11 +120,26 @@ function createWindow(): void {
 
   async function updateServerList(): Promise<void> {
     try {
-      serverList = (
+      serverList = [
+        ...(process.env.NODE_ENV === 'development'
+          ? ([
+              {
+                id: -1,
+                name: 'Localhost',
+                ip: '127.0.0.1:23600',
+                maxPlayers: 10,
+                players: 0,
+                region: 'LOCAL',
+                status: 'online'
+              }
+            ] satisfies Server[])
+          : []),
+        ...(
         await axios.get(`https://api.kocity.xyz/stats/servers`, {
           timeout: 5000
         })
       ).data
+      ]
     } catch (error) {
       console.log(error)
     }
