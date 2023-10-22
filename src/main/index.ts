@@ -935,7 +935,7 @@ function createWindow(): void {
   ipcMain.on('launch-url', async (event, arg) => {
     console.log('Launching URL: ' + arg.url)
     event.returnValue = 'launched'
-    exec(`start ${arg.url}`)
+    exec(`${os.platform() === 'linux' ? 'xdg-open' : 'start'} ${arg.url}`)
   })
 }
 
