@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain, dialog, screen, shell } from 'electron'
 import remote from '@electron/remote/main'
 import https from 'https'
 import fs from 'fs'
+import fse from 'fs-extra'
 import path from 'path'
 import unzipper from 'unzipper'
 import { spawn, exec } from 'child_process'
@@ -12,6 +13,9 @@ import killProcess from 'tree-kill'
 import discordRPC from 'discord-rpc'
 import { is } from '@electron-toolkit/utils'
 import { IncomingMessage } from 'http'
+import lodash from 'lodash'
+import JSZip from 'jszip'
+
 remote.initialize()
 
 try {
@@ -120,11 +124,26 @@ function createWindow(): void {
 
   async function updateServerList(): Promise<void> {
     try {
-      serverList = (
-        await axios.get(`https://api.kocity.xyz/stats/servers`, {
-          timeout: 5000
-        })
-      ).data
+      serverList = [
+        ...(process.env.NODE_ENV === 'development'
+          ? ([
+              {
+                id: -1,
+                name: 'Localhost',
+                ip: '127.0.0.1:23600',
+                maxPlayers: 10,
+                players: 0,
+                region: 'LOCAL',
+                status: 'online'
+              }
+            ] satisfies Server[])
+          : []),
+        ...(
+          await axios.get(`https://api.kocity.xyz/stats/servers`, {
+            timeout: 5000
+          })
+        ).data
+      ]
     } catch (error) {
       console.log(error)
     }
@@ -141,6 +160,68 @@ function createWindow(): void {
     if (win.isMinimized()) win.restore()
     win.focus()
   })
+
+  ipcMain.on('clean-gamedir-mods', async (event, args: { basePath: string; gameVersion: number; }) => {
+    const gameDirPath = path.join(args.basePath, args.gameVersion == 1 ? 'highRes' : 'lowRes', 'KnockoutCity')
+    
+    const outDirPath = path.join(gameDirPath, 'out')
+    fs.rmSync(outDirPath, {recursive: true, force: true})
+
+    const viperRootPath = path.join(gameDirPath, '.viper_root')
+    fs.rmSync(viperRootPath, {recursive: true, force: true})
+
+    const versionsPath = path.join(gameDirPath, 'version.json')
+    fs.rmSync(versionsPath, {recursive: true, force: true})
+
+    event.returnValue = undefined
+  })
+  
+  ipcMain.on(
+    'install-server-mods',
+    async (event, args: { basePath: string; gameVersion: number; server: { name: string, addr: string } }) => {
+      const serverModsDownloadPath = path.join(args.basePath, 'downloads', 'mods', args.server.name)
+      const serverModsVersionPath = path.join(serverModsDownloadPath, 'version.json')
+      const gameDirPath = path.join(args.basePath, args.gameVersion == 1 ? 'highRes' : 'lowRes', 'KnockoutCity')
+
+      const protocol = args.server.addr.startsWith('127.0.0.1:23600') ? 'http' : 'https'
+      const result = (await axios.get(`${protocol}://${args.server.addr}/mods/list`)).data
+
+      const downloadMods = async () => {
+        const content = await (await fetch(`${protocol}://${args.server.addr}/mods/download`)).arrayBuffer()
+
+        const zip = new JSZip()
+        await zip.loadAsync(content).then(async (contents) => {
+          for (const filename of Object.keys(contents.files)) {
+            await zip
+              .file(filename)
+              ?.async('nodebuffer')
+              .then((content) => {
+                const filePath = path.join(serverModsDownloadPath, filename)
+                fs.mkdirSync(path.dirname(filePath), { recursive: true })
+                fs.writeFileSync(filePath, content)
+              })
+          }
+        })
+
+        fs.writeFileSync(serverModsVersionPath, JSON.stringify(result, null, 2))
+      }
+
+      fs.mkdirSync(serverModsDownloadPath, { recursive: true })
+      if (fs.existsSync(serverModsVersionPath) && fs.statSync(serverModsVersionPath).isFile()) {
+        const versions = JSON.parse(fs.readFileSync(serverModsVersionPath).toString('utf-8'))
+
+        if (!lodash.isEqual(versions, result)) {
+          await downloadMods()
+        }
+      } else {
+        await downloadMods()
+      }
+
+      fse.copySync(serverModsDownloadPath, gameDirPath)
+
+      event.returnValue = undefined
+    }
+  )
 
   ipcMain.on('set-RPCstate', async (event, arg) => {
     event.returnValue = 'ok'

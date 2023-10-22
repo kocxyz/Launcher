@@ -103,6 +103,26 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // @ts-ignore (define in dts)
+  window.cleanGameDirMods = () => {
+    return ipcRenderer.sendSync('clean-gamedir-mods', {
+      basePath: localStorage.getItem('gameDirectory'),
+      gameVersion: localStorage.getItem('gameVersion')
+    })
+  }
+
+  // @ts-ignore (define in dts)
+  window.installServerMods = (): void => {
+    return ipcRenderer.sendSync('install-server-mods', {
+      basePath: localStorage.getItem('gameDirectory'),
+      gameVersion: localStorage.getItem('gameVersion'),
+      server: {
+        name: localStorage.getItem('currServerName'),
+        addr: localStorage.getItem('currServer'),
+      }
+    })
+  }
+
+  // @ts-ignore (define in dts)
   window.getGameInstalls = (): string[] => {
     const result = ipcRenderer.sendSync('get-game-installs', {
       path: localStorage.getItem('gameDirectory')
