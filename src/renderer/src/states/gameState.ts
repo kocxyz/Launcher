@@ -54,7 +54,24 @@ export const useGameState = create<GameState>((set) => ({
         ]
       }
     })
-    set(() => ({ publicServers: response.data }))
+    set(() => ({
+      publicServers: [
+        ...(process.env.NODE_ENV === 'development'
+          ? [
+              {
+                id: -1,
+                name: 'Localhost',
+                ip: '127.0.0.1:23600',
+                maxPlayers: 10,
+                players: 0,
+                region: 'LOCAL',
+                status: 'online'
+              }
+            ]
+          : []),
+        ...response.data
+      ]
+    }))
   },
 
   playtime: null,
