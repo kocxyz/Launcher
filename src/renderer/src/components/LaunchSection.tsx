@@ -60,6 +60,11 @@ function LaunchSection(): JSX.Element {
                       return alert('You must be logged in to use public servers!')
                     }
 
+                    setPopUpState('installing-server-mods')
+                    window.installServerMods()
+
+                    setPopUpState('authenticating')
+
                     const res = await axios
                       .post(`https://api.kocity.xyz/auth/getkey`, {
                         username: localStorage.getItem('username'),

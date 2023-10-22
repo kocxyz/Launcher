@@ -22,6 +22,8 @@ declare global {
     getGameState: () => 'installed' | 'deprecated' | 'notInstalled'
     getGameInstalls: () => string[]
 
+    installServerMods: () => void
+
     installGame: (props: {
       setGameState: (state: 'installed' | 'deprecated' | 'notInstalled' | 'installing') => void
       setInstallData: (data: number) => void
