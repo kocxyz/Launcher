@@ -161,6 +161,21 @@ function createWindow(): void {
     win.focus()
   })
 
+  ipcMain.on('clean-gamedir-mods', async (event, args: { basePath: string; gameVersion: number; }) => {
+    const gameDirPath = path.join(args.basePath, args.gameVersion == 1 ? 'highRes' : 'lowRes', 'KnockoutCity')
+    
+    const outDirPath = path.join(gameDirPath, 'out')
+    fs.rmSync(outDirPath, {recursive: true, force: true})
+
+    const viperRootPath = path.join(gameDirPath, '.viper_root')
+    fs.rmSync(viperRootPath, {recursive: true, force: true})
+
+    const versionsPath = path.join(gameDirPath, 'version.json')
+    fs.rmSync(versionsPath, {recursive: true, force: true})
+
+    event.returnValue = undefined
+  })
+  
   ipcMain.on(
     'install-server-mods',
     async (event, args: { basePath: string; gameVersion: number; server: { name: string, addr: string } }) => {
