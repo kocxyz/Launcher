@@ -209,6 +209,8 @@ function createWindow(): void {
           }
         })
 
+        fs.rmSync(serverModsDownloadPath, { recursive: true, force: true })
+        fs.mkdirSync(serverModsDownloadPath, { recursive: true })
         fs.writeFileSync(serverModsVersionPath, JSON.stringify(result, null, 2))
       }
 
