@@ -187,7 +187,13 @@ function createWindow(): void {
       const result = (await axios.get(`${protocol}://${args.server.addr}/mods/list`)).data
 
       const downloadMods = async () => {
-        const content = await (await fetch(`${protocol}://${args.server.addr}/mods/download`)).arrayBuffer()
+        if (result.length === 0) {
+          return
+        }
+
+        const content = await (
+          await fetch(`${protocol}://${args.server.addr}/mods/download`)
+        ).arrayBuffer()
 
         const zip = new JSZip()
         await zip.loadAsync(content).then(async (contents) => {
