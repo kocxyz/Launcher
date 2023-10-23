@@ -11,8 +11,14 @@ import { useUIState } from '../states/uiState'
 
 function LaunchSection(): JSX.Element {
   const { gameState, setGameState } = useGameState()
-  const { currServer, currServerName, setCurrServer, setCurrServerName, setCurrServerType } =
-    useSelectedServerState()
+  const {
+    currServer,
+    currServerName,
+    setCurrServer,
+    setCurrServerName,
+    setCurrServerType,
+    setLastConnectedServer
+  } = useSelectedServerState()
   const { setPopUpState } = useUIState()
 
   const [installData, setInstallData] = useState<number>(0)
@@ -87,6 +93,7 @@ function LaunchSection(): JSX.Element {
 
                     const authkey = res.data.authkey
 
+                    setLastConnectedServer(localStorage.getItem('currServer'))
                     setPopUpState(false)
                     return window.launchGame({ setGameState, authkey })
                   } else return window.launchGame({ setGameState })
