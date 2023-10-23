@@ -50,7 +50,7 @@ function LaunchSection(): JSX.Element {
                   setCurrServerName(localStorage.getItem('currServerName') || 'localhost')
                   setCurrServerType(localStorage.getItem('currServerType') || 'private')
 
-                  window.cleanGameDirMods()
+                  await window.cleanGameDirMods()
                   
                   if (localStorage.getItem('currServerType') === 'public') {
                     setPopUpState('authenticating')
@@ -63,7 +63,7 @@ function LaunchSection(): JSX.Element {
                     }
 
                     setPopUpState('installing-server-mods')
-                    window.installServerMods()
+                    await window.installServerMods()
 
                     setPopUpState('authenticating')
 

@@ -162,6 +162,8 @@ function createWindow(): void {
   })
 
   ipcMain.on('clean-gamedir-mods', async (event, args: { basePath: string; gameVersion: number; }) => {
+    event.returnValue = undefined
+
     const gameDirPath = path.join(args.basePath, args.gameVersion == 1 ? 'highRes' : 'lowRes', 'KnockoutCity')
     
     const outDirPath = path.join(gameDirPath, 'out')
@@ -173,12 +175,14 @@ function createWindow(): void {
     const versionsPath = path.join(gameDirPath, 'version.json')
     fs.rmSync(versionsPath, {recursive: true, force: true})
 
-    event.returnValue = undefined
+    event.sender.send('cleaned-gamedir-mods')
   })
   
   ipcMain.on(
     'install-server-mods',
     async (event, args: { basePath: string; gameVersion: number; server: { name: string, addr: string } }) => {
+      event.returnValue = undefined
+
       const serverModsDownloadPath = path.join(args.basePath, 'downloads', 'mods', args.server.name)
       const serverModsVersionPath = path.join(serverModsDownloadPath, 'version.json')
       const gameDirPath = path.join(args.basePath, args.gameVersion == 1 ? 'highRes' : 'lowRes', 'KnockoutCity')
@@ -227,7 +231,7 @@ function createWindow(): void {
 
       fse.copySync(serverModsDownloadPath, gameDirPath)
 
-      event.returnValue = undefined
+      event.sender.send('installed-server-mods')
     }
   )
 
