@@ -71,6 +71,9 @@ function LaunchSection(): JSX.Element {
                     setPopUpState('installing-server-mods')
                     await window.installServerMods()
 
+                    setPopUpState('sync-server-configuration')
+                    await window.syncServerConfiguration()
+                    
                     setPopUpState('authenticating')
 
                     const res = await axios

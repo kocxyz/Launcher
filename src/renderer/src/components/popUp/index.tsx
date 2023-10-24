@@ -7,11 +7,12 @@ import Authenticating from './views/Authenticating'
 import ConfirmLogout from './views/ConfirmLogout'
 import SelectUninstall from './views/SelectUninstall'
 import AccountSettings from './views/AccountSettings'
+import InstallingServerMods from './views/InstallingServerMods'
+import SyncServerConfiguration from './views/SyncServerConfiguration'
 
 // States
 import { useUIState } from '@renderer/states/uiState'
 import { useAuthState } from '@renderer/states/authState'
-import InstallingServerMods from './views/InstallingServerMods'
 
 function PopUp(): JSX.Element {
   const [popUpLoading, setPopUpLoading] = useState(false)
@@ -274,6 +275,8 @@ function PopUp(): JSX.Element {
       return <AccountSettings />
     case 'installing-server-mods':
       return <InstallingServerMods />
+    case 'sync-server-configuration':
+      return <SyncServerConfiguration />
     default:
       return <></>
   }

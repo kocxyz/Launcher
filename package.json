@@ -32,6 +32,8 @@
     "discord-rpc": "^4.0.1",
     "fs-extra": "^11.1.1",
     "jszip": "^3.10.1",
+    "knockoutcity-auth-client": "^1.0.2",
+    "knockoutcity-sdk": "^1.0.4",
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "react-color": "^2.19.3",

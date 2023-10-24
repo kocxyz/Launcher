@@ -24,6 +24,7 @@ declare global {
 
     cleanGameDirMods: () => Promise<void>
     installServerMods: () => Promise<void>
+    syncServerConfiguration: () => Promise<void>
 
     installGame: (props: {
       setGameState: (state: 'installed' | 'deprecated' | 'notInstalled' | 'installing') => void

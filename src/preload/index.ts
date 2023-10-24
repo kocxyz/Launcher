@@ -111,7 +111,7 @@ window.addEventListener('DOMContentLoaded', () => {
         basePath: localStorage.getItem('gameDirectory'),
         gameVersion: localStorage.getItem('gameVersion')
       })
-    }) 
+    })
   }
 
   // @ts-ignore (define in dts)
@@ -124,10 +124,32 @@ window.addEventListener('DOMContentLoaded', () => {
         gameVersion: localStorage.getItem('gameVersion'),
         server: {
           name: localStorage.getItem('currServerName'),
-          addr: localStorage.getItem('currServer'),
+          addr: localStorage.getItem('currServer')
         }
       })
-    }) 
+    })
+  }
+
+  // @ts-ignore (define in dts)
+  window.syncServerConfiguration = (): Promise<void> => {
+    return new Promise((resolve) => {
+      ipcRenderer.once('synced-server-configuration', () => resolve())
+
+      ipcRenderer.sendSync('sync-server-configuration', {
+        credentials: {
+          username: localStorage.getItem('username'),
+          authToken: localStorage.getItem('authToken')
+        },
+        server: {
+          lastConnected: localStorage.getItem('server:lastConnected'),
+          current: localStorage.getItem('currServer')
+        },
+        enabled: {
+          settings: localStorage.getItem('sync:settings') ?? false,
+          brawler: localStorage.getItem('sync:brawlers') ?? false,
+        }
+      })
+    })
   }
 
   // @ts-ignore (define in dts)

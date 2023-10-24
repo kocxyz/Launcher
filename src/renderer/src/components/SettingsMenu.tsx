@@ -255,6 +255,36 @@ function SettingsMenu(): JSX.Element {
         </Button>
       </Box>
 
+      <Divider />
+
+      <Box style={{ display: 'flex', flexDirection: 'column' }}>
+        <label>Server Synchronization</label>
+
+        <Stack direction="row" spacing={1} style={{ display: 'flex', alignItems: 'center' }}>
+          <Switch
+            color="secondary"
+            defaultChecked={localStorage.getItem('sync:settings') === 'true'}
+            onChange={(e): void => {
+              localStorage.setItem('sync:settings', `${e.target.checked}`)
+            }}
+          />
+
+          <Typography fontWeight="light">Game Settings</Typography>
+        </Stack>
+
+        <Stack direction="row" spacing={1} style={{ display: 'flex', alignItems: 'center' }}>
+          <Switch
+            color="secondary"
+            defaultChecked={localStorage.getItem('sync:brawlers') === 'true'}
+            onChange={(e): void => {
+              localStorage.setItem('sync:brawlers', `${e.target.checked}`)
+            }}
+          />
+
+          <Typography fontWeight="light">Brawler Configurations</Typography>
+        </Stack>
+      </Box>
+
       <Typography
         style={{
           color: 'grey',

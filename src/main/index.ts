@@ -15,6 +15,15 @@ import { is } from '@electron-toolkit/utils'
 import { IncomingMessage } from 'http'
 import lodash from 'lodash'
 import JSZip from 'jszip'
+import {
+  APIClient,
+  KOCWebsocketClient,
+  authenticate,
+  emitCommerceInventoryEquip,
+  emitUserPersistenceSetSettings
+} from 'knockoutcity-sdk'
+import { DEFAULT_AUTH_URL, generateSessionToken } from 'knockoutcity-auth-client'
+import { KOCServerUrl } from 'knockoutcity-auth-client/dist/types'
 
 remote.initialize()
 
@@ -161,31 +170,141 @@ function createWindow(): void {
     win.focus()
   })
 
-  ipcMain.on('clean-gamedir-mods', async (event, args: { basePath: string; gameVersion: number; }) => {
-    event.returnValue = undefined
+  ipcMain.on(
+    'sync-server-configuration',
+    async (
+      event,
+      args: {
+        credentials: { username: string; authToken: string }
+        server: { lastConnected: KOCServerUrl | null; current: KOCServerUrl }
+        enabled: { settings: boolean; brawler: boolean }
+      }
+    ) => {
+      event.returnValue = undefined
 
-    const gameDirPath = path.join(args.basePath, args.gameVersion == 1 ? 'highRes' : 'lowRes', 'KnockoutCity')
-    
-    const outDirPath = path.join(gameDirPath, 'out')
-    fs.rmSync(outDirPath, {recursive: true, force: true})
+      // If no synchronization is enabled we can skip it.
+      if (!args.enabled.settings && !args.enabled.brawler) {
+        return event.sender.send('synced-server-configuration')
+      }
 
-    const viperRootPath = path.join(gameDirPath, '.viper_root')
-    fs.rmSync(viperRootPath, {recursive: true, force: true})
 
-    const versionsPath = path.join(gameDirPath, 'version.json')
-    fs.rmSync(versionsPath, {recursive: true, force: true})
+      // If we never connected to a server before
+      // we cant sync anything.
+      if (args.server.lastConnected === null) {
+        return event.sender.send('synced-server-configuration')
+      }
 
-    event.sender.send('cleaned-gamedir-mods')
-  })
+      // If its the same server we connected to last time
+      // we dont need to load and push to the same server.
+      // We can just skip syncing.
+      if (args.server.lastConnected === args.server.current) {
+        return event.sender.send('synced-server-configuration')
+      }
+
+      const generateSessionTokenForServer = async (server: KOCServerUrl): Promise<string> => {
+        const lastConnectedServerSessionKey = await generateSessionToken(
+          DEFAULT_AUTH_URL,
+          args.credentials.username,
+          args.credentials.authToken,
+          server
+        )
+
+        const apiClient = new APIClient(`http://${server}`)
+        const { token } = await authenticate(
+          apiClient,
+          lastConnectedServerSessionKey.data.authkey
+        )
+
+        return token
+      }
+
+      const lastConnectedJWT = await generateSessionTokenForServer(args.server.lastConnected)
+
+      const wsClientLastConnected = new KOCWebsocketClient(`ws://${args.server.lastConnected}`)
+      wsClientLastConnected.once('_welcome', async (welcomeDataLastConnected) => {
+        wsClientLastConnected.once('_commerce_inventory_update', async(inventoryUpdateDataLastConnected) => {
+          // Disconnect from server
+          await wsClientLastConnected.disconnect()
+
+          const currentJWT = await generateSessionTokenForServer(args.server.current)
+          const wsClientCurrent = new KOCWebsocketClient(`ws://${args.server.current}`)
+
+          wsClientCurrent.once('_commerce_inventory_update', async (inventoryUpdateDataCurrent) => {            
+            // Synchronize settings if enabled
+            if (args.enabled.settings) {
+              await emitUserPersistenceSetSettings(wsClientCurrent, { settings: welcomeDataLastConnected.user_settings })
+            }
+
+            // Synchronize Brawler if enabled
+            if (args.enabled.brawler) {
+              const availableSlots = Object.keys(inventoryUpdateDataCurrent.equipment).reduce((acc, cur) => {
+                const currentSlot = cur.at(0)
+                if (currentSlot && !(currentSlot in acc)) {
+                  acc.add(currentSlot as '0' | '1' | '2' | '3' | '4' | '5')
+                }
+                return acc
+              }, new Set<'0' | '1' | '2' | '3' | '4' | '5'>())
+  
+              const slotFilteredEquipment = Object.fromEntries(
+                Object.entries(inventoryUpdateDataLastConnected.equipment)
+                  .filter(([key]) => availableSlots.has((key.at(0) ?? '-1') as '0' | '1' | '2' | '3' | '4' | '5') && !(key.includes('_crew_'))
+                )
+              )
+              
+              await emitCommerceInventoryEquip(wsClientCurrent, { userId: inventoryUpdateDataCurrent.user_id.velan, equipment: slotFilteredEquipment })
+            }
+
+            await wsClientCurrent.disconnect()
+            event.sender.send('synced-server-configuration')
+          })
+
+          await wsClientCurrent.connect(currentJWT)
+        })
+      })
+
+      await wsClientLastConnected.connect(lastConnectedJWT)
+    }
+  )
+
+  ipcMain.on(
+    'clean-gamedir-mods',
+    async (event, args: { basePath: string; gameVersion: number }) => {
+      event.returnValue = undefined
+
+      const gameDirPath = path.join(
+        args.basePath,
+        args.gameVersion == 1 ? 'highRes' : 'lowRes',
+        'KnockoutCity'
+      )
+
+      const outDirPath = path.join(gameDirPath, 'out')
+      fs.rmSync(outDirPath, { recursive: true, force: true })
+
+      const viperRootPath = path.join(gameDirPath, '.viper_root')
+      fs.rmSync(viperRootPath, { recursive: true, force: true })
+
+      const versionsPath = path.join(gameDirPath, 'version.json')
+      fs.rmSync(versionsPath, { recursive: true, force: true })
+
+      event.sender.send('cleaned-gamedir-mods')
+    }
+  )
   
   ipcMain.on(
     'install-server-mods',
-    async (event, args: { basePath: string; gameVersion: number; server: { name: string, addr: string } }) => {
+    async (
+      event,
+      args: { basePath: string; gameVersion: number; server: { name: string; addr: string } }
+    ) => {
       event.returnValue = undefined
 
       const serverModsDownloadPath = path.join(args.basePath, 'downloads', 'mods', args.server.name)
       const serverModsVersionPath = path.join(serverModsDownloadPath, 'version.json')
-      const gameDirPath = path.join(args.basePath, args.gameVersion == 1 ? 'highRes' : 'lowRes', 'KnockoutCity')
+      const gameDirPath = path.join(
+        args.basePath,
+        args.gameVersion == 1 ? 'highRes' : 'lowRes',
+        'KnockoutCity'
+      )
 
       const result = (await axios.get(`http://${args.server.addr}/mods/list`)).data
 
