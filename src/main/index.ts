@@ -187,8 +187,7 @@ function createWindow(): void {
       const serverModsVersionPath = path.join(serverModsDownloadPath, 'version.json')
       const gameDirPath = path.join(args.basePath, args.gameVersion == 1 ? 'highRes' : 'lowRes', 'KnockoutCity')
 
-      const protocol = args.server.addr.startsWith('127.0.0.1:23600') ? 'http' : 'https'
-      const result = (await axios.get(`${protocol}://${args.server.addr}/mods/list`)).data
+      const result = (await axios.get(`http://${args.server.addr}/mods/list`)).data
 
       const downloadMods = async () => {
         if (result.length === 0) {
@@ -196,7 +195,7 @@ function createWindow(): void {
         }
 
         const content = await (
-          await fetch(`${protocol}://${args.server.addr}/mods/download`)
+          await fetch(`http://${args.server.addr}/mods/download`)
         ).arrayBuffer()
 
         const zip = new JSZip()
