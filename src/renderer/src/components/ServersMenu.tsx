@@ -55,7 +55,7 @@ function ServersMenu(): JSX.Element {
       >
         <Tab label="Public" />
         <Tab label="Private" />
-        <Tab label="Host" />
+        <Tab label="Host" disabled={window.isLinux} />
       </Tabs>
       <Box
         style={{

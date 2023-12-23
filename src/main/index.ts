@@ -161,35 +161,49 @@ function createWindow(): void {
     win.focus()
   })
 
-  ipcMain.on('clean-gamedir-mods', async (event, args: { basePath: string; gameVersion: number; }) => {
-    event.returnValue = undefined
+  ipcMain.on(
+    'clean-gamedir-mods',
+    async (event, args: { basePath: string; gameVersion: number }) => {
+      event.returnValue = undefined
 
-    const gameDirPath = path.join(args.basePath, args.gameVersion == 1 ? 'highRes' : 'lowRes', 'KnockoutCity')
-    
-    const outDirPath = path.join(gameDirPath, 'out')
-    fs.rmSync(outDirPath, {recursive: true, force: true})
+      const gameDirPath = path.join(
+        args.basePath,
+        args.gameVersion == 1 ? 'highRes' : 'lowRes',
+        'KnockoutCity'
+      )
 
-    const viperRootPath = path.join(gameDirPath, '.viper_root')
-    fs.rmSync(viperRootPath, {recursive: true, force: true})
+      const outDirPath = path.join(gameDirPath, 'out')
+      fs.rmSync(outDirPath, { recursive: true, force: true })
 
-    const versionsPath = path.join(gameDirPath, 'version.json')
-    fs.rmSync(versionsPath, {recursive: true, force: true})
+      const viperRootPath = path.join(gameDirPath, '.viper_root')
+      fs.rmSync(viperRootPath, { recursive: true, force: true })
 
-    event.sender.send('cleaned-gamedir-mods')
-  })
-  
+      const versionsPath = path.join(gameDirPath, 'version.json')
+      fs.rmSync(versionsPath, { recursive: true, force: true })
+
+      event.sender.send('cleaned-gamedir-mods')
+    }
+  )
+
   ipcMain.on(
     'install-server-mods',
-    async (event, args: { basePath: string; gameVersion: number; server: { name: string, addr: string } }) => {
+    async (
+      event,
+      args: { basePath: string; gameVersion: number; server: { name: string; addr: string } }
+    ) => {
       event.returnValue = undefined
 
       const serverModsDownloadPath = path.join(args.basePath, 'downloads', 'mods', args.server.name)
       const serverModsVersionPath = path.join(serverModsDownloadPath, 'version.json')
-      const gameDirPath = path.join(args.basePath, args.gameVersion == 1 ? 'highRes' : 'lowRes', 'KnockoutCity')
+      const gameDirPath = path.join(
+        args.basePath,
+        args.gameVersion == 1 ? 'highRes' : 'lowRes',
+        'KnockoutCity'
+      )
 
       const result = (await axios.get(`http://${args.server.addr}/mods/list`)).data
 
-      const downloadMods = async () => {
+      const downloadMods = async (): Promise<void> => {
         if (result.length === 0) {
           return
         }
@@ -478,7 +492,7 @@ function createWindow(): void {
               ? `mkdir "${arg.path}" && icacls "${arg.path}" /grant "${
                   os.userInfo().username
                 }":(OI)(CI)F /T`
-              : `mkdir "${arg.path}" && chown -R ${os.userInfo().username} "${arg.path}"`,
+              : `mkdir -p "${arg.path}" && chown -R ${os.userInfo().username} "${arg.path}"`,
             { name: 'Knockout City Launcher' },
             (error) => {
               if (error) reject(new Error(error.message)), console.log(error)
@@ -891,11 +905,9 @@ function createWindow(): void {
           contextIsolation: false
         }
       })
-      if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-        cmd.loadURL(process.env['ELECTRON_RENDERER_URL'] + '/shell.html')
-      } else {
-        cmd.loadFile(path.join(__dirname, '../renderer/shell.html'))
-      }
+      if (is.dev && process.env['ELECTRON_RENDERER_URL'])
+        cmd.loadFile(path.join(process.env['ELECTRON_RENDERER_URL'], '../../resources/shell.html'))
+      else cmd.loadFile(path.join(__dirname, '../../resources/shell.html'))
     }
 
     server.stdout.on('data', (data) => {

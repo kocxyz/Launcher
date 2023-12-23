@@ -1,14 +1,18 @@
 import { ipcRenderer } from 'electron'
 import { getCurrentWindow } from '@electron/remote'
 import { BrowserWindow } from 'electron'
+const os = require('os')
 
 // Use `contextBridge` APIs to expose Electron APIs to
 // renderer only if context isolation is enabled, otherwise
 // just add to the DOM global.
 
+// @ts-ignore (define in dts)
+window.isLinux = os.platform() === 'linux'
+
 if (!localStorage.getItem('username')) {
   // get username from system
-  const username = require('os').userInfo().username
+  const username = os.userInfo().username
   localStorage.setItem('username', username)
 }
 if (!localStorage.getItem('gameVersion')) localStorage.setItem('gameVersion', '1')
@@ -17,6 +21,11 @@ if (!localStorage.getItem('currServerName')) localStorage.setItem('currServerNam
 if (!localStorage.getItem('currServer')) localStorage.setItem('currServer', '127.0.0.1')
 if (localStorage.getItem('servers') === null)
   localStorage.setItem('servers', '[{"name":"localhost","ip":"127.0.0.1"}]')
+if (!localStorage.getItem('gameDirectory'))
+  localStorage.setItem(
+    'gameDirectory',
+    os.Platform() === 'win32' ? 'C:/Program Files/KOCity' : `${os.homedir()}/Games/KOCity`
+  )
 
 if (localStorage.getItem('discordRPC:enabled') === null)
   localStorage.setItem('discordRPC:enabled', 'true')
@@ -111,7 +120,7 @@ window.addEventListener('DOMContentLoaded', () => {
         basePath: localStorage.getItem('gameDirectory'),
         gameVersion: localStorage.getItem('gameVersion')
       })
-    }) 
+    })
   }
 
   // @ts-ignore (define in dts)
@@ -124,10 +133,10 @@ window.addEventListener('DOMContentLoaded', () => {
         gameVersion: localStorage.getItem('gameVersion'),
         server: {
           name: localStorage.getItem('currServerName'),
-          addr: localStorage.getItem('currServer'),
+          addr: localStorage.getItem('currServer')
         }
       })
-    }) 
+    })
   }
 
   // @ts-ignore (define in dts)

@@ -25,7 +25,7 @@ linux:
   target:
     - AppImage
     # - snap
-    # - deb
+    - deb
   maintainer: kocity.xyz
   category: Game
 appImage:
