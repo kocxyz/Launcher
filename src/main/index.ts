@@ -978,7 +978,7 @@ if (gotTheLock) {
     }
 
     axios
-      .get('http://cdn.ipgg.net/kocity/version', {
+      .get('https://cdn.ipgg.net/kocity/version', {
         timeout: 5000
       })
       .then(async (res) => {
@@ -1028,7 +1028,7 @@ if (gotTheLock) {
             // download the exe file using axios
             console.log('Downloading update...')
             axios
-              .get('http://cdn.ipgg.net/kocity/kocitylauncher.exe', {
+              .get('https://cdn.ipgg.net/kocity/kocitylauncher.exe', {
                 responseType: 'arraybuffer'
               })
               .then(async (res) => {
