@@ -754,7 +754,7 @@ function createWindow(): void {
             gid: os.userInfo().gid,
             shell: '/bin/bash'
           })
-        : spawn(`KnockoutCity.exe ${args.join(' ')}`, args, {
+        : spawn(`KnockoutCity.exe`, args, {
             detached: true,
             stdio: 'ignore',
             cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
