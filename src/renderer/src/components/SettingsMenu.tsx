@@ -182,7 +182,13 @@ function SettingsMenu(): JSX.Element {
             variant="contained"
             className="hoverButton"
             style={{ width: '100%' }}
-            onClick={(): void => window.launchURL(`"" "${gameDirectory}"`)}
+            disabled={
+              !['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState) ||
+              !gameDirectory
+            }
+            onClick={(): void =>
+              window.launchURL(window.isLinux ? (gameDirectory as string) : `"" "${gameDirectory}"`)
+            }
           >
             Open
           </Button>
