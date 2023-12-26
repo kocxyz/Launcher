@@ -24,7 +24,7 @@ if (localStorage.getItem('servers') === null)
 if (!localStorage.getItem('gameDirectory'))
   localStorage.setItem(
     'gameDirectory',
-    os.Platform() === 'win32' ? 'C:/Program Files/KOCity' : `${os.homedir()}/Games/KOCity`
+    os.platform() === 'win32' ? 'C:/Program Files/KOCity' : `${os.homedir()}/Games/KOCity`
   )
 
 if (localStorage.getItem('discordRPC:enabled') === null)
@@ -260,6 +260,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // @ts-ignore (define in dts)
   window.launchURL = (url: string): void => {
+    console.log('launch url', url)
     ipcRenderer.send('launch-url', { url })
   }
 
