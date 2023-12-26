@@ -746,13 +746,21 @@ function createWindow(): void {
       `-username=${arg.authkey ? arg.authkey : arg.username}`,
       `-backend=${arg.server}`
     ]
-    const game = spawn(`${os.platform() === 'linux' ? 'wine ' : ''}KnockoutCity.exe`, args, {
-      cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
-      detached: true,
-      stdio: 'ignore',
-      env: {}
-    })
-    console.log(game.spawnargs)
+    const game =
+      os.platform() === 'linux'
+        ? exec(`wine KnockoutCity.exe ${args.join(' ')}`, {
+            cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
+            uid: os.userInfo().uid,
+            gid: os.userInfo().gid,
+            shell: '/bin/bash'
+          })
+        : spawn(`KnockoutCity.exe ${args.join(' ')}`, args, {
+            detached: true,
+            stdio: 'ignore',
+            cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
+            env: {}
+          })
+
     event.returnValue = 'launched'
     game.on('error', (err) => {
       console.log(err)
@@ -956,6 +964,7 @@ function createWindow(): void {
   })
 
   ipcMain.on('launch-url', async (event, arg) => {
+    arg.url = typeof arg.url == 'string' ? arg.url : arg.url.toString()
     console.log('Launching URL: ' + arg.url)
     event.returnValue = 'launched'
     exec(`${os.platform() === 'linux' ? 'xdg-open' : 'start'} ${arg.url}`)
@@ -978,7 +987,7 @@ if (gotTheLock) {
     }
 
     axios
-      .get('http://cdn.ipgg.net/kocity/version', {
+      .get('https://cdn.ipgg.net/kocity/version', {
         timeout: 5000
       })
       .then(async (res) => {
@@ -1028,7 +1037,7 @@ if (gotTheLock) {
             // download the exe file using axios
             console.log('Downloading update...')
             axios
-              .get('http://cdn.ipgg.net/kocity/kocitylauncher.exe', {
+              .get('https://cdn.ipgg.net/kocity/kocitylauncher.exe', {
                 responseType: 'arraybuffer'
               })
               .then(async (res) => {
