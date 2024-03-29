@@ -51,7 +51,7 @@ function LaunchSection(): JSX.Element {
                   setCurrServerType(localStorage.getItem('currServerType') || 'private')
 
                   await window.cleanGameDirMods()
-                  
+
                   if (localStorage.getItem('currServerType') === 'public') {
                     setPopUpState('authenticating')
                     if (

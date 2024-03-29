@@ -174,7 +174,6 @@ window.addEventListener('DOMContentLoaded', () => {
   }): void => {
     ipcRenderer.sendSync('launch-game', {
       path: localStorage.getItem('gameDirectory'),
-      version: localStorage.getItem('gameVersion'),
       username: localStorage.getItem('username'),
       language: localStorage.getItem('language'),
       server: localStorage.getItem('currServer'),

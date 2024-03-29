@@ -195,11 +195,7 @@ function createWindow(): void {
 
       const serverModsDownloadPath = path.join(args.basePath, 'downloads', 'mods', args.server.name)
       const serverModsVersionPath = path.join(serverModsDownloadPath, 'version.json')
-      const gameDirPath = path.join(
-        args.basePath,
-        args.gameVersion == 1 ? 'highRes' : 'lowRes',
-        'KnockoutCity'
-      )
+      const gameDirPath = path.join(args.basePath, 'KnockoutCity')
 
       const result = (await axios.get(`http://${args.server.addr}/mods/list`)).data
 
@@ -300,7 +296,7 @@ function createWindow(): void {
     if (!result.canceled) {
       console.log('Not canceled')
 
-      let path = result.filePaths[0].replaceAll('\\', '/')
+      const path = result.filePaths[0].replaceAll('\\', '/')
 
       if (result.filePaths[0].replaceAll('\\', '/') == arg.path) {
         console.log('Directory is identical')
@@ -310,98 +306,12 @@ function createWindow(): void {
 
       console.log(path.endsWith('/highRes'), path.endsWith('/lowRes'))
 
-      if (path.endsWith('/highRes') || path.endsWith('/lowRes')) {
-        console.log(path)
-        const pathAR = path.split('/')
-        pathAR.pop()
-        path = pathAR.join('/')
-        result.filePaths[0] = path
-      }
-
       if (!fs.existsSync(arg.path)) {
         console.log("Doesn't exist")
         return (event.returnValue = result)
       }
 
-      console.log('Reading previous dir')
-      const files = fs.readdirSync(arg.path)
-
-      if (files.length != 0) {
-        console.log('Has files, checking content')
-        let hasDownloadFiles = false
-        for (const file of files) {
-          if (file.startsWith('files-') && file.endsWith('.zip')) hasDownloadFiles = true
-          console.log(file)
-        }
-
-        if (files.includes('highRes') || files.includes('lowRes') || hasDownloadFiles) {
-          console.log('Detected install traces')
-          const action = await dialog.showMessageBox(win, {
-            type: 'warning',
-            title: 'Warning',
-            message:
-              'The previous directory contains traces of a KOcity installation. What do you want to do with the previous installation?',
-            buttons: ['Keep', 'Move', 'Delete', 'Cancel']
-          })
-          console.log(action)
-          switch (action.response) {
-            case 0:
-              // Keep
-              event.returnValue = result
-              break
-            case 1:
-              // Move
-              // Check for permissions
-              try {
-                const res = await setUpPermission(result.filePaths[0])
-                console.log(res)
-              } catch (error) {
-                console.log(error)
-                dialog.showErrorBox('Error', 'Failed to set up permissions. Please try again.')
-                return (event.returnValue = null)
-              }
-
-              try {
-                await new Promise((resolve) => {
-                  for (const file of files) {
-                    if (
-                      (file.startsWith('files-') && file.endsWith('.zip')) ||
-                      file == 'highRes' ||
-                      file == 'lowRes'
-                    ) {
-                      fs.renameSync(`${arg.path}/${file}`, `${result.filePaths[0]}/${file}`)
-                    }
-                  }
-                  resolve(null)
-                })
-              } catch (error) {
-                console.error(error)
-                dialog.showErrorBox('Error', 'Failed to copy files. ' + error)
-                return (event.returnValue = null)
-              }
-              event.returnValue = result
-              break
-            case 2:
-              // Delete
-              await new Promise((resolve) => {
-                fs.rmSync(arg.path, { recursive: true })
-                resolve(null)
-              })
-              event.returnValue = result
-              break
-            case 3:
-              // Cancel
-              event.returnValue = null
-              break
-          }
-        } else {
-          console.log('Changed directory, no traces')
-          event.returnValue = result
-        }
-      } else {
-        console.log('Changed directory, no traces')
-        event.returnValue = result
-      }
+      event.returnValue = result
     } else {
       console.log('Canceled')
       event.returnValue = null
@@ -412,49 +322,12 @@ function createWindow(): void {
   ipcMain.on('get-game-state', async (event, arg) => {
     console.log(arg)
 
-    const startFile = fs.existsSync(
-      `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity/KnockoutCity.exe`
-    )
-    const currentVersion = (await axios.get('https://cdn.ipgg.net/kocity/game/version')).data.trim()
-
+    const startFile = fs.existsSync(`${arg.path}/KnockoutCity/KnockoutCity.exe`)
     let installValid = false
-    if (fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`))
-      installValid = true
-    if (fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/eula.txt`))
-      installValid = true
+    if (fs.existsSync(`${arg.path}/KnockoutCity`)) installValid = true
+    if (fs.existsSync(`${arg.path}/eula.txt`)) installValid = true
 
-    if (
-      installValid &&
-      !fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`)
-    ) {
-      const result = await dialog.showMessageBox(win, {
-        type: 'warning',
-        title: 'Installation faulty',
-        message:
-          'The used directory contains a valid installation. But the version.txt file is missing. Do you want to create one? (NOT RECOMMENDED)',
-        buttons: ['Yes', 'No']
-      })
-
-      if (result.response === 0)
-        fs.writeFileSync(
-          `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`,
-          currentVersion
-        )
-    }
-
-    const installedVersion = fs.existsSync(
-      `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`
-    )
-      ? fs.readFileSync(
-          `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`,
-          'utf8'
-        )
-      : null
-
-    if (startFile && currentVersion.trim() == installedVersion)
-      return (event.returnValue = 'installed')
-    else if (startFile && currentVersion != installedVersion)
-      return (event.returnValue = 'deprecated')
+    if (startFile && installValid) return (event.returnValue = 'installed')
     else return (event.returnValue = 'notInstalled')
   })
 
@@ -749,7 +622,7 @@ function createWindow(): void {
     const game =
       os.platform() === 'linux'
         ? exec(`wine KnockoutCity.exe ${args.join(' ')}`, {
-            cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
+            cwd: `${arg.path}/KnockoutCity`,
             uid: os.userInfo().uid,
             gid: os.userInfo().gid,
             shell: '/bin/bash'
@@ -757,7 +630,7 @@ function createWindow(): void {
         : spawn(`KnockoutCity.exe`, args, {
             detached: true,
             stdio: 'ignore',
-            cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
+            cwd: `${arg.path}/KnockoutCity`,
             env: {}
           })
 
@@ -1084,33 +957,6 @@ app.on('activate', () => {
     createWindow()
   }
 })
-
-async function setUpPermission(path: string): Promise<void> {
-  // check if this process is allowed to write to the directory
-  try {
-    fs.writeFileSync(path + '/test.txt', 'test')
-    console.log(`Writable ${fs.existsSync(path + '/test.txt')}`)
-    console.log('Has permissions')
-  } catch (error: unknown) {
-    console.log((error as Error).message)
-    // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
-    await new Promise((resolve, reject): void => {
-      sudo.exec(
-        `icacls "${path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`,
-        { name: 'Knockout City Launcher' },
-        (error) => {
-          if (error) reject('Could not raise permissions'), console.log(error)
-          else return resolve(null)
-        }
-      )
-    }).catch((err) => {
-      return Promise.reject(err)
-    })
-  } finally {
-    if (fs.existsSync(path + '/test.txt')) fs.rmSync(path + '/test.txt')
-    Promise.resolve()
-  }
-}
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
