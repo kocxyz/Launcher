@@ -11,7 +11,6 @@ import AccountSettings from './views/AccountSettings'
 // States
 import { useUIState } from '@renderer/states/uiState'
 import { useAuthState } from '@renderer/states/authState'
-import InstallingServerMods from './views/InstallingServerMods'
 
 function PopUp(): JSX.Element {
   const [popUpLoading, setPopUpLoading] = useState(false)
@@ -272,8 +271,6 @@ function PopUp(): JSX.Element {
       return <SelectUninstall />
     case 'accountSettings':
       return <AccountSettings />
-    case 'installing-server-mods':
-      return <InstallingServerMods />
     default:
       return <></>
   }
