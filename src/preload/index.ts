@@ -112,6 +112,18 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // @ts-ignore (define in dts)
+  window.patchGameClient = (): Promise<void> => {
+    return new Promise((resolve) => {
+      ipcRenderer.once('patched-game-client', () => resolve())
+
+      ipcRenderer.sendSync('patch-game-client', {
+        basePath: localStorage.getItem('gameDirectory'),
+        gameVersion: localStorage.getItem('gameVersion')
+      })
+    })
+  }
+
+  // @ts-ignore (define in dts)
   window.getGameInstalls = (): string[] => {
     const result = ipcRenderer.sendSync('get-game-installs', {
       path: localStorage.getItem('gameDirectory')

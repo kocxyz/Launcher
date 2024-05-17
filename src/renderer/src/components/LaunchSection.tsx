@@ -50,6 +50,9 @@ function LaunchSection(): JSX.Element {
                   setCurrServerName(localStorage.getItem('currServerName') || 'localhost')
                   setCurrServerType(localStorage.getItem('currServerType') || 'private')
 
+                  setPopUpState('patchGameClient')
+                  await window.patchGameClient()
+
                   if (localStorage.getItem('currServerType') === 'public') {
                     setPopUpState('authenticating')
                     if (

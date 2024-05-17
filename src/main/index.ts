@@ -159,6 +159,72 @@ function createWindow(): void {
     win.focus()
   })
 
+  ipcMain.on(
+    'patch-game-client',
+    async (event, args: { basePath: string; gameVersion: number }) => {
+      event.returnValue = undefined
+
+      const gameDirPath = path.join(
+        args.basePath,
+        args.gameVersion == 1 ? 'highRes' : 'lowRes',
+        'KnockoutCity'
+      )
+
+      const gameExePath = path.join(gameDirPath, 'KnockoutCity.exe')
+      const backupGameExePath = path.join(gameDirPath, 'KnockoutCity.exe.bak')
+
+      if (!fse.existsSync(backupGameExePath)) {
+        console.log(`Backing up ${gameExePath} to ${backupGameExePath}`)
+        fse.copySync(gameExePath, backupGameExePath)
+      }
+
+      let data = await fse.readFile(backupGameExePath).catch((error) => {
+        console.error('Failed to read Game File:', error)
+        throw Error('Failed to read Game File')
+      })
+
+      const patches: {
+        name: string
+        startAddress: number
+        endAddress: number
+        replacement: () => Buffer
+      }[] = [
+        {
+          name: 'Signature Verification',
+          startAddress: 0x3cad481,
+          endAddress: 0x3cad485,
+          replacement: () => Buffer.from([0xb8, 0x01, 0x00, 0x00])
+        },
+        {
+          name: 'Auth Provider',
+          startAddress: 0x4f97230,
+          endAddress: 0x4f97233,
+          replacement: () => Buffer.from([0x78, 0x79, 0x7a])
+        }
+      ]
+
+      for (const patch of patches) {
+        console.log(`Patching ${patch.name}...`)
+        const startBuffer = data.subarray(0, patch.startAddress)
+        const endBuffer = data.subarray(patch.endAddress)
+
+        console.log('data pre')
+        console.log(data.subarray(patch.startAddress, patch.endAddress))
+        data = Buffer.concat([startBuffer, patch.replacement(), endBuffer])
+
+        console.log('data post')
+        console.log(data.subarray(patch.startAddress, patch.endAddress))
+      }
+
+      await fse.writeFile(gameExePath, data).catch((error) => {
+        console.error('Failed to write patched Game File:', error)
+        throw Error('Failed to write patched Game File')
+      })
+
+      event.sender.send('patched-game-client')
+    }
+  )
+
   ipcMain.on('set-RPCstate', async (event, arg) => {
     event.returnValue = 'ok'
 
