@@ -7,11 +7,11 @@ import Authenticating from './views/Authenticating'
 import ConfirmLogout from './views/ConfirmLogout'
 import SelectUninstall from './views/SelectUninstall'
 import AccountSettings from './views/AccountSettings'
+import PatchGameClient from './views/PatchGameClient'
 
 // States
 import { useUIState } from '@renderer/states/uiState'
 import { useAuthState } from '@renderer/states/authState'
-import InstallingServerMods from './views/InstallingServerMods'
 
 function PopUp(): JSX.Element {
   const [popUpLoading, setPopUpLoading] = useState(false)
@@ -272,8 +272,8 @@ function PopUp(): JSX.Element {
       return <SelectUninstall />
     case 'accountSettings':
       return <AccountSettings />
-    case 'installing-server-mods':
-      return <InstallingServerMods />
+    case 'patchGameClient':
+      return <PatchGameClient />
     default:
       return <></>
   }

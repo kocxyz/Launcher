@@ -50,8 +50,9 @@ function LaunchSection(): JSX.Element {
                   setCurrServerName(localStorage.getItem('currServerName') || 'localhost')
                   setCurrServerType(localStorage.getItem('currServerType') || 'private')
 
-                  await window.cleanGameDirMods()
-                  
+                  setPopUpState('patchGameClient')
+                  await window.patchGameClient()
+
                   if (localStorage.getItem('currServerType') === 'public') {
                     setPopUpState('authenticating')
                     if (
@@ -61,9 +62,6 @@ function LaunchSection(): JSX.Element {
                       setPopUpState(false)
                       return alert('You must be logged in to use public servers!')
                     }
-
-                    setPopUpState('installing-server-mods')
-                    await window.installServerMods()
 
                     setPopUpState('authenticating')
 
