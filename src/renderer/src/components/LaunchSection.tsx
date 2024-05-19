@@ -87,7 +87,10 @@ function LaunchSection(): JSX.Element {
 
                     setPopUpState(false)
                     return window.launchGame({ setGameState, authkey })
-                  } else return window.launchGame({ setGameState })
+                  } else {
+                    setPopUpState(false)
+                    return window.launchGame({ setGameState })
+                  }
                 }}
               />
             )
