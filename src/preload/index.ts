@@ -118,7 +118,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
       ipcRenderer.sendSync('patch-game-client', {
         basePath: localStorage.getItem('gameDirectory'),
-        gameVersion: localStorage.getItem('gameVersion')
+        gameVersion: localStorage.getItem('gameVersion'),
+        serverType: localStorage.getItem('currServerType') || 'private'
       })
     })
   }

@@ -161,7 +161,10 @@ function createWindow(): void {
 
   ipcMain.on(
     'patch-game-client',
-    async (event, args: { basePath: string; gameVersion: number }) => {
+    async (
+      event,
+      args: { basePath: string; gameVersion: number; serverType: 'public' | 'private' }
+    ) => {
       event.returnValue = undefined
 
       const gameDirPath = path.join(
@@ -199,7 +202,8 @@ function createWindow(): void {
           name: 'Auth Provider',
           startAddress: 0x4f97230,
           endAddress: 0x4f97233,
-          replacement: () => Buffer.from([0x78, 0x79, 0x7a])
+          replacement: () =>
+            Buffer.from(args.serverType === 'private' ? [0x64, 0x65, 0x76] : [0x78, 0x79, 0x7a])
         }
       ]
 
