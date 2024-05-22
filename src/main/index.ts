@@ -178,10 +178,10 @@ function createWindow(): void {
 
       if (!fse.existsSync(backupGameExePath)) {
         console.log(`Backing up ${gameExePath} to ${backupGameExePath}`)
-        fse.copySync(gameExePath, backupGameExePath)
+        await fse.copy(gameExePath, backupGameExePath)
       }
 
-      let data = await fse.readFile(backupGameExePath).catch((error) => {
+      let data = await fse.readFile(gameExePath).catch((error) => {
         console.error('Failed to read Game File:', error)
         throw Error('Failed to read Game File')
       })
@@ -207,23 +207,28 @@ function createWindow(): void {
         }
       ]
 
+      let needsPatching = false
       for (const patch of patches) {
-        console.log(`Patching ${patch.name}...`)
+        console.log(`Checking ${patch.name}...`)
         const startBuffer = data.subarray(0, patch.startAddress)
+        const existingBytes = data.subarray(patch.startAddress, patch.endAddress)
         const endBuffer = data.subarray(patch.endAddress)
 
-        console.log('data pre')
-        console.log(data.subarray(patch.startAddress, patch.endAddress))
-        data = Buffer.concat([startBuffer, patch.replacement(), endBuffer])
+        if (!existingBytes.equals(patch.replacement())) {
+          needsPatching = true
 
-        console.log('data post')
-        console.log(data.subarray(patch.startAddress, patch.endAddress))
+          console.log(`Patching ${patch.name}...`)
+          data = Buffer.concat([startBuffer, patch.replacement(), endBuffer])
+        }
       }
 
-      await fse.writeFile(gameExePath, data).catch((error) => {
-        console.error('Failed to write patched Game File:', error)
-        throw Error('Failed to write patched Game File')
-      })
+      if (needsPatching) {
+        console.log('Writing patched Game File...')
+        await fse.writeFile(gameExePath, data).catch((error) => {
+          console.error('Failed to write patched Game File:', error)
+          throw Error('Failed to write patched Game File')
+        })
+      }
 
       event.sender.send('patched-game-client')
     }
