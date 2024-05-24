@@ -282,15 +282,11 @@ function createWindow(): void {
     if (!result.canceled) {
       console.log('Not canceled')
 
-      const path = result.filePaths[0].replaceAll('\\', '/')
-
       if (result.filePaths[0].replaceAll('\\', '/') == arg.path) {
         console.log('Directory is identical')
         event.returnValue = null
         return dialog.showErrorBox('Error', 'Selected directory is identical.')
       }
-
-      console.log(path.endsWith('/highRes'), path.endsWith('/lowRes'))
 
       if (!fs.existsSync(arg.path)) {
         console.log("Doesn't exist")
