@@ -118,38 +118,19 @@ window.addEventListener('DOMContentLoaded', () => {
 
       ipcRenderer.sendSync('patch-game-client', {
         basePath: localStorage.getItem('gameDirectory'),
-        gameVersion: localStorage.getItem('gameVersion'),
         serverType: localStorage.getItem('currServerType') || 'private'
       })
     })
   }
 
   // @ts-ignore (define in dts)
-  window.getGameInstalls = (): string[] => {
-    const result = ipcRenderer.sendSync('get-game-installs', {
-      path: localStorage.getItem('gameDirectory')
-    })
-    return result
+  window.installGame = (): void => {
+    ipcRenderer.sendSync('download-game')
   }
 
   // @ts-ignore (define in dts)
-  window.installGame = (props: {
-    setGameState: (state: 'installed' | 'deprecated' | 'notInstalled' | 'installing') => void
-    setInstallData: (data: { progress: number; speed: number }) => void
-  }): void => {
-    ipcRenderer.sendSync('download-game', {
-      path: localStorage.getItem('gameDirectory'),
-      version: localStorage.getItem('gameVersion')
-    })
-    props.setGameState('installing')
-    window.addEventListener('message', (evt) => {
-      if (evt.data.type === 'download-progress') {
-        props.setInstallData(evt.data.data)
-      }
-      if (evt.data.type === 'download-error') {
-        props.setGameState('notInstalled')
-      }
-    })
+  window.uninstallGame = (): void => {
+    ipcRenderer.sendSync('uninstall-game')
   }
 
   // @ts-ignore (define in dts)
@@ -186,7 +167,6 @@ window.addEventListener('DOMContentLoaded', () => {
   window.startServer = (props): void => {
     ipcRenderer.sendSync('start-server', {
       path: localStorage.getItem('gameDirectory'),
-      version: localStorage.getItem('gameVersion'),
       server: localStorage.getItem('currServer'),
 
       port: props.port,
@@ -227,32 +207,8 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // @ts-ignore (define in dts)
-  window.cancelInstall = (): void => {
-    ipcRenderer.send('cancel-download', {
-      path: localStorage.getItem('gameDirectory'),
-      version: localStorage.getItem('gameVersion')
-    })
-  }
-
-  // @ts-ignore (define in dts)
-  window.pauseInstall = (): void => {
-    ipcRenderer.send('pause-download', {
-      path: localStorage.getItem('gameDirectory'),
-      version: localStorage.getItem('gameVersion')
-    })
-  }
-
-  // @ts-ignore (define in dts)
   window.launchURL = (url: string): void => {
     console.log('launch url', url)
     ipcRenderer.send('launch-url', { url })
-  }
-
-  // @ts-ignore (define in dts)
-  window.removeFiles = (files: string[]): void => {
-    ipcRenderer.sendSync('remove-files', {
-      files,
-      path: localStorage.getItem('gameDirectory')
-    })
   }
 })

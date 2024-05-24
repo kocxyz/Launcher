@@ -5,7 +5,6 @@ import { useState } from 'react'
 // Views
 import Authenticating from './views/Authenticating'
 import ConfirmLogout from './views/ConfirmLogout'
-import SelectUninstall from './views/SelectUninstall'
 import AccountSettings from './views/AccountSettings'
 import PatchGameClient from './views/PatchGameClient'
 
@@ -268,8 +267,6 @@ function PopUp(): JSX.Element {
       return <ConfirmLogout />
     case 'authenticating':
       return <Authenticating />
-    case 'selectUninstall':
-      return <SelectUninstall />
     case 'accountSettings':
       return <AccountSettings />
     case 'patchGameClient':

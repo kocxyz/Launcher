@@ -1,7 +1,5 @@
-import { Box, IconButton, LinearProgress, Stack, Typography } from '@mui/material'
-import { useState } from 'react'
+import { Box, Stack, Typography } from '@mui/material'
 import FancyButton from './fancyButton'
-import { CloseOutlined, PauseOutlined } from '@mui/icons-material'
 import axios from 'axios'
 
 // states
@@ -15,15 +13,13 @@ function LaunchSection(): JSX.Element {
     useSelectedServerState()
   const { setPopUpState } = useUIState()
 
-  const [installData, setInstallData] = useState<number>(0)
-
   return (
     <Box
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: '75px',
+        marginTop: '130px',
         flexDirection: 'column'
       }}
     >
@@ -34,7 +30,7 @@ function LaunchSection(): JSX.Element {
               <FancyButton
                 text="INSTALL"
                 onClick={(): void => {
-                  window.installGame({ setInstallData, setGameState })
+                  window.installGame()
                 }}
               />
             )
@@ -102,79 +98,13 @@ function LaunchSection(): JSX.Element {
                 style={{ filter: 'grayscale(1)', pointerEvents: 'none' }}
               />
             )
-          case 'installing':
-            return (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexDirection: 'column',
-                  width: '100%'
-                }}
-              >
-                <p style={{ marginTop: '5px', fontSize: '15px' }}>
-                  {installData === 100 ? 'UNPACKING' : 'DOWNLOADING'}
-                </p>
-                <Box
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    width: '90%',
-                    justifyContent: 'center',
-                    alignItems: 'center'
-                  }}
-                >
-                  <LinearProgress
-                    style={{ width: '450px', background: '#320853' }}
-                    color="secondary"
-                    variant={installData === 100 ? 'indeterminate' : 'determinate'}
-                    value={installData === 100 ? undefined : installData}
-                  />
-                  <p
-                    style={{
-                      fontSize: '15px',
-                      marginLeft: '20px',
-                      textAlign: 'start',
-                      width: '50px'
-                    }}
-                  >
-                    {installData.toFixed(2)}%
-                  </p>
-
-                  <Stack direction={'row'} style={{ marginLeft: 'auto', marginRight: '10px' }}>
-                    <IconButton
-                      disabled={installData === 100}
-                      style={{ display: `${installData === 100 ? 'none' : 'inline'}` }}
-                      onClick={(): void => {
-                        window.pauseInstall()
-                        setGameState('notInstalled')
-                      }}
-                    >
-                      <PauseOutlined style={{ color: '#ffffff' }} />
-                    </IconButton>
-
-                    <IconButton
-                      disabled={installData === 100}
-                      style={{ display: `${installData === 100 ? 'none' : 'inline'}` }}
-                      onClick={(): void => {
-                        window.cancelInstall()
-                        setGameState('notInstalled')
-                      }}
-                    >
-                      <CloseOutlined style={{ color: '#ffffff' }} />
-                    </IconButton>
-                  </Stack>
-                </Box>
-              </div>
-            )
 
           case 'deprecated':
             return (
               <FancyButton
                 text="UPDATE"
                 onClick={(): void => {
-                  window.installGame({ setInstallData, setGameState })
+                  window.installGame()
                 }}
               />
             )
@@ -186,7 +116,7 @@ function LaunchSection(): JSX.Element {
       <Stack
         direction="row"
         sx={{
-          opacity: ['installing', 'deprecated', 'notInstalled'].includes(gameState) ? 0 : 1,
+          opacity: ['deprecated', 'notInstalled'].includes(gameState) ? 0 : 1,
           transition: 'all 0.25s ease-in-out',
           zIndex: -1,
 

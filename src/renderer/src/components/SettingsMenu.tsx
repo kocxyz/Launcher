@@ -107,9 +107,7 @@ function SettingsMenu(): JSX.Element {
             variant="contained"
             className="hoverButton"
             sx={{ width: '100%' }}
-            disabled={
-              !['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)
-            }
+            disabled={!['installed', 'notInstalled', 'deprecated'].includes(gameState)}
             onClick={(): void => {
               if (authState) setPopUpState('confirmLogout')
               else {
@@ -163,9 +161,7 @@ function SettingsMenu(): JSX.Element {
           <Button
             variant="contained"
             className="hoverButton"
-            disabled={
-              !['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)
-            }
+            disabled={!['installed', 'notInstalled', 'deprecated'].includes(gameState)}
             style={{ width: '100%' }}
             onClick={async (): Promise<void> => {
               const result = await window.selectGameDir()
@@ -183,8 +179,7 @@ function SettingsMenu(): JSX.Element {
             className="hoverButton"
             style={{ width: '100%' }}
             disabled={
-              !['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState) ||
-              !gameDirectory
+              !['installed', 'notInstalled', 'deprecated'].includes(gameState) || !gameDirectory
             }
             onClick={(): void =>
               window.launchURL(window.isLinux ? (gameDirectory as string) : `"" "${gameDirectory}"`)
@@ -195,12 +190,10 @@ function SettingsMenu(): JSX.Element {
           <Button
             variant="contained"
             className="hoverButton"
-            disabled={
-              !['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)
-            }
+            disabled={!['installed', 'notInstalled', 'deprecated'].includes(gameState)}
             style={{ width: '100%' }}
             onClick={(): void => {
-              setPopUpState('selectUninstall')
+              window.uninstallGame()
             }}
           >
             Uninstall
@@ -252,7 +245,7 @@ function SettingsMenu(): JSX.Element {
         <Button
           variant="contained"
           className="hoverButton"
-          disabled={!['installed', 'notInstalled', 'deprecated', 'installing'].includes(gameState)}
+          disabled={!['installed', 'notInstalled', 'deprecated'].includes(gameState)}
           onClick={(): void => {
             window.updateRPC()
           }}

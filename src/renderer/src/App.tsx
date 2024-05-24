@@ -1,4 +1,4 @@
-import { Box, MenuItem, Select, Tab, Tabs } from '@mui/material'
+import { Box, Tab, Tabs } from '@mui/material'
 import './App.css'
 import { useEffect, useState } from 'react'
 
@@ -37,8 +37,7 @@ function App(): JSX.Element {
   const [background, setBackground] = useState(0)
   const [backgrounds, setBackgrounds] = useState<string[]>([])
 
-  const { fetchPublicServers, gameState, setGameState, gameVersion, setGameVersion } =
-    useGameState()
+  const { fetchPublicServers } = useGameState()
   const { currServer, currServerName, currServerType } = useSelectedServerState()
 
   useEffect(() => {
@@ -96,11 +95,6 @@ function App(): JSX.Element {
   }, [currServer]) // eslint-disable-line
 
   useEffect(() => {
-    console.log('Getting game states')
-    setGameState(window.getGameState())
-  }, [gameVersion])
-
-  useEffect(() => {
     setInterval(fetchPublicServers, 1000 * 60 * 3)
     fetchPublicServers()
   }, [])
@@ -145,29 +139,6 @@ function App(): JSX.Element {
             flexDirection: 'column'
           }}
         >
-          <Select
-            disabled={!['installed', 'notInstalled', 'deprecated'].includes(gameState as string)}
-            defaultValue={gameVersion}
-            variant="outlined"
-            style={{
-              width: '350px',
-              height: '35px',
-              marginBottom: '20px',
-              marginLeft: '-50px',
-              paddingLeft: '35px',
-              background: 'rgba(75, 0, 110, 0.3)',
-              borderLeft: '4px solid #743a8d',
-              borderRadius: '0',
-              textTransform: 'uppercase'
-            }}
-            onChange={(e): void => {
-              setGameVersion(e.target.value as 'highRes' | 'lowRes')
-              localStorage.setItem('gameVersion', e.target.value as string)
-            }}
-          >
-            <MenuItem value="1">High Res</MenuItem>
-            <MenuItem value="2">Low Res</MenuItem>
-          </Select>
           <a
             style={links}
             className="hoverLink"

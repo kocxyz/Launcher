@@ -1,14 +1,11 @@
 import axios from 'axios'
 import { create } from 'zustand'
 
-type GameStates = 'notInstalled' | 'installed' | 'running' | 'installing' | 'deprecated'
-type GameVersions = 'highRes' | 'lowRes'
+type GameStates = 'notInstalled' | 'installed' | 'running' | 'deprecated'
 
 interface GameState {
-  gameVersion: GameVersions
   gameState: GameStates
   serverState: string
-  setGameVersion: (gameVersion: GameVersions) => void
   setGameState: (gameState: GameStates) => void
   setServerState: (serverState: string) => void
 
@@ -21,10 +18,6 @@ interface GameState {
 }
 
 export const useGameState = create<GameState>((set) => ({
-  gameVersion: (localStorage.getItem('gameVersion') as GameVersions) || ('highRes' as GameVersions),
-  setGameVersion: (gameVersion): void => {
-    set(() => ({ gameVersion: gameVersion }))
-  },
   gameState: 'notInstalled',
   setGameState: (gameState): void => {
     set(() => ({ gameState: gameState }))
