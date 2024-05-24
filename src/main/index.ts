@@ -13,8 +13,6 @@ import killProcess from 'tree-kill'
 import discordRPC from 'discord-rpc'
 import { is } from '@electron-toolkit/utils'
 import { IncomingMessage } from 'http'
-import lodash from 'lodash'
-import JSZip from 'jszip'
 
 remote.initialize()
 
@@ -162,85 +160,73 @@ function createWindow(): void {
   })
 
   ipcMain.on(
-    'clean-gamedir-mods',
-    async (event, args: { basePath: string; gameVersion: number }) => {
-      event.returnValue = undefined
-
-      const gameDirPath = path.join(
-        args.basePath,
-        args.gameVersion == 1 ? 'highRes' : 'lowRes',
-        'KnockoutCity'
-      )
-
-      const outDirPath = path.join(gameDirPath, 'out')
-      fs.rmSync(outDirPath, { recursive: true, force: true })
-
-      const viperRootPath = path.join(gameDirPath, '.viper_root')
-      fs.rmSync(viperRootPath, { recursive: true, force: true })
-
-      const versionsPath = path.join(gameDirPath, 'version.json')
-      fs.rmSync(versionsPath, { recursive: true, force: true })
-
-      event.sender.send('cleaned-gamedir-mods')
-    }
-  )
-
-  ipcMain.on(
-    'install-server-mods',
+    'patch-game-client',
     async (
       event,
-      args: { basePath: string; gameVersion: number; server: { name: string; addr: string } }
+      args: { basePath: string; gameVersion: number; serverType: 'public' | 'private' }
     ) => {
       event.returnValue = undefined
 
-      const serverModsDownloadPath = path.join(args.basePath, 'downloads', 'mods', args.server.name)
-      const serverModsVersionPath = path.join(serverModsDownloadPath, 'version.json')
       const gameDirPath = path.join(args.basePath, 'KnockoutCity')
 
-      const result = (await axios.get(`http://${args.server.addr}/mods/list`)).data
+      const gameExePath = path.join(gameDirPath, 'KnockoutCity.exe')
+      const backupGameExePath = path.join(gameDirPath, 'KnockoutCity.exe.bak')
 
-      const downloadMods = async (): Promise<void> => {
-        if (result.length === 0) {
-          return
+      if (!fse.existsSync(backupGameExePath)) {
+        console.log(`Backing up ${gameExePath} to ${backupGameExePath}`)
+        await fse.copy(gameExePath, backupGameExePath)
+      }
+
+      let data = await fse.readFile(gameExePath).catch((error) => {
+        console.error('Failed to read Game File:', error)
+        throw Error('Failed to read Game File')
+      })
+
+      const patches: {
+        name: string
+        startAddress: number
+        endAddress: number
+        replacement: () => Buffer
+      }[] = [
+        {
+          name: 'Signature Verification',
+          startAddress: 0x3cad481,
+          endAddress: 0x3cad485,
+          replacement: () => Buffer.from([0xb8, 0x01, 0x00, 0x00])
+        },
+        {
+          name: 'Auth Provider',
+          startAddress: 0x4f97230,
+          endAddress: 0x4f97233,
+          replacement: () =>
+            Buffer.from(args.serverType === 'private' ? [0x64, 0x65, 0x76] : [0x78, 0x79, 0x7a])
         }
+      ]
 
-        const content = await (
-          await fetch(`http://${args.server.addr}/mods/download`)
-        ).arrayBuffer()
+      let needsPatching = false
+      for (const patch of patches) {
+        console.log(`Checking ${patch.name}...`)
+        const startBuffer = data.subarray(0, patch.startAddress)
+        const existingBytes = data.subarray(patch.startAddress, patch.endAddress)
+        const endBuffer = data.subarray(patch.endAddress)
 
-        const zip = new JSZip()
-        await zip.loadAsync(content).then(async (contents) => {
-          for (const filename of Object.keys(contents.files)) {
-            await zip
-              .file(filename)
-              ?.async('nodebuffer')
-              .then((content) => {
-                const filePath = path.join(serverModsDownloadPath, filename)
-                fs.mkdirSync(path.dirname(filePath), { recursive: true })
-                fs.writeFileSync(filePath, content)
-              })
-          }
+        if (!existingBytes.equals(patch.replacement())) {
+          needsPatching = true
+
+          console.log(`Patching ${patch.name}...`)
+          data = Buffer.concat([startBuffer, patch.replacement(), endBuffer])
+        }
+      }
+
+      if (needsPatching) {
+        console.log('Writing patched Game File...')
+        await fse.writeFile(gameExePath, data).catch((error) => {
+          console.error('Failed to write patched Game File:', error)
+          throw Error('Failed to write patched Game File')
         })
-
-        fs.rmSync(serverModsDownloadPath, { recursive: true, force: true })
-        fs.mkdirSync(serverModsDownloadPath, { recursive: true })
-        fs.writeFileSync(serverModsVersionPath, JSON.stringify(result, null, 2))
       }
 
-      fs.mkdirSync(serverModsDownloadPath, { recursive: true })
-      if (fs.existsSync(serverModsVersionPath) && fs.statSync(serverModsVersionPath).isFile()) {
-        const versions = JSON.parse(fs.readFileSync(serverModsVersionPath).toString('utf-8'))
-
-        if (!lodash.isEqual(versions, result)) {
-          await downloadMods()
-        }
-      } else {
-        await downloadMods()
-      }
-
-      fse.copySync(serverModsDownloadPath, gameDirPath)
-
-      event.sender.send('installed-server-mods')
+      event.sender.send('patched-game-client')
     }
   )
 

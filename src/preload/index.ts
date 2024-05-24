@@ -112,29 +112,14 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   // @ts-ignore (define in dts)
-  window.cleanGameDirMods = (): Promise<void> => {
+  window.patchGameClient = (): Promise<void> => {
     return new Promise((resolve) => {
-      ipcRenderer.once('cleaned-gamedir-mods', () => resolve())
+      ipcRenderer.once('patched-game-client', () => resolve())
 
-      ipcRenderer.sendSync('clean-gamedir-mods', {
-        basePath: localStorage.getItem('gameDirectory'),
-        gameVersion: localStorage.getItem('gameVersion')
-      })
-    })
-  }
-
-  // @ts-ignore (define in dts)
-  window.installServerMods = (): Promise<void> => {
-    return new Promise((resolve) => {
-      ipcRenderer.once('installed-server-mods', () => resolve())
-
-      ipcRenderer.sendSync('install-server-mods', {
+      ipcRenderer.sendSync('patch-game-client', {
         basePath: localStorage.getItem('gameDirectory'),
         gameVersion: localStorage.getItem('gameVersion'),
-        server: {
-          name: localStorage.getItem('currServerName'),
-          addr: localStorage.getItem('currServer')
-        }
+        serverType: localStorage.getItem('currServerType') || 'private'
       })
     })
   }

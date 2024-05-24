@@ -1,6 +1,6 @@
-import { Backdrop, Box, LinearProgress, Typography } from '@mui/material'
+import { Backdrop, Box, Typography, LinearProgress } from '@mui/material'
 
-export default function InstallingServerMods(): JSX.Element {
+function PatchGameClient(): JSX.Element {
   return (
     <Backdrop open={true} style={{ zIndex: 1000 }}>
       <Box
@@ -10,7 +10,7 @@ export default function InstallingServerMods(): JSX.Element {
           alignItems: 'center',
           backgroundColor: '#1a1a1a',
           width: '600px',
-          height: '200px',
+          height: '175px',
           borderRadius: '5px',
           padding: '10px',
           textAlign: 'center'
@@ -27,11 +27,13 @@ export default function InstallingServerMods(): JSX.Element {
             letterSpacing: '2px'
           }}
         >
-          Installing Server Mods
+          Patch Game Client
         </Typography>
-        <p>Hang on while we are trying to install the required server mods</p>
+        <p>Patching the Game Client...</p>
         <LinearProgress color="secondary" style={{ opacity: 1, width: '200px' }} />
       </Box>
     </Backdrop>
   )
 }
+
+export default PatchGameClient
