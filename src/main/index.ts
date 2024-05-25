@@ -330,16 +330,16 @@ function createWindow(): void {
     // check if steam is installed
     let steamPath: string | false = false
     if (os.platform() === 'win32') {
-      // get the steam installation path from the registry mind that steam can be in local machine or current user
-      regedit.list(['HKCU\\Software\\Valve\\Steam'], (err, result) => {
-        if (err) {
-          regedit.list(['HKLM\\Software\\Valve\\Steam'], (err, result) => {
-            if (err) steamPath = false
-            else
-              steamPath = result['HKLM\\Software\\Valve\\Steam'].values.InstallPath.value.toString()
-          })
-        } else
-          steamPath = result['HKCU\\Software\\Valve\\Steam'].values.InstallPath.value.toString()
+      steamPath = await new Promise((resolve, reject) => {
+        // get the steam installation path from the registry mind that steam can be in local machine or current user
+        regedit.list(['HKCU\\Software\\Valve\\Steam'], (err, result) => {
+          if (err) {
+            regedit.list(['HKLM\\Software\\Valve\\Steam'], (err, result) => {
+              if (err) reject()
+              else resolve(result['HKLM\\Software\\Valve\\Steam'].values.SteamPath.value.toString())
+            })
+          } else resolve(result['HKCU\\Software\\Valve\\Steam'].values.SteamPath.value.toString())
+        })
       })
     } else if (os.platform() === 'linux') {
       if (!fs.existsSync(`${os.homedir()}/.steam/steam/steam.sh`)) steamPath = false
@@ -347,6 +347,7 @@ function createWindow(): void {
     }
 
     if (!steamPath) {
+      console.log('Steam not installed')
       dialog.showErrorBox(
         'Error',
         'Steam is not installed on your system. Please install Steam and try again.'
