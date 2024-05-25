@@ -8,6 +8,7 @@ import axios from 'axios'
 import os from 'os'
 import killProcess from 'tree-kill'
 import discordRPC from 'discord-rpc'
+import vdf from 'vdf'
 import { is } from '@electron-toolkit/utils'
 
 remote.initialize()
@@ -300,15 +301,82 @@ function createWindow(): void {
     const startFile = fs.existsSync(`${arg.path}/KnockoutCity/KnockoutCity.exe`)
     let installValid = false
     if (fs.existsSync(`${arg.path}/KnockoutCity`)) installValid = true
-    if (fs.existsSync(`${arg.path}/eula.txt`)) installValid = true
+
+    console.log(`Start File: ${startFile}`)
+    console.log(`Install Valid: ${installValid}`)
 
     if (startFile && installValid) return (event.returnValue = 'installed')
     else return (event.returnValue = 'notInstalled')
   })
 
+  interface SteamLibraryFolders {
+    libraryfolders: {
+      [key: string]: {
+        path: string
+        label: string
+        contentid: string
+        totalsize: string
+        update_clean_bytes_tally: string
+        time_last_update_corruption: string
+        apps: {
+          [key: string]: string
+        }
+      }
+    }
+  }
+
   ipcMain.on('download-game', async (event) => {
-    shell.openExternal('steam://install/2915930')
-    event.returnValue = undefined
+    // check if steam is installed
+    if (os.platform() === 'win32' && !fs.existsSync('C:/Program Files (x86)/Steam/steam.exe')) {
+      dialog.showErrorBox(
+        'Error',
+        'Steam is not installed on your system. Please install Steam and try again.'
+      )
+      event.returnValue = undefined
+      return
+    } else if (
+      os.platform() === 'linux' &&
+      !fs.existsSync(`${os.homedir()}/.local/share/Steam/steam.sh`)
+    ) {
+      dialog.showErrorBox(
+        'Error',
+        'Steam is not installed on your system. Please install Steam and try again.'
+      )
+      event.returnValue = undefined
+      return
+    }
+
+    const libraryData =
+      os.platform() === 'win32'
+        ? fs.readFileSync('C:/Program Files (x86)/Steam/steamapps/libraryfolders.vdf')
+        : fs.readFileSync(`${os.homedir()}/.local/share/Steam/steamapps/libraryfolders.vdf`)
+
+    const libraryFolders: SteamLibraryFolders = vdf.parse(libraryData.toString())
+
+    let installedlib: string | false = false
+
+    for (const steamLib in libraryFolders.libraryfolders) {
+      if (
+        fs.existsSync(
+          `${libraryFolders.libraryfolders[steamLib].path}/steamapps/common/Knockout City - Private Server Edition/KnockoutCity/KnockoutCity.exe`
+        )
+      ) {
+        installedlib = steamLib
+        break
+      }
+    }
+
+    if (installedlib) {
+      // save the library path to the config
+      win.webContents.executeJavaScript(
+        `localStorage.setItem("gameDirectory", "${libraryFolders.libraryfolders[installedlib].path}/steamapps/common/Knockout City - Private Server Edition")`
+      )
+      win.webContents.reload()
+      event.returnValue = undefined
+    } else {
+      shell.openExternal('steam://install/2915930')
+      event.returnValue = undefined
+    }
   })
 
   ipcMain.on('uninstall-game', async (event) => {

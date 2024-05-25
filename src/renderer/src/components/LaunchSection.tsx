@@ -6,12 +6,17 @@ import axios from 'axios'
 import { useGameState } from '../states/gameState'
 import { useSelectedServerState } from '../states/selectedServerState'
 import { useUIState } from '../states/uiState'
+import { useEffect } from 'react'
 
 function LaunchSection(): JSX.Element {
   const { gameState, setGameState } = useGameState()
   const { currServer, currServerName, setCurrServer, setCurrServerName, setCurrServerType } =
     useSelectedServerState()
   const { setPopUpState } = useUIState()
+
+  useEffect(() => {
+    setGameState(window.getGameState())
+  }, [])
 
   return (
     <Box
