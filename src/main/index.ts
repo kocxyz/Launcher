@@ -9,6 +9,7 @@ import os from 'os'
 import killProcess from 'tree-kill'
 import discordRPC from 'discord-rpc'
 import vdf from 'vdf'
+import regedit from 'regedit'
 import { is } from '@electron-toolkit/utils'
 
 remote.initialize()
@@ -327,17 +328,25 @@ function createWindow(): void {
 
   ipcMain.on('download-game', async (event) => {
     // check if steam is installed
-    if (os.platform() === 'win32' && !fs.existsSync('C:/Program Files (x86)/Steam/steam.exe')) {
-      dialog.showErrorBox(
-        'Error',
-        'Steam is not installed on your system. Please install Steam and try again.'
-      )
-      event.returnValue = undefined
-      return
-    } else if (
-      os.platform() === 'linux' &&
-      !fs.existsSync(`${os.homedir()}/.local/share/Steam/steam.sh`)
-    ) {
+    let steamPath: string | false = false
+    if (os.platform() === 'win32') {
+      // get the steam installation path from the registry mind that steam can be in local machine or current user
+      regedit.list(['HKCU\\Software\\Valve\\Steam'], (err, result) => {
+        if (err) {
+          regedit.list(['HKLM\\Software\\Valve\\Steam'], (err, result) => {
+            if (err) steamPath = false
+            else
+              steamPath = result['HKLM\\Software\\Valve\\Steam'].values.InstallPath.value.toString()
+          })
+        } else
+          steamPath = result['HKCU\\Software\\Valve\\Steam'].values.InstallPath.value.toString()
+      })
+    } else if (os.platform() === 'linux') {
+      if (!fs.existsSync(`${os.homedir()}/.steam/steam/steam.sh`)) steamPath = false
+      else steamPath = `${os.homedir()}/.steam/steam`
+    }
+
+    if (!steamPath) {
       dialog.showErrorBox(
         'Error',
         'Steam is not installed on your system. Please install Steam and try again.'
@@ -346,11 +355,7 @@ function createWindow(): void {
       return
     }
 
-    const libraryData =
-      os.platform() === 'win32'
-        ? fs.readFileSync('C:/Program Files (x86)/Steam/steamapps/libraryfolders.vdf')
-        : fs.readFileSync(`${os.homedir()}/.local/share/Steam/steamapps/libraryfolders.vdf`)
-
+    const libraryData = fs.readFileSync(`${steamPath}/steamapps/libraryfolders.vdf`)
     const libraryFolders: SteamLibraryFolders = vdf.parse(libraryData.toString())
 
     let installedlib: string | false = false
