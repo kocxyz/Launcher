@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom/client'
 import './index.css'
 import App from './App'
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material'
-import SnowFall from './components/SnowFall'
+import EventManager from './components/EventManager'
 
 const darkTheme = createTheme({
   palette: {
@@ -20,7 +20,7 @@ const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
   <ThemeProvider theme={darkTheme}>
     <CssBaseline />
-    <SnowFall />
+    <EventManager />
     <App />
   </ThemeProvider>
 )
