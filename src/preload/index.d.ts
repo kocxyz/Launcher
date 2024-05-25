@@ -1,11 +1,6 @@
 import electron from 'electron'
 
 declare global {
-  interface DownloadProgress {
-    progress: number
-    speed: number
-  }
-
   interface Window {
     version: string
     isLinux: boolean
@@ -21,14 +16,11 @@ declare global {
 
     selectGameDir: () => string | null
     getGameState: () => 'installed' | 'deprecated' | 'notInstalled'
-    getGameInstalls: () => string[]
 
     patchGameClient: () => Promise<void>
 
-    installGame: (props: {
-      setGameState: (state: 'installed' | 'deprecated' | 'notInstalled' | 'installing') => void
-      setInstallData: (data: number) => void
-    }) => void
+    installGame: () => void
+    uninstallGame: () => void
 
     launchGame: (props: {
       authkey?: string
@@ -44,10 +36,6 @@ declare global {
     stopServer: (props: {
       setServerState: (state: 'starting' | 'running' | 'stopped' | 'stopping') => void
     }) => void
-
-    cancelInstall: () => void
-    pauseInstall: () => void
-    removeFiles: (files: string[]) => void
 
     launchURL: (url: string) => void
 

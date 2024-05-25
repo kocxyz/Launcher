@@ -1,6 +1,6 @@
 {
   "name": "knockoutcitylauncher",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "description": "Unofficial Knockout City Launcher",
   "main": "./out/main/index.js",
   "author": "IPGsystems",
@@ -35,9 +35,11 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "react-color": "^2.19.3",
+    "regedit": "^5.1.3",
     "sudo-prompt": "^9.2.1",
     "tree-kill": "^1.2.2",
     "unzipper": "^0.10.14",
+    "vdf": "^0.0.2",
     "zustand": "^4.4.1"
   },
   "devDependencies": {

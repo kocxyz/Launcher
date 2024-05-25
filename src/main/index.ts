@@ -1,18 +1,16 @@
 import { app, BrowserWindow, ipcMain, dialog, screen, shell } from 'electron'
 import remote from '@electron/remote/main'
-import https from 'https'
 import fs from 'fs'
 import fse from 'fs-extra'
 import path from 'path'
-import unzipper from 'unzipper'
 import { spawn, exec } from 'child_process'
 import axios from 'axios'
 import os from 'os'
-import sudo from 'sudo-prompt'
 import killProcess from 'tree-kill'
 import discordRPC from 'discord-rpc'
+import vdf from 'vdf'
+import regedit from 'regedit'
 import { is } from '@electron-toolkit/utils'
-import { IncomingMessage } from 'http'
 
 remote.initialize()
 
@@ -161,17 +159,10 @@ function createWindow(): void {
 
   ipcMain.on(
     'patch-game-client',
-    async (
-      event,
-      args: { basePath: string; gameVersion: number; serverType: 'public' | 'private' }
-    ) => {
+    async (event, args: { basePath: string; serverType: 'public' | 'private' }) => {
       event.returnValue = undefined
 
-      const gameDirPath = path.join(
-        args.basePath,
-        args.gameVersion == 1 ? 'highRes' : 'lowRes',
-        'KnockoutCity'
-      )
+      const gameDirPath = path.join(args.basePath, 'KnockoutCity')
 
       const gameExePath = path.join(gameDirPath, 'KnockoutCity.exe')
       const backupGameExePath = path.join(gameDirPath, 'KnockoutCity.exe.bak')
@@ -286,22 +277,10 @@ function createWindow(): void {
     if (!result.canceled) {
       console.log('Not canceled')
 
-      let path = result.filePaths[0].replaceAll('\\', '/')
-
       if (result.filePaths[0].replaceAll('\\', '/') == arg.path) {
         console.log('Directory is identical')
         event.returnValue = null
         return dialog.showErrorBox('Error', 'Selected directory is identical.')
-      }
-
-      console.log(path.endsWith('/highRes'), path.endsWith('/lowRes'))
-
-      if (path.endsWith('/highRes') || path.endsWith('/lowRes')) {
-        console.log(path)
-        const pathAR = path.split('/')
-        pathAR.pop()
-        path = pathAR.join('/')
-        result.filePaths[0] = path
       }
 
       if (!fs.existsSync(arg.path)) {
@@ -309,85 +288,7 @@ function createWindow(): void {
         return (event.returnValue = result)
       }
 
-      console.log('Reading previous dir')
-      const files = fs.readdirSync(arg.path)
-
-      if (files.length != 0) {
-        console.log('Has files, checking content')
-        let hasDownloadFiles = false
-        for (const file of files) {
-          if (file.startsWith('files-') && file.endsWith('.zip')) hasDownloadFiles = true
-          console.log(file)
-        }
-
-        if (files.includes('highRes') || files.includes('lowRes') || hasDownloadFiles) {
-          console.log('Detected install traces')
-          const action = await dialog.showMessageBox(win, {
-            type: 'warning',
-            title: 'Warning',
-            message:
-              'The previous directory contains traces of a KOcity installation. What do you want to do with the previous installation?',
-            buttons: ['Keep', 'Move', 'Delete', 'Cancel']
-          })
-          console.log(action)
-          switch (action.response) {
-            case 0:
-              // Keep
-              event.returnValue = result
-              break
-            case 1:
-              // Move
-              // Check for permissions
-              try {
-                const res = await setUpPermission(result.filePaths[0])
-                console.log(res)
-              } catch (error) {
-                console.log(error)
-                dialog.showErrorBox('Error', 'Failed to set up permissions. Please try again.')
-                return (event.returnValue = null)
-              }
-
-              try {
-                await new Promise((resolve) => {
-                  for (const file of files) {
-                    if (
-                      (file.startsWith('files-') && file.endsWith('.zip')) ||
-                      file == 'highRes' ||
-                      file == 'lowRes'
-                    ) {
-                      fs.renameSync(`${arg.path}/${file}`, `${result.filePaths[0]}/${file}`)
-                    }
-                  }
-                  resolve(null)
-                })
-              } catch (error) {
-                console.error(error)
-                dialog.showErrorBox('Error', 'Failed to copy files. ' + error)
-                return (event.returnValue = null)
-              }
-              event.returnValue = result
-              break
-            case 2:
-              // Delete
-              await new Promise((resolve) => {
-                fs.rmSync(arg.path, { recursive: true })
-                resolve(null)
-              })
-              event.returnValue = result
-              break
-            case 3:
-              // Cancel
-              event.returnValue = null
-              break
-          }
-        } else {
-          console.log('Changed directory, no traces')
-          event.returnValue = result
-        }
-      } else {
-        console.log('Changed directory, no traces')
-        event.returnValue = result
-      }
+      event.returnValue = result
     } else {
       console.log('Canceled')
       event.returnValue = null
@@ -398,308 +299,94 @@ function createWindow(): void {
   ipcMain.on('get-game-state', async (event, arg) => {
     console.log(arg)
 
-    const startFile = fs.existsSync(
-      `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity/KnockoutCity.exe`
-    )
-    const currentVersion = (await axios.get('https://cdn.ipgg.net/kocity/game/version')).data.trim()
-
+    const startFile = fs.existsSync(`${arg.path}/KnockoutCity/KnockoutCity.exe`)
     let installValid = false
-    if (fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`))
-      installValid = true
-    if (fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/eula.txt`))
-      installValid = true
+    if (fs.existsSync(`${arg.path}/KnockoutCity`)) installValid = true
 
-    if (
-      installValid &&
-      !fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`)
-    ) {
-      const result = await dialog.showMessageBox(win, {
-        type: 'warning',
-        title: 'Installation faulty',
-        message:
-          'The used directory contains a valid installation. But the version.txt file is missing. Do you want to create one? (NOT RECOMMENDED)',
-        buttons: ['Yes', 'No']
-      })
+    console.log(`Start File: ${startFile}`)
+    console.log(`Install Valid: ${installValid}`)
 
-      if (result.response === 0)
-        fs.writeFileSync(
-          `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`,
-          currentVersion
-        )
-    }
-
-    const installedVersion = fs.existsSync(
-      `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`
-    )
-      ? fs.readFileSync(
-          `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`,
-          'utf8'
-        )
-      : null
-
-    if (startFile && currentVersion.trim() == installedVersion)
-      return (event.returnValue = 'installed')
-    else if (startFile && currentVersion != installedVersion)
-      return (event.returnValue = 'deprecated')
+    if (startFile && installValid) return (event.returnValue = 'installed')
     else return (event.returnValue = 'notInstalled')
   })
 
-  ipcMain.on('get-game-installs', async (event, arg) => {
-    const installs: string[] = []
-    const folders = fs.readdirSync(arg.path)
-    for (const folder of folders.filter((folder) => ['highRes', 'lowRes'].includes(folder))) {
-      if (fs.existsSync(`${arg.path}/${folder}/KnockoutCity/KnockoutCity.exe`)) {
-        installs.push(folder)
+  interface SteamLibraryFolders {
+    libraryfolders: {
+      [key: string]: {
+        path: string
+        label: string
+        contentid: string
+        totalsize: string
+        update_clean_bytes_tally: string
+        time_last_update_corruption: string
+        apps: {
+          [key: string]: string
+        }
       }
     }
-    event.returnValue = installs
+  }
+
+  ipcMain.on('download-game', async (event) => {
+    // check if steam is installed
+    let steamPath: string | false = false
+    if (os.platform() === 'win32') {
+      // get the steam installation path from the registry mind that steam can be in local machine or current user
+      regedit.list(['HKCU\\Software\\Valve\\Steam'], (err, result) => {
+        if (err) {
+          regedit.list(['HKLM\\Software\\Valve\\Steam'], (err, result) => {
+            if (err) steamPath = false
+            else
+              steamPath = result['HKLM\\Software\\Valve\\Steam'].values.InstallPath.value.toString()
+          })
+        } else
+          steamPath = result['HKCU\\Software\\Valve\\Steam'].values.InstallPath.value.toString()
+      })
+    } else if (os.platform() === 'linux') {
+      if (!fs.existsSync(`${os.homedir()}/.steam/steam/steam.sh`)) steamPath = false
+      else steamPath = `${os.homedir()}/.steam/steam`
+    }
+
+    if (!steamPath) {
+      dialog.showErrorBox(
+        'Error',
+        'Steam is not installed on your system. Please install Steam and try again.'
+      )
+      event.returnValue = undefined
+      return
+    }
+
+    const libraryData = fs.readFileSync(`${steamPath}/steamapps/libraryfolders.vdf`)
+    const libraryFolders: SteamLibraryFolders = vdf.parse(libraryData.toString())
+
+    let installedlib: string | false = false
+
+    for (const steamLib in libraryFolders.libraryfolders) {
+      if (
+        fs.existsSync(
+          `${libraryFolders.libraryfolders[steamLib].path}/steamapps/common/Knockout City - Private Server Edition/KnockoutCity/KnockoutCity.exe`
+        )
+      ) {
+        installedlib = steamLib
+        break
+      }
+    }
+
+    if (installedlib) {
+      // save the library path to the config
+      win.webContents.executeJavaScript(
+        `localStorage.setItem("gameDirectory", "${libraryFolders.libraryfolders[installedlib].path}/steamapps/common/Knockout City - Private Server Edition")`
+      )
+      win.webContents.reload()
+      event.returnValue = undefined
+    } else {
+      shell.openExternal('steam://install/2915930')
+      event.returnValue = undefined
+    }
   })
 
-  ipcMain.on('download-game', async (event, arg) => {
-    console.log('Starting download')
-    console.log('Requesting version...')
-    const version = (await axios.get('https://cdn.ipgg.net/kocity/game/version')).data
-    console.log(`Version: ${version}`)
-
-    let cancelled = false
-    event.returnValue = 'downloading'
-
-    // Check write permissions
-    if (!fs.existsSync(arg.path)) {
-      // check if this process is allowed to write to the directory
-      try {
-        fs.mkdirSync(arg.path)
-      } catch (error: unknown) {
-        console.log((error as Error).message)
-        // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
-        await new Promise((resolve, reject) => {
-          sudo.exec(
-            os.platform() === 'win32'
-              ? `mkdir "${arg.path}" && icacls "${arg.path}" /grant "${
-                  os.userInfo().username
-                }":(OI)(CI)F /T`
-              : `mkdir -p "${arg.path}" && chown -R ${os.userInfo().username} "${arg.path}"`,
-            { name: 'Knockout City Launcher' },
-            (error) => {
-              if (error) reject(new Error(error.message)), console.log(error)
-              else {
-                resolve(null)
-              }
-            }
-          )
-        })
-      }
-    } else {
-      // check if this process is allowed to write to the directory
-      try {
-        fs.writeFileSync(`${arg.path}/test.txt`, 'test')
-      } catch (error: unknown) {
-        console.log((error as Error).message)
-        // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
-        await new Promise((resolve, reject) => {
-          sudo.exec(
-            os.platform() === 'win32'
-              ? `icacls "${arg.path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`
-              : `chown -R ${os.userInfo().username} "${arg.path}"`,
-            { name: 'Knockout City Launcher' },
-            (error) => {
-              if (error) reject(new Error(error.message)), console.log(error)
-              else resolve(null)
-            }
-          )
-        })
-      } finally {
-        fs.existsSync(`${arg.path}/test.txt`) && fs.unlinkSync(`${arg.path}/test.txt`)
-      }
-    }
-
-    // Parse the file size for resuming downloads
-    let fileSize = 0
-    if (fs.existsSync(`${arg.path}/files-${arg.version}-${version}.zip`)) {
-      const stats = fs.statSync(`${arg.path}/files-${arg.version}-${version}.zip`)
-      fileSize = stats.size
-    }
-
-    // Check if there are redundant files
-    ;((): void => {
-      console.log('Checking for redundant files')
-
-      if (fs.existsSync(`${arg.path}/files-1.zip`)) fs.rmSync(`${arg.path}/files-1.zip`)
-      if (fs.existsSync(`${arg.path}/files-2.zip`)) fs.rmSync(`${arg.path}/files-2.zip`)
-
-      const files = fs.readdirSync(arg.path)
-
-      for (const file of files) {
-        if (!file.startsWith('files-')) continue
-        const fileVersionReg = file.match(/(\d+\.\d+-\d+)/)
-        if (!fileVersionReg) continue
-        const fileVersion = fileVersionReg[1]
-        console.log(fileVersion)
-        if (fileVersion != version) {
-          console.log(`Deleting redundant file ${file}`)
-          fs.unlinkSync(`${arg.path}/${file}`)
-        }
-      }
-    })()
-
-    const options = {
-      headers: {
-        Range: `bytes=${fileSize}-`
-      }
-    }
-
-    const downloadCallback = (res: IncomingMessage): void => {
-      const writeStream = fs.createWriteStream(`${arg.path}/files-${arg.version}-${version}.zip`, {
-        flags: 'a'
-      })
-      if (fileSize > 0) console.log('Resuming download')
-      if (!res.headers['content-length']) throw new Error('No content length header')
-
-      res.pipe(writeStream)
-
-      let lastPercentage = 0
-
-      res.on('data', () => {
-        if (!res.headers['content-length']) throw new Error('No content length header')
-
-        win.webContents.executeJavaScript(
-          `window.postMessage({type: "download-progress", data: ${roundToDecimalPlace(
-            ((fileSize + writeStream.bytesWritten) /
-              (parseFloat(res.headers['content-length']) + fileSize)) *
-              100,
-            2
-          )}})`
-        )
-        win.setProgressBar(
-          (fileSize + writeStream.bytesWritten) /
-            (parseFloat(res.headers['content-length']) + fileSize)
-        )
-
-        lastPercentage =
-          ((fileSize + writeStream.bytesWritten) /
-            (parseFloat(res.headers['content-length']) + fileSize)) *
-          100
-      })
-
-      const updateRPCInterval = setInterval(() => {
-        if (rpcSettings.enabled && !cancelled) {
-          // Keep the percentage in this format: 00.00%
-          rpc
-            .setActivity({
-              details: `Downloading the ${arg.version == 1 ? 'HighRes' : 'LowRes'} game files`,
-              state: `${lastPercentage.toFixed(2)}%`,
-              largeImageKey: 'logo',
-              largeImageText: 'Knockout City'
-            })
-            .catch(console.error)
-        }
-      }, 2000)
-
-      ipcMain.once('cancel-download', async (_, arg) => {
-        if (cancelled) return
-        console.log('Canceling download')
-        cancelled = true
-        res.destroy()
-        writeStream.close()
-        fs.rmSync(`${arg.path}/files-${arg.version}-${version}.zip`)
-
-        if (updateRPCInterval && rpcSettings.enabled) clearInterval(updateRPCInterval)
-        if (rpcSettings.enabled) rpc.setActivity(discordRPCS.idle).catch(console.error)
-
-        win.setProgressBar(-1)
-      })
-
-      ipcMain.once('pause-download', async () => {
-        if (cancelled) return
-        console.log('Pausing download')
-        cancelled = true
-        res.destroy()
-
-        if (updateRPCInterval && rpcSettings.enabled) clearInterval(updateRPCInterval)
-        if (rpcSettings.enabled) rpc.setActivity(discordRPCS.idle).catch(console.error)
-
-        writeStream.close()
-        win.setProgressBar(-1)
-      })
-
-      win.once('close', () => {
-        console.log('Canceling download due to window close')
-        if (cancelled) return
-        cancelled = true
-        res.destroy()
-
-        if (updateRPCInterval && rpcSettings.enabled) clearInterval(updateRPCInterval)
-        if (rpcSettings.enabled) rpc.setActivity(discordRPCS.idle).catch(console.error)
-
-        writeStream.close()
-      })
-
-      writeStream.on('finish', () => {
-        if (cancelled) return
-        writeStream.close()
-
-        if (updateRPCInterval && rpcSettings.enabled) clearInterval(updateRPCInterval)
-
-        if (rpcSettings.enabled)
-          rpc
-            .setActivity({
-              details: `Downloading the ${arg.version == 1 ? 'HighRes' : 'LowRes'} game files`,
-              state: `Unpacking`,
-              largeImageKey: 'logo',
-              largeImageText: 'Knockout City'
-            })
-            .catch(console.error)
-
-        win.setProgressBar(-1)
-        win.webContents.executeJavaScript(
-          `window.postMessage({type: "download-progress", data: 100})`
-        )
-        console.log('Downloaded')
-        // unzip the file
-        try {
-          win.setProgressBar(5)
-          if (fs.existsSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}`))
-            fs.rmdirSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}`, {
-              recursive: true
-            })
-          fs.mkdirSync(`${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}`)
-
-          fs.createReadStream(`${arg.path}/files-${arg.version}-${version}.zip`)
-            .pipe(
-              unzipper.Extract({ path: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}` })
-            )
-            .on('finish', () => {
-              console.log('Files unzipped successfully')
-              fs.writeFileSync(
-                `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/version.txt`,
-                version
-              )
-              fs.rmSync(`${arg.path}/files-${arg.version}-${version}.zip`)
-              win.reload()
-
-              if (rpcSettings.enabled) rpc.setActivity(discordRPCS.idle).catch(console.error)
-
-              win.setProgressBar(-1)
-            })
-        } catch (err) {
-          console.log(err)
-          win.setProgressBar(-1)
-          dialog.showMessageBox(win, {
-            type: 'error',
-            title: 'Unexpected Error',
-            message: 'An error occurred while unzipping the files. Error: ' + (err as Error).message
-          })
-        }
-      })
-    }
-
-    const mirrors = (await axios.get('https://cdn.ipgg.net/kocity/game/mirror')).data
-
-    https.get(
-      arg.version == 1 ? mirrors.highRes : mirrors.lowRes,
-      fileSize > 0 ? options : {},
-      downloadCallback
-    )
+  ipcMain.on('uninstall-game', async (event) => {
+    shell.openExternal('steam://uninstall/2915930')
+    event.returnValue = undefined
   })
 
   ipcMain.on('launch-game', async (event, arg) => {
@@ -735,7 +422,7 @@ function createWindow(): void {
     const game =
       os.platform() === 'linux'
         ? exec(`wine KnockoutCity.exe ${args.join(' ')}`, {
-            cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
+            cwd: `${arg.path}/KnockoutCity`,
             uid: os.userInfo().uid,
             gid: os.userInfo().gid,
             shell: '/bin/bash'
@@ -743,7 +430,7 @@ function createWindow(): void {
         : spawn(`KnockoutCity.exe`, args, {
             detached: true,
             stdio: 'ignore',
-            cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCity`,
+            cwd: `${arg.path}/KnockoutCity`,
             env: {}
           })
 
@@ -832,22 +519,6 @@ function createWindow(): void {
     })
   })
 
-  ipcMain.on('remove-files', async (event, arg) => {
-    console.log(`File Remove triggered with files: "${arg.files.join(', ')}"`)
-    await new Promise((resolve) => {
-      setTimeout(resolve, 2000)
-    })
-
-    console.log('Removing files')
-    for (const file of arg.files) {
-      console.log(`Removing file ${file}`)
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      fs.rmSync(`${arg.path}/${file}`, { recursive: true, force: true })
-    }
-
-    event.returnValue = 'removed'
-  })
-
   ipcMain.on('start-server', async (event, arg) => {
     console.log(arg)
     console.log('Starting server')
@@ -868,7 +539,7 @@ function createWindow(): void {
       `${os.platform() === 'linux' ? 'wine ' : ''}KnockoutCityServer.exe`,
       args,
       {
-        cwd: `${arg.path}/${arg.version == 1 ? 'highRes' : 'lowRes'}/KnockoutCityServer`
+        cwd: `${arg.path}/KnockoutCityServer`
       }
     )
 
@@ -1071,40 +742,8 @@ app.on('activate', () => {
   }
 })
 
-async function setUpPermission(path: string): Promise<void> {
-  // check if this process is allowed to write to the directory
-  try {
-    fs.writeFileSync(path + '/test.txt', 'test')
-    console.log(`Writable ${fs.existsSync(path + '/test.txt')}`)
-    console.log('Has permissions')
-  } catch (error: unknown) {
-    console.log((error as Error).message)
-    // Make the directory using sudoer and edit the permissions of the directory to allow everyone to write to it windows only
-    await new Promise((resolve, reject): void => {
-      sudo.exec(
-        `icacls "${path}" /grant "${os.userInfo().username}":(OI)(CI)F /T`,
-        { name: 'Knockout City Launcher' },
-        (error) => {
-          if (error) reject('Could not raise permissions'), console.log(error)
-          else return resolve(null)
-        }
-      )
-    }).catch((err) => {
-      return Promise.reject(err)
-    })
-  } finally {
-    if (fs.existsSync(path + '/test.txt')) fs.rmSync(path + '/test.txt')
-    Promise.resolve()
-  }
-}
-
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-
-// Function that rounds a number to a certain number of decimal places
-function roundToDecimalPlace(number, decimalPlaces): number {
-  return Math.round(number * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces)
-}
 
 process.on('uncaughtException', function (err) {
   if (mainWindow)
