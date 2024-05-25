@@ -24,7 +24,9 @@ if (localStorage.getItem('servers') === null)
 if (!localStorage.getItem('gameDirectory'))
   localStorage.setItem(
     'gameDirectory',
-    os.platform() === 'win32' ? 'C:/Program Files/KOCity' : `${os.homedir()}/Games/KOCity`
+    os.platform() === 'win32'
+      ? 'C:/Program Files (x86)/Steam/steamapps/common/Knockout City - Private Server Edition'
+      : `${os.homedir()}/.local/share/Steam/steamapps/common/Knockout City - Private Server Edition`
   )
 
 if (localStorage.getItem('discordRPC:enabled') === null)
