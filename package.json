@@ -19,6 +19,17 @@
     "build:mac": "electron-vite build && electron-builder --mac --config",
     "build:linux": "electron-vite build && electron-builder --linux --config"
   },
+  "build": {
+    "extraResources": [
+      {
+        "from": "node_modules/regedit/vbs",
+        "to": "regedit/vbs",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
+  },
   "dependencies": {
     "@electron-toolkit/preload": "^2.0.0",
     "@electron-toolkit/utils": "^1.0.2",

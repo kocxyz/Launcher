@@ -12,6 +12,7 @@ import vdf from 'vdf'
 import regedit from 'regedit'
 import { is } from '@electron-toolkit/utils'
 
+regedit.setExternalVBSLocation('resources/regedit/vbs')
 remote.initialize()
 
 try {
