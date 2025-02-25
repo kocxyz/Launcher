@@ -9,13 +9,21 @@ files:
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
+  - '!**/.github/*'
+  - node_modules/**
+  - out/**
 asarUnpack:
   - resources/**
+extraResources:
+  - from: node_modules/regedit/vbs
+    to: regedit/vbs
+    filter:
+      - '**/*'
 afterSign: build/notarize.js
 win:
   executableName: koclauncherv2
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
+  artifactName: koclauncher-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
@@ -25,9 +33,9 @@ linux:
   target:
     - AppImage
     # - snap
-    - deb
+    # - deb
   maintainer: kocity.xyz
   category: Game
 appImage:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: koclauncher.${ext}
 npmRebuild: true

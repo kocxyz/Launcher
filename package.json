@@ -1,6 +1,6 @@
 {
   "name": "knockoutcitylauncher",
-  "version": "2.2.1",
+  "version": "2.3.0",
   "description": "Unofficial Knockout City Launcher",
   "main": "./out/main/index.js",
   "author": "IPGsystems",
@@ -19,17 +19,6 @@
     "build:mac": "electron-vite build && electron-builder --mac --config",
     "build:linux": "electron-vite build && electron-builder --linux --config"
   },
-  "build": {
-    "extraResources": [
-      {
-        "from": "node_modules/regedit/vbs",
-        "to": "regedit/vbs",
-        "filter": [
-          "**/*"
-        ]
-      }
-    ]
-  },
   "dependencies": {
     "@electron-toolkit/preload": "^2.0.0",
     "@electron-toolkit/utils": "^1.0.2",
@@ -39,7 +28,7 @@
     "@fontsource/roboto": "^5.0.8",
     "@mui/icons-material": "^5.14.7",
     "@mui/material": "^5.14.7",
-    "axios": "^1.5.0",
+    "axios": "^1.7.9",
     "discord-rpc": "^4.0.1",
     "fs-extra": "^11.1.1",
     "jszip": "^3.10.1",

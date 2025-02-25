@@ -1,0 +1,50 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Windows
+        run: npm run build:win
+
+      - name: Rename and upload Windows artifact
+        run: |
+          mv dist/koclauncher-setup.exe Knockoutcitylauncher-Setup.exe
+          gh release upload ${{ github.event.release.tag_name }} Knockoutcitylauncher-Setup.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Linux
+        run: npm run build:linux
+
+      - name: Rename and upload Linux artifact
+        run: |
+          mv dist/koclauncher.AppImage Knockoutcitylauncher.AppImage
+          gh release upload ${{ github.event.release.tag_name }} Knockoutcitylauncher.AppImage
