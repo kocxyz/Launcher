@@ -22,12 +22,18 @@ jobs:
       - name: Build Windows
         run: npm run build:win
 
-      - name: Rename and upload Windows artifact
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mv dist/koclauncher-setup.exe Knockoutcitylauncher-Setup.exe
-          gh release upload ${{ github.event.release.tag_name }} Knockoutcitylauncher-Setup.exe --clobber
+      - name: Rename Windows artifact
+        run: mv dist/koclauncher-setup.exe Knockoutcitylauncher-Setup.exe
+
+      - name: Upload Windows binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: Knockoutcitylauncher-Setup.exe
+          asset_name: Knockoutcitylauncher-Setup.exe
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "This is the Windows release"
 
   build-linux:
     runs-on: ubuntu-latest
@@ -46,9 +52,15 @@ jobs:
       - name: Build Linux
         run: npm run build:linux
 
-      - name: Rename and upload Linux artifact
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          mv dist/koclauncher.AppImage Knockoutcitylauncher.AppImage
-          gh release upload ${{ github.event.release.tag_name }} Knockoutcitylauncher.AppImage --clobber
+      - name: Rename Linux artifact
+        run: mv dist/koclauncher.AppImage Knockoutcitylauncher.AppImage
+
+      - name: Upload Linux binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: Knockoutcitylauncher.AppImage
+          asset_name: Knockoutcitylauncher.AppImage
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "This is the Linux release"
