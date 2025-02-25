@@ -23,9 +23,11 @@ jobs:
         run: npm run build:win
 
       - name: Rename and upload Windows artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mv dist/koclauncher-setup.exe Knockoutcitylauncher-Setup.exe
-          gh release upload ${{ github.event.release.tag_name }} Knockoutcitylauncher-Setup.exe
+          gh release upload ${{ github.event.release.tag_name }} Knockoutcitylauncher-Setup.exe --clobber
 
   build-linux:
     runs-on: ubuntu-latest
@@ -45,6 +47,8 @@ jobs:
         run: npm run build:linux
 
       - name: Rename and upload Linux artifact
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mv dist/koclauncher.AppImage Knockoutcitylauncher.AppImage
-          gh release upload ${{ github.event.release.tag_name }} Knockoutcitylauncher.AppImage
+          gh release upload ${{ github.event.release.tag_name }} Knockoutcitylauncher.AppImage --clobber
