@@ -10,16 +10,61 @@ files:
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
   - '!**/.github/*'
-  - node_modules/**
-  - out/**
 asarUnpack:
   - resources/**
 extraResources:
+  # Special case for regedit
   - from: node_modules/regedit/vbs
     to: regedit/vbs
     filter:
       - '**/*'
-afterSign: build/notarize.js
+      
+  # Include only needed dependencies with their dependency chains
+  - from: node_modules
+    to: node_modules
+    filter:
+      # The axios dependency chain causing issues - more comprehensive
+      - axios/**/*
+      - call-bind-apply-helpers/**/*
+      - function-bind/**/*
+      - get-intrinsic/**/*
+      - has-symbols/**/*
+      - has-proto/**/*
+      - dunder-proto/**/*
+      - get-proto/**/*
+      - es-set-tostringtag/**/*
+      - es-errors/**/*
+      - form-data/**/*
+      - mime-db/**/*
+      - mime-types/**/*
+      - combined-stream/**/*
+      - delayed-stream/**/*
+      - asynckit/**/*
+      
+      # Other critical dependencies you're using
+      - fs-extra/**/*.js
+      - discord-rpc/**/*.js
+      - jszip/**/*.js
+      - lodash/**/*.js
+      - moment/**/*.js
+      - react-color/**/*.js
+      - sudo-prompt/**/*.js
+      - tree-kill/**/*.js
+      - unzipper/**/*.js
+      - vdf/**/*.js
+      - zustand/**/*.js
+      
+      # Exclude unnecessary files
+      - '!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}'
+      - '!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}'
+      - '!**/node_modules/*.d.ts'
+      - '!**/node_modules/.bin'
+      - '!**/node_modules/.git'
+      - '!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}'
+      - '!**/._*'
+      - '!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,__pycache__,thumbs.db,.gitignore,.gitattributes}'
+      - '!**/{appveyor.yml,.travis.yml,circle.yml}'
+      - '!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}'
 win:
   executableName: koclauncherv2
 nsis:
@@ -27,8 +72,6 @@ nsis:
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
-dmg:
-  artifactName: ${name}-${version}.${ext}
 linux:
   target:
     - AppImage
@@ -38,4 +81,4 @@ linux:
   category: Game
 appImage:
   artifactName: koclauncher.${ext}
-npmRebuild: true
+npmRebuild: false
