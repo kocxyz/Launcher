@@ -11,7 +11,7 @@ function SettingsMenu(): JSX.Element {
 
   useEffect(() => {
     axios
-      .get('https://cdn.ipgg.net/kocity/news', {
+      .get('https://cdn.ipmake.dev/kocity/news', {
         headers: {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache'

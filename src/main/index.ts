@@ -646,7 +646,7 @@ if (gotTheLock) {
     }
 
     axios
-      .get('https://cdn.ipgg.net/kocity/version', {
+      .get('https://cdn.ipmake.dev/kocity/version', {
         timeout: 5000
       })
       .then(async (res) => {
@@ -654,6 +654,13 @@ if (gotTheLock) {
         // get the version of the app from electron
         const version = app.getVersion().trim()
         console.log(`${version} => ${res.data}`)
+
+        if(res.data === undefined || res.data === null || String(res.data).trim().length >= 10) {
+          console.log('No update available')
+          createWindow()
+          return
+        }
+
         if (`${res.data}`.trim() == `${version}`.trim()) {
           createWindow()
         } else {
@@ -696,7 +703,7 @@ if (gotTheLock) {
             // download the exe file using axios
             console.log('Downloading update...')
             axios
-              .get('https://cdn.ipgg.net/kocity/kocitylauncher.exe', {
+              .get(`https://github.com/kocxyz/Launcher/releases/download/v${String(res.data).trim()}/Knockoutcitylauncher-Setup.exe`, {
                 responseType: 'arraybuffer'
               })
               .then(async (res) => {
@@ -717,6 +724,14 @@ if (gotTheLock) {
             createWindow()
           }
         }
+      })
+      .catch((err) => {
+        console.error('Error checking for update:', err)
+        dialog.showErrorBox(
+          'Update Check Failed',
+          'Failed to check for updates. Please try again later.'
+        )
+        createWindow()
       })
   })
 } else {

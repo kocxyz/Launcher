@@ -7,7 +7,7 @@ export default function EventManager(): JSX.Element {
 
   useEffect(() => {
     axios
-      .get('https://cdn.ipgg.net/kocity/event', {
+      .get('https://cdn.ipmake.dev/kocity/event', {
         responseType: 'text'
       })
       .then((res) => {
