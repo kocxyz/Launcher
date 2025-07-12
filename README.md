@@ -6,7 +6,7 @@ This launcher is an unofficial community-run project and is not affiliated with 
 
 Our Website: https://kocity.xyz Our discord: https://discord.gg/4kNPb4cRxN
 
-![Screenshot of Knockout City Launcher](https://cdn.discordapp.com/attachments/798935892059488276/1102977194805964800/image.png)
+![Screenshot of Knockout City Launcher](https://cdn.ipmake.dev/kocity/assets/launcher.png)
 
 ## Installation
 
@@ -42,7 +42,7 @@ This launcher gives you a list of community servers and deals with all the comma
 Platforms:
 - PC: Yes.
 - Console: No. Velan can't publish the client on console stores because the official release requires setting command line arguments to run the game. (This is one problem that this launcher tries to solve on PC.)
-- Linux / Steam Deck: Probably. At least one person has gotten the game and launcher working.
+- Linux / Steam Deck: Yes, but you need to install [wine](https://www.winehq.org/).
 
 Launcher features:
 - Download and launch the game.
@@ -77,33 +77,13 @@ Not in game:
 - Official support. Velan released it but it's up to the community to manage it now.
 - Reporting players.
 
-Launcher TODO:
-- [ ] enter private server secrets instead of discord
-- [ ] ~~Some kind of account system~~ with cloud sync (maybe)
-
 ## The Details
 
 ### Downloading
 
-The Low Res download is 17.0G. The High Res download is 22.4G.
-
-If you've already downloaded the game, you can use the existing files instead of redownloading it (though this may be less reliable than letting the launcher download the files itself).
-
-1. Create a folder somewhere that will house everything
-1. Create either a folder either called `lowRes` or `highRes` depending on which version you downloaded.
-1. Move the private server editions files into the `highRes` or `lowRes` folder
-1. Restart your launcher and click "Yes" when it asks you to create a version.txt
-
-This should be the folder strucutre:
-
-```
-Knockout City/
-├─ highRes/
-│  ├─ KnockoutCity/
-│  ├─ KnockoutCityServer/
-│  ├─ eula.txt
-│  ├─ readme.txt
-```
+1. Download and install the launcher for your operating system [here][releases].
+2. Run the launcher and hit the big install button. It will prompt you to download the knockout city private server build on steam. Once downloaded, hit the install button in the launcher again. (Make sure you have steam installed)
+3. Select a server using the server tab and hit launch, happy brawling! 
 
 ### Authentication, Discord, and usernames
 
@@ -179,14 +159,13 @@ If you have questions, need help, or have other contributions, join us on the [K
 [kocxyz]: https://kocity.xyz
 [discord kocxyz]: https://discord.gg/4kNPb4cRxN
 [discord tcns]: https://discord.gg/FdvGezR3YY
-[dummycorps]: https://koc.dummycorps.net/
 [official blog]: https://www.knockoutcity.com/updates/knockout-city-private-hosted-server-edition
 [official download]: https://www.knockoutcity.com/private-server-edition
 [docs]: https://kocity.xyz/docs/intro
 [docs proxy]: https://kocity.xyz/docs/proxy/intro
 [docs docker]: https://kocity.xyz/docs/hosting/docker 
 [api servers]: https://api.kocity.xyz/stats/servers
-[server list form]: https://cloud.ipmake.me:9001/apps/forms/s/FenZoKcexYxDo3QTeXjCWarW
+[server list form]: https://cdn.ipmake.dev/kocity/serverlistform.txt
 [issues]: https://github.com/Ipmake/kocitylauncher/issues
 
 ## Credits
