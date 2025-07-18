@@ -11,15 +11,14 @@ import discordRPC from 'discord-rpc'
 import vdf from 'vdf'
 import regedit from 'regedit'
 import { is } from '@electron-toolkit/utils'
-import * as Sentry from "@sentry/electron/main";
+import * as Sentry from '@sentry/electron/main'
 
 regedit.setExternalVBSLocation('resources/regedit/vbs')
 remote.initialize()
 
 Sentry.init({
-  dsn: "https://7d1f0b4e98dec1bf3ed35c23971e7b74@sentry.ipmake.dev/3",
-  
-});
+  dsn: 'https://7d1f0b4e98dec1bf3ed35c23971e7b74@sentry.ipmake.dev/3'
+})
 
 try {
   if (!fs.existsSync(path.join(os.tmpdir(), 'kocitylauncherlogs')))
@@ -661,7 +660,7 @@ if (gotTheLock) {
         const version = app.getVersion().trim()
         console.log(`${version} => ${res.data}`)
 
-        if(res.data === undefined || res.data === null || String(res.data).trim().length >= 10) {
+        if (res.data === undefined || res.data === null || String(res.data).trim().length >= 10) {
           console.log('No update available')
           createWindow()
           return
@@ -690,6 +689,11 @@ if (gotTheLock) {
               width: 500,
               height: 250,
               frame: false,
+              transparent: true,
+              alwaysOnTop: true,
+              skipTaskbar: true,
+              titleBarStyle: 'hidden',
+              movable: false,
               resizable: false,
               icon: './www/logo.png',
               webPreferences: {
@@ -709,9 +713,12 @@ if (gotTheLock) {
             // download the exe file using axios
             console.log('Downloading update...')
             axios
-              .get(`https://github.com/kocxyz/Launcher/releases/download/v${String(res.data).trim()}/Knockoutcitylauncher-Setup.exe`, {
-                responseType: 'arraybuffer'
-              })
+              .get(
+                `https://github.com/kocxyz/Launcher/releases/download/v${String(res.data).trim()}/Knockoutcitylauncher-Setup.exe`,
+                {
+                  responseType: 'arraybuffer'
+                }
+              )
               .then(async (res) => {
                 console.log('Update complete!')
 

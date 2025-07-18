@@ -1,142 +1,133 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=500, initial-scale=1.0" />
     <title>KnockoutCityLauncher Update</title>
     <link rel="stylesheet" href="./fonts/Brda/CSS/fonts.css" />
     <link rel="stylesheet" href="./fonts/Azbuka/CSS/fonts.css" />
+    <style>
+      html,
+      body {
+        width: 500px;
+        height: 250px;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        border-radius: 5px;
+      }
+      body {
+        width: 500px;
+        height: 250px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Azbuka, sans-serif;
+        color: #fff;
+        background:
+          linear-gradient(120deg, rgba(30, 0, 60, 0.85) 60%, rgba(80, 0, 120, 0.7) 100%),
+          url('https://cdn.kocity.xyz/launcher/assets/defaultBackgrounds/1.jpg') center/cover
+            no-repeat;
+        user-select: none;
+        border-radius: 5px;
+        overflow: hidden;
+      }
+      .content {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        padding: 0px 0 0 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        background: none;
+        box-shadow: none;
+      }
+      h3 {
+        margin: 0 0 8px 24px;
+        font-size: 32px;
+        font-family: Brda, sans-serif;
+        font-weight: bold;
+        font-style: italic;
+        letter-spacing: 2px;
+        text-shadow: 0 2px 12px #000a;
+      }
+      p {
+        margin: 0 0 0 24px;
+        font-size: 18px;
+        opacity: 0.85;
+        letter-spacing: 1px;
+        text-shadow: 0 1px 8px #0008;
+      }
+      .particles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+      }
+    </style>
   </head>
-  <style>
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    body {
-      background: #1e1e1e;
-      color: #fff;
-
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-
-      font-family: Azbuka;
-
-      text-align: center;
-
-      overflow: hidden;
-    }
-
-    .content {
-      background: #00000055;
-      z-index: 2;
-
-      width: 100vw;
-      height: 150px;
-
-      position: absolute;
-      top: calc(50vh - 75px);
-      left: 0;
-
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    h3 {
-      margin-top: 10px;
-      text-align: center;
-      font-size: 40px;
-      margin-bottom: 5px;
-
-      font-family: Brda;
-      font-weight: bold;
-      font-style: italic;
-
-      letter-spacing: 2px;
-      z-index: 2;
-    }
-
-    p {
-      margin-top: 0;
-      z-index: 2;
-    }
-
-    .loader {
-      position: absolute;
-      top: 0;
-      left: 0;
-
-      width: 100vw;
-      height: 100vh;
-    }
-
-    .item {
-      position: absolute;
-      top: -50px;
-      background-color: #9619fa;
-      transition: all 5s ease-in-out;
-
-      width: 20px;
-      height: 20px;
-
-      border-radius: 50%;
-    }
-  </style>
   <body>
+    <canvas class="particles" id="particles"></canvas>
     <div class="content">
-      <h3>KnockoutCity Launcher</h3>
+      <h3>Knockoutcity Launcher</h3>
       <p>Downloading Updates...</p>
     </div>
+    <script>
+      // Modern minimal particles: slow, soft, subtle, less chaotic
+      const canvas = document.getElementById('particles')
+      const ctx = canvas.getContext('2d')
+      const W = 500,
+        H = 250
+      canvas.width = W
+      canvas.height = H
 
-    <div class="spawner" id="spawner"></div>
-  </body>
-  <script>
-    const spawner = document.getElementById('spawner')
+      const PARTICLE_COUNT = 12
+      const particles = []
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const angle = Math.random() * Math.PI * 2
+        particles.push({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 10 + 8,
+          speed: 0.2 + Math.random() * 0.3,
+          angle,
+          color: `rgba(${170 + Math.random() * 60},${60 + Math.random() * 60},${250},0.18)`,
+          glow: `rgba(${170 + Math.random() * 60},${60 + Math.random() * 60},${250},0.7)`
+        })
+      }
 
-    {
-      ;(async () => {
-        while (true) {
-          await delay(50)
-          const item = document.createElement('div')
-          item.classList.add('item')
+      function drawParticles() {
+        ctx.clearRect(0, 0, W, H)
+        for (const p of particles) {
+          // Soft glow
+          ctx.save()
+          ctx.beginPath()
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+          ctx.shadowColor = p.glow
+          ctx.shadowBlur = 18
+          ctx.fillStyle = p.color
+          ctx.fill()
+          ctx.restore()
 
-          spawner.appendChild(item)
-          item.style.left = `${Math.random() * 200 - 125}vw`
+          // Move in a slow, slanted direction
+          p.x += Math.cos(p.angle) * p.speed
+          p.y += Math.sin(p.angle + 0.2) * p.speed * 0.7
 
-          const size = Math.random() * 10 + 5
-          item.style.width = `${size}px`
-          item.style.height = `${size}px`
-
-          const tintR = Math.random() * 30
-          const tintG = Math.random() * 80
-          const tintB = Math.random() * 5
-
-          item.style.backgroundColor = `rgb(${tintR + 150}, ${tintG + 25}, ${tintB + 250})`
-
-          setTimeout(() => {
-            item.style.top = `120vh`
-            item.style.left = `${
-              Math.random() * 100 + parseFloat(item.style.left.replace('vw', ''))
-            }vw`
-          }, 20)
-
-          setTimeout(() => {
-            item.remove()
-          }, 5200)
+          // Wrap around edges
+          if (p.x < -20) p.x = W + 20
+          if (p.x > W + 20) p.x = -20
+          if (p.y < -20) p.y = H + 20
+          if (p.y > H + 20) p.y = -20
         }
-      })()
-    }
-
-    async function delay(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms))
-    }
-  </script>
+        requestAnimationFrame(drawParticles)
+      }
+      drawParticles()
+    </script>
+  </body>
 </html>
