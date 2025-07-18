@@ -11,9 +11,15 @@ import discordRPC from 'discord-rpc'
 import vdf from 'vdf'
 import regedit from 'regedit'
 import { is } from '@electron-toolkit/utils'
+import * as Sentry from "@sentry/electron/main";
 
 regedit.setExternalVBSLocation('resources/regedit/vbs')
 remote.initialize()
+
+Sentry.init({
+  dsn: "https://7d1f0b4e98dec1bf3ed35c23971e7b74@sentry.ipmake.dev/3",
+  
+});
 
 try {
   if (!fs.existsSync(path.join(os.tmpdir(), 'kocitylauncherlogs')))

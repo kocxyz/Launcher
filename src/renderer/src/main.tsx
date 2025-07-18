@@ -3,6 +3,11 @@ import './index.css'
 import App from './App'
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material'
 import EventManager from './components/EventManager'
+import * as Sentry from "@sentry/electron/renderer";
+
+Sentry.init({
+  dsn: "https://7d1f0b4e98dec1bf3ed35c23971e7b74@sentry.ipmake.dev/3",
+});
 
 const darkTheme = createTheme({
   palette: {
