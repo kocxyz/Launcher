@@ -32,7 +32,7 @@ function NewsArticle({
       >
         {date}
       </Typography>
-      <Typography style={{ fontSize: '14px', fontFamily: 'Azbuka' }}>{content}</Typography>
+      <Typography style={{ fontSize: '14px', fontFamily: 'Azbuka' }}><div className='news-content' dangerouslySetInnerHTML={{ __html: content }} /></Typography>
       <Divider style={{ marginTop: '10px' }} />
     </Box>
   )

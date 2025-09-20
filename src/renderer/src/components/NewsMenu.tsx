@@ -11,14 +11,18 @@ function SettingsMenu(): JSX.Element {
 
   useEffect(() => {
     axios
-      .get('https://cdn.ipmake.dev/kocity/news', {
+      .get('https://chonky.kocity.xyz/api/news/public', {
         headers: {
           'Content-Type': 'application/json',
           'Cache-Control': 'no-cache'
         }
       })
       .then((res) => {
-        setNews(res.data)
+        setNews((res.data ?? []).map((item: any) => ({
+          title: item.title,
+          time: item.date,
+          description: item.content
+        })) as Types.NewsArticle[])
       })
   }, [])
 
@@ -43,7 +47,7 @@ function SettingsMenu(): JSX.Element {
               <NewsArticle
                 key={index}
                 title={item.title.toUpperCase()}
-                date={moment(parseInt(item.time)).fromNow()}
+                date={moment(item.time).fromNow()}
                 content={item.description}
               />
             )

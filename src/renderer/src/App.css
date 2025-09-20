@@ -202,3 +202,29 @@ html, body {
     background: white;
     border-radius: 50%;
 }
+
+iframe {
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    width: 85%;
+    aspect-ratio: 16/9;
+}
+
+.news-content a {
+    text-decoration: none;
+    color: #1E90FF;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+.news-content a:hover {
+    text-decoration: underline;
+    color: #63B8FF;
+}
+
+.news-content img {
+    max-width: 85%;
+    height: auto;
+    border-radius: 8px;
+}
