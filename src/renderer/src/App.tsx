@@ -1,6 +1,6 @@
 import { Box, Tab, Tabs } from '@mui/material'
 import './App.css'
-import { useEffect, useState } from 'react'
+import { JSX, useEffect, useState } from 'react'
 
 // Fonts
 import '@fontsource/roboto/500.css'
@@ -19,7 +19,7 @@ import { useSelectedServerState } from './states/selectedServerState'
 
 // Images
 import LogoImage from './images/logo.png'
-import axios from 'axios'
+import AnimatedBackground from './components/AnimatedBackground'
 
 const boxes = { height: '97vh' }
 const links = {
@@ -34,58 +34,9 @@ const links = {
 
 function App(): JSX.Element {
   const [tab, setTab] = useState(0)
-  const [background, setBackground] = useState(0)
-  const [backgrounds, setBackgrounds] = useState<string[]>([])
 
   const { fetchPublicServers } = useGameState()
   const { currServer, currServerName, currServerType } = useSelectedServerState()
-
-  useEffect(() => {
-    axios.get('https://cdn.kocity.xyz/launcher/assets/options.json').then((res) => {
-      console.log(res.data)
-      const data = res.data as {
-        activeBackgrounds: string[]
-      }
-
-      axios
-        .get(`${data.activeBackgrounds[localStorage.getItem('premium') || '0']}/manifest`)
-        .then((res) => {
-          const backgroundList = res.data.split('\n')
-          let backgrounds: string[] = []
-
-          console.log(backgroundList)
-
-          backgroundList.forEach((background: string) => {
-            backgrounds.push(
-              `${data.activeBackgrounds[localStorage.getItem('premium') || '0']}/${background}`
-            )
-          })
-
-          backgrounds = ((): string[] => {
-            const array: string[] = []
-            // randomize backgrounds array
-            while (backgrounds.length > 0) {
-              const index = Math.floor(Math.random() * backgrounds.length)
-              array.push(backgrounds[index])
-              backgrounds.splice(index, 1)
-            }
-
-            return array
-          })()
-
-          console.log(backgrounds)
-
-          setBackgrounds(backgrounds)
-        })
-    })
-  }, [])
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setBackground((background + 1) % backgrounds.length)
-    }, 15000)
-    return () => clearInterval(interval)
-  })
 
   useEffect(() => {
     if (!currServer || !currServerName || !currServerType) return
@@ -105,27 +56,8 @@ function App(): JSX.Element {
       <Box style={{ position: 'absolute' }}>
         <PopUp />
       </Box>
-      {backgrounds.map((img, index) => (
-        <img
-          key={index}
-          src={img}
-          alt="bgImg"
-          className="bgImg"
-          style={{
-            opacity: index === background ? 1 : 0,
-            zIndex: index === background ? -2 : -1,
-            transition: 'opacity ease-in-out 2s',
-            animation:
-              index === background ||
-              index === background - 1 ||
-              (background === 0 && index === backgrounds.length - 1)
-                ? index % 2 === 0
-                  ? 'slideL 25s ease-out infinite'
-                  : 'slideR 25s ease-out infinite'
-                : 'none'
-          }}
-        />
-      ))}
+
+      <AnimatedBackground />
 
       <Box style={boxes}>
         <Box>
@@ -185,7 +117,7 @@ function App(): JSX.Element {
 
       <Box
         style={{
-          background: 'rgba(50, 8, 83, 0.75)',
+          background: 'linear-gradient(135deg, rgba(55, 12, 88, 0.7), rgba(50, 8, 83, 0.75), rgba(45, 10, 75, 0.75))',
           padding: '20px',
           marginTop: '-3vh',
           paddingBottom: '0px'
