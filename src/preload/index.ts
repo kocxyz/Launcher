@@ -215,7 +215,3 @@ window.addEventListener('DOMContentLoaded', () => {
     ipcRenderer.send('launch-url', { url })
   }
 })
-
-Sentry.init({
-  dsn: "https://7d1f0b4e98dec1bf3ed35c23971e7b74@sentry.ipmake.dev/3",
-});
