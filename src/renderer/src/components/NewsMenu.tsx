@@ -1,12 +1,12 @@
 import { Box, CircularProgress } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { memo, useEffect, useState } from 'react'
 import axios from 'axios'
 import moment from 'moment'
 
 // Components
 import NewsArticle from './NewsArticle'
 
-function SettingsMenu(): JSX.Element {
+function NewsMenuElm(): JSX.Element {
   const [news, setNews] = useState<Types.NewsArticle[]>([])
 
   useEffect(() => {
@@ -18,11 +18,13 @@ function SettingsMenu(): JSX.Element {
         }
       })
       .then((res) => {
-        setNews((res.data ?? []).map((item: any) => ({
-          title: item.title,
-          time: item.date,
-          description: item.content
-        })) as Types.NewsArticle[])
+        setNews(
+          (res.data ?? []).map((item: any) => ({
+            title: item.title,
+            time: item.date,
+            description: item.content
+          })) as Types.NewsArticle[]
+        )
       })
   }, [])
 
@@ -57,4 +59,10 @@ function SettingsMenu(): JSX.Element {
   )
 }
 
-export default SettingsMenu
+const NewsMenu = memo(
+  () => <NewsMenuElm />,
+  () => {
+    return false
+  }
+)
+export default NewsMenu
