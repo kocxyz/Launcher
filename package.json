@@ -1,6 +1,6 @@
 {
   "name": "knockoutcitylauncher",
-  "version": "2.3.6",
+  "version": "2.3.7",
   "description": "Unofficial Knockout City Launcher",
   "main": "./out/main/index.js",
   "author": "IPGsystems",
@@ -27,7 +27,6 @@
     "@fontsource/roboto": "^5.2.8",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
-    "@sentry/electron": "^7.2.0",
     "axios": "^1.12.2",
     "call-bind-apply-helpers": "^1.0.2",
     "discord-rpc": "^4.0.1",

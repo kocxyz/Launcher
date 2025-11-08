@@ -1,7 +1,6 @@
 import { ipcRenderer } from 'electron'
 import { getCurrentWindow } from '@electron/remote'
 import { BrowserWindow } from 'electron'
-import * as Sentry from "@sentry/electron/preload";
 const os = require('os')
 
 // Use `contextBridge` APIs to expose Electron APIs to

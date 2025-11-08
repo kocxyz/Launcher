@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog, screen, shell } from 'electron'
+import { app, BrowserWindow, ipcMain, dialog, screen, shell, session } from 'electron'
 import remote from '@electron/remote/main'
 import fs from 'fs'
 import fse from 'fs-extra'
@@ -98,6 +98,26 @@ function createWindow(): void {
       webSecurity: false
     }
   })
+
+  session.defaultSession.webRequest.onHeadersReceived(
+    {
+      urls: ['https://www.twitch.tv/*', 'https://player.twitch.tv/*', 'https://embed.twitch.tv/*']
+    },
+    (details, cb) => {
+      var responseHeaders = details.responseHeaders
+
+      console.log('headers', details.url, responseHeaders)
+
+      if (responseHeaders) {
+        delete responseHeaders['Content-Security-Policy']
+      }
+
+      cb({
+        cancel: false,
+        responseHeaders
+      })
+    }
+  )
 
   mainWindow = win
 
