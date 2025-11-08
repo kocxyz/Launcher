@@ -6,7 +6,7 @@ import moment from 'moment'
 // Components
 import NewsArticle from './NewsArticle'
 
-function NewsMenuElm(): JSX.Element {
+function NewsMenuElm() {
   const [news, setNews] = useState<Types.NewsArticle[]>([])
 
   useEffect(() => {
@@ -40,7 +40,7 @@ function NewsMenuElm(): JSX.Element {
         overflowY: 'scroll'
       }}
     >
-      {((): JSX.Element | JSX.Element[] => {
+      {(() => {
         if (news.length === 0)
           return <CircularProgress style={{ margin: 'auto', marginTop: '150px' }} />
         else

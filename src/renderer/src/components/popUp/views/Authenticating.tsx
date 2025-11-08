@@ -1,6 +1,6 @@
 import { Backdrop, Box, LinearProgress, Typography } from '@mui/material'
 
-export default function authenticating(): JSX.Element {
+export default function authenticating() {
   return (
     <Backdrop open={true} style={{ zIndex: 1000 }}>
       <Box

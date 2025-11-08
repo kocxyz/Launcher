@@ -29,7 +29,7 @@ import HostingSection from './HostingSection'
 import { useGameState } from '../states/gameState'
 import { useSelectedServerState } from '../states/selectedServerState'
 
-function ServersMenu(): JSX.Element {
+function ServersMenu() {
   const { publicServers, setPublicServers, fetchPublicServers } = useGameState()
   const { currServer, setCurrServer, setCurrServerName, setCurrServerType } =
     useSelectedServerState()
@@ -67,7 +67,7 @@ function ServersMenu(): JSX.Element {
         }}
       >
         {tab === 0 &&
-          ((): JSX.Element => {
+          (() => {
             if (!publicServers)
               return (
                 <h4>

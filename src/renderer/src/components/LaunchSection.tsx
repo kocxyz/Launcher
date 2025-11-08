@@ -8,7 +8,7 @@ import { useSelectedServerState } from '../states/selectedServerState'
 import { useUIState } from '../states/uiState'
 import { useEffect } from 'react'
 
-function LaunchSection(): JSX.Element {
+function LaunchSection() {
   const { gameState, setGameState } = useGameState()
   const { currServer, currServerName, setCurrServer, setCurrServerName, setCurrServerType } =
     useSelectedServerState()
@@ -28,7 +28,7 @@ function LaunchSection(): JSX.Element {
         flexDirection: 'column'
       }}
     >
-      {((gameState): JSX.Element => {
+      {((gameState) => {
         switch (gameState) {
           case 'notInstalled':
             return (

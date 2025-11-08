@@ -19,7 +19,7 @@ import { useUIState } from '../states/uiState'
 import { useAuthState } from '../states/authState'
 import axios from 'axios'
 
-function SettingsMenu(): JSX.Element {
+function SettingsMenu() {
   const [gameDirectory, setGameDirectory] = React.useState(localStorage.getItem('gameDirectory'))
 
   const { gameState, setGameState } = useGameState()

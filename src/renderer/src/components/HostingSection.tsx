@@ -12,7 +12,7 @@ import { useState } from 'react'
 // states
 import { useGameState } from '../states/gameState'
 
-function HostingSection(): JSX.Element {
+function HostingSection() {
   const [serverSettings, setServerSettings] = useState({
     port: localStorage.getItem('server:port') || '23600',
     secret: localStorage.getItem('server:secret') || '',
@@ -108,7 +108,7 @@ function HostingSection(): JSX.Element {
           marginTop: '20px'
         }}
       >
-        {((): JSX.Element => {
+        {(() => {
           switch (serverState) {
             case 'starting':
               return (

@@ -1,7 +1,7 @@
 import { Box } from '@mui/material'
 import { useEffect } from 'react'
 
-function SnowFall(): JSX.Element {
+function SnowFall() {
   const snowflakeCount = 100
   const snowflakeSize = 5
   const snowflakeSpeed = 2

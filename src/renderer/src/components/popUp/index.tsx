@@ -9,10 +9,10 @@ import AccountSettings from './views/AccountSettings'
 import PatchGameClient from './views/PatchGameClient'
 
 // States
-import { useUIState } from '@renderer/states/uiState'
-import { useAuthState } from '@renderer/states/authState'
+import { useUIState } from '../../states/uiState' 
+import { useAuthState } from '../../states/authState' 
 
-function PopUp(): JSX.Element {
+function PopUp() {
   const [popUpLoading, setPopUpLoading] = useState(false)
   const [wrongInputs, setWrongInputs] = useState(0)
   const [inputIncorrect, setInputIncorrect] = useState(false)

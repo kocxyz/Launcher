@@ -1,6 +1,6 @@
 import { Backdrop, Box, Typography, LinearProgress } from '@mui/material'
 
-function Uninstall(): JSX.Element {
+function Uninstall() {
   return (
     <Backdrop open={true} style={{ zIndex: 1000 }}>
       <Box

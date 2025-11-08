@@ -5,7 +5,7 @@ import { useGameState } from '../states/gameState'
 import { useEffect } from 'react'
 import { QueryBuilder } from '@mui/icons-material'
 
-function Playtime(): JSX.Element {
+function Playtime() {
   const { playtime, fetchPlaytime } = useGameState()
 
   useEffect(() => {

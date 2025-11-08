@@ -1,10 +1,10 @@
 import { Backdrop, Box, Typography, Stack, Button } from '@mui/material'
 
 // states
-import { useAuthState } from '@renderer/states/authState'
-import { useUIState } from '@renderer/states/uiState'
+import { useAuthState } from '../../../states/authState'
+import { useUIState } from '../../../states/uiState'
 
-export default function ConfirmLogout(): JSX.Element {
+export default function ConfirmLogout() {
   const { setAuthState } = useAuthState()
   const { setPopUpState } = useUIState()
 

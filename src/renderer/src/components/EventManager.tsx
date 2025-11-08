@@ -2,7 +2,7 @@ import axios from 'axios'
 import { useEffect, useState } from 'react'
 import SnowFall from './SnowFall'
 
-export default function EventManager(): JSX.Element {
+export default function EventManager() {
   const [currEvent, setCurrEvent] = useState('none')
 
   useEffect(() => {

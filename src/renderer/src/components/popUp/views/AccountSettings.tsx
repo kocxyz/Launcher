@@ -12,7 +12,7 @@ import axios from 'axios'
 import { useEffect, useState } from 'react'
 
 // states
-import { useUIState } from '@renderer/states/uiState'
+import { useUIState } from '../../../states/uiState'
 
 const colors = [
   null,
@@ -36,7 +36,7 @@ const colors = [
   '#f3b17d'
 ]
 
-export default function AccountSettings(): JSX.Element {
+export default function AccountSettings() {
   const { setPopUpState } = useUIState()
 
   const [loaded, setLoaded] = useState<boolean>(false)
@@ -225,7 +225,6 @@ export default function AccountSettings(): JSX.Element {
           >
             {colors.map((color, index) => (
               <Grid
-                item
                 key={index}
                 onClick={(): void => {
                   setSelectedColor(index)

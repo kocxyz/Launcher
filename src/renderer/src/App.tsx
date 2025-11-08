@@ -1,6 +1,6 @@
 import { Box, Tab, Tabs } from '@mui/material'
 import './App.css'
-import { JSX, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // Fonts
 import '@fontsource/roboto/500.css'
@@ -32,7 +32,7 @@ const links = {
   cursor: 'pointer'
 }
 
-function App(): JSX.Element {
+function App() {
   const [tab, setTab] = useState(0)
 
   const { fetchPublicServers } = useGameState()

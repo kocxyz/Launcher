@@ -8,7 +8,7 @@ function NewsArticle({
   title: string
   date: string
   content: string
-}): JSX.Element {
+}) {
   return (
     <Box
       style={{

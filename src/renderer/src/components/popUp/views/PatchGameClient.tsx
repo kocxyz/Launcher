@@ -1,6 +1,6 @@
 import { Backdrop, Box, Typography, LinearProgress } from '@mui/material'
 
-function PatchGameClient(): JSX.Element {
+function PatchGameClient() {
   return (
     <Backdrop open={true} style={{ zIndex: 1000 }}>
       <Box

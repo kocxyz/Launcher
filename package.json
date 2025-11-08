@@ -1,6 +1,6 @@
 {
   "name": "knockoutcitylauncher",
-  "version": "2.3.7",
+  "version": "2.3.8",
   "description": "Unofficial Knockout City Launcher",
   "main": "./out/main/index.js",
   "author": "IPGsystems",

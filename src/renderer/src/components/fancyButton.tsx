@@ -1,4 +1,4 @@
-function fancyButton(props): JSX.Element {
+function fancyButton(props) {
   return (
     <button
       className="cta"
