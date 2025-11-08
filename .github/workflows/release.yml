@@ -33,7 +33,6 @@ jobs:
           asset_name: Knockoutcitylauncher-Setup.exe
           tag: ${{ github.ref }}
           overwrite: true
-          body: "This is the Windows release"
 
   build-linux:
     runs-on: ubuntu-latest
@@ -63,4 +62,3 @@ jobs:
           asset_name: Knockoutcitylauncher.AppImage
           tag: ${{ github.ref }}
           overwrite: true
-          body: "This is the Linux release"
