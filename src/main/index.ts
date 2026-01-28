@@ -436,6 +436,91 @@ function createWindow(): void {
 
     console.log(arg)
 
+    const preflight = await axios.get(`http://${arg.server}/stats/preflight`).catch((err) => {
+      console.log(err)
+      dialog.showMessageBox(win, {
+        type: 'error',
+        title: 'Connection Error',
+        message:
+          'Failed to connect to the selected server. Please make sure the server is online and try again.'
+      })
+      return null
+    })
+
+    if (preflight == null) {
+      event.returnValue = 'error'
+      return
+    }
+
+    let zeroStaticProcess: any = null
+    let zeroStaticHash: string | null = null
+
+    if (preflight.data.zeroStaticEnabled && arg.authkey) {
+      dialog.showMessageBox(win, {
+        type: 'info',
+        title: 'This server requires ZeroStatic',
+        message: "The selected server requires ZeroStatic to connect. It will be automatically installed and enabled. Do you want to continue?",
+        buttons: ['Yes', 'No']
+      }).then(async ({ response }) => {
+        if (response === 0) {
+          const dir = os.tmpdir() + '/kocity-zerostatic'
+          if (fs.existsSync(dir)) fs.rmdirSync(dir, { recursive: true })
+          fs.mkdirSync(dir)
+
+          const url = {
+            win32: 'https://eu-central-1.ipmake.dev/api/storage/kocxyz/zerostatic/executables/ZeroStatic.exe',
+            linux: 'https://eu-central-1.ipmake.dev/api/storage/kocxyz/zerostatic/executables/ZeroStatic_linux'
+          }[os.platform()] || ''
+
+          const filePath = path.join(dir, os.platform() === 'win32' ? 'ZeroStatic.exe' : 'ZeroStatic_linux')
+
+          const writer = fs.createWriteStream(filePath)
+
+          const response = await axios.get(url, {
+            responseType: 'stream'
+          })
+
+          response.data.pipe(writer)
+
+          await new Promise((resolve, reject) => {
+            writer.on('finish', () => resolve(null))
+            writer.on('error', reject)
+          })
+
+          zeroStaticProcess = spawn(filePath, [
+            `http://${arg.server}`,
+            arg.authkey,
+            arg.username
+          ], {
+            detached: false,
+            stdio: 'pipe',
+            cwd: dir
+          })
+
+          await new Promise((resolve, reject) => {
+            zeroStaticProcess.stdout.on('data', (data: Buffer) => {
+              const str = data.toString()
+              console.log('ZeroStatic:', str)
+              if (str.includes('Hash: ')) {
+                zeroStaticHash = str.split('Hash: ')[1].trim()
+                resolve(null)
+              }
+            })
+            zeroStaticProcess.on('error', (err: Error) => {
+              reject(err)
+            })
+          })
+        } else {
+          event.returnValue = 'error'
+          return
+        }
+      })
+      event.returnValue = 'error'
+      return
+    }
+
+    console.log('ZeroStatic Hash:', zeroStaticHash)
+
     const args = [
       `-lang=${arg.language || 'en'}`,
       `-username=${arg.authkey ? arg.authkey : arg.username}`,
@@ -464,6 +549,8 @@ function createWindow(): void {
         title: 'Unexpected Error',
         message: 'An error occurred while launching the game. Error: ' + err.message
       })
+
+      if (zeroStaticProcess) killProcess(zeroStaticProcess.pid, 'SIGINT')
     })
 
     game.once('spawn', async () => {
@@ -538,6 +625,8 @@ function createWindow(): void {
       if (statusUpdateInterval) clearInterval(statusUpdateInterval)
 
       if (rpcSettings.enabled) rpc.setActivity(discordRPCS.idle).catch(console.error)
+
+      if (zeroStaticProcess) killProcess(zeroStaticProcess.pid, 'SIGINT')
     })
   })
 
