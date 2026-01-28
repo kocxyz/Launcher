@@ -456,70 +456,97 @@ function createWindow(): void {
     let zeroStaticHash: string | null = null
 
     if (preflight.data.zeroStaticEnabled && arg.authkey) {
-      dialog.showMessageBox(win, {
-        type: 'info',
-        title: 'This server requires ZeroStatic',
-        message: "The selected server requires ZeroStatic to connect. It will be automatically installed and enabled. Do you want to continue?",
-        buttons: ['Yes', 'No']
-      }).then(async ({ response }) => {
-        if (response === 0) {
-          const dir = os.tmpdir() + '/kocity-zerostatic'
-          if (fs.existsSync(dir)) fs.rmdirSync(dir, { recursive: true })
-          fs.mkdirSync(dir)
+      dialog
+        .showMessageBox(win, {
+          type: 'info',
+          title: 'This server requires ZeroStatic',
+          message:
+            'The server owner requires ZeroStatic AntiCheat to be running. It will be automatically installed and enabled. Do you want to continue?',
+          buttons: ['Yes', 'No']
+        })
+        .then(async ({ response }) => {
+          if (response === 0) {
+            const dir = os.tmpdir() + '/kocity-zerostatic'
+            if (fs.existsSync(dir)) fs.rmdirSync(dir, { recursive: true })
+            fs.mkdirSync(dir)
 
-          const url = {
-            win32: 'https://eu-central-1.ipmake.dev/api/storage/kocxyz/zerostatic/executables/ZeroStatic.exe',
-            linux: 'https://eu-central-1.ipmake.dev/api/storage/kocxyz/zerostatic/executables/ZeroStatic_linux'
-          }[os.platform()] || ''
+            const url =
+              {
+                win32:
+                  'https://eu-central-1.ipmake.dev/api/storage/kocxyz/zerostatic/executables/ZeroStatic.exe',
+                linux:
+                  'https://eu-central-1.ipmake.dev/api/storage/kocxyz/zerostatic/executables/ZeroStatic_linux'
+              }[os.platform()] || ''
 
-          const filePath = path.join(dir, os.platform() === 'win32' ? 'ZeroStatic.exe' : 'ZeroStatic_linux')
+            const filePath = path.join(
+              dir,
+              os.platform() === 'win32' ? 'ZeroStatic.exe' : 'ZeroStatic_linux'
+            )
 
-          const writer = fs.createWriteStream(filePath)
+            const writer = fs.createWriteStream(filePath)
 
-          const response = await axios.get(url, {
-            responseType: 'stream'
-          })
+            const response = await axios.get(url, {
+              responseType: 'stream'
+            })
 
-          response.data.pipe(writer)
+            response.data.pipe(writer)
 
-          await new Promise((resolve, reject) => {
-            writer.on('finish', () => resolve(null))
-            writer.on('error', reject)
-          })
+            await new Promise((resolve, reject) => {
+              writer.on('finish', () => resolve(null))
+              writer.on('error', reject)
+            })
 
-          zeroStaticProcess = spawn(filePath, [
-            `http://${arg.server}`,
-            arg.authkey,
-            arg.username
-          ], {
-            detached: false,
-            stdio: 'pipe',
-            cwd: dir
-          })
-
-          await new Promise((resolve, reject) => {
-            zeroStaticProcess.stdout.on('data', (data: Buffer) => {
-              const str = data.toString()
-              console.log('ZeroStatic:', str)
-              if (str.includes('Hash: ')) {
-                zeroStaticHash = str.split('Hash: ')[1].trim()
-                resolve(null)
+            zeroStaticProcess = spawn(
+              filePath,
+              [`http://${arg.server}`, arg.authkey, arg.username],
+              {
+                detached: false,
+                stdio: 'pipe',
+                cwd: dir
               }
+            )
+
+            await new Promise((resolve, reject) => {
+              zeroStaticProcess.stdout.on('data', (data: Buffer) => {
+                const str = data.toString()
+                console.log('ZeroStatic:', str)
+                if (str.includes('Hash: ')) {
+                  zeroStaticHash = str.split('Hash: ')[1].trim()
+                  resolve(null)
+                }
+              })
+              zeroStaticProcess.on('error', (err: Error) => {
+                reject(err)
+              })
             })
-            zeroStaticProcess.on('error', (err: Error) => {
-              reject(err)
-            })
-          })
-        } else {
-          event.returnValue = 'error'
-          return
-        }
-      })
+          } else {
+            event.returnValue = 'error'
+            return
+          }
+        })
       event.returnValue = 'error'
       return
     }
 
     console.log('ZeroStatic Hash:', zeroStaticHash)
+
+    if (preflight.data.zeroStaticEnabled && zeroStaticHash != null) {
+      await axios
+        .post(`http://${arg.server}/zerostatic/init`, {
+          username: arg.username,
+          authkey: arg.authkey || '',
+          hash: zeroStaticHash || ''
+        })
+        .catch((err) => {
+          console.log(err)
+          dialog.showMessageBox(win, {
+            type: 'error',
+            title: 'ZeroStatic Initialization Error',
+            message: 'Failed to initialize ZeroStatic with the selected server. Please try again.'
+          })
+          return null
+        })
+    }
 
     const args = [
       `-lang=${arg.language || 'en'}`,
