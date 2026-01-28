@@ -454,7 +454,7 @@ function createWindow(): void {
 
     let zeroStaticProcess: any = null
     let zeroStaticHash: string | null = null
-
+    
     if (preflight.data.zeroStaticEnabled && arg.authkey) {
       dialog
         .showMessageBox(win, {
@@ -466,6 +466,8 @@ function createWindow(): void {
         })
         .then(async ({ response }) => {
           if (response === 0) {
+            // remember in localstorage that zerostatic is enabled
+            win.webContents.executeJavaScript(`localStorage.setItem("zeroStaticEnabled", "true")`)
             const dir = os.tmpdir() + '/kocity-zerostatic'
             if (fs.existsSync(dir)) fs.rmdirSync(dir, { recursive: true })
             fs.mkdirSync(dir)
@@ -518,14 +520,18 @@ function createWindow(): void {
               zeroStaticProcess.on('error', (err: Error) => {
                 reject(err)
               })
+
+              setTimeout(() => {
+                if (zeroStaticHash == null) {
+                  reject(new Error('Timeout waiting for ZeroStatic hash'))
+                }
+              }, 15000)
             })
           } else {
             event.returnValue = 'error'
             return
           }
         })
-      event.returnValue = 'error'
-      return
     }
 
     console.log('ZeroStatic Hash:', zeroStaticHash)
