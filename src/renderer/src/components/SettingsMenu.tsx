@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Divider,
-  Icon,
   MenuItem,
   Select,
   Stack,
