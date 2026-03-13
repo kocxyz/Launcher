@@ -104,16 +104,19 @@ label {
 
 
 .hoverButton {
-    transition: 0.3s !important;
-    background: linear-gradient(90deg, #4B006E, #6c009e) !important;
+    transition: all 0.3s ease-in-out !important;
+    background: linear-gradient(90deg, #4B006E, #4B006E, #6c009e, #4B006E, #4B006E) !important;
+    background-size: 200% 100% !important;
+    background-position: 100% 0 !important;
+    border: 2px solid transparent !important;
     color: #ffffff !important;
     transform: skewX(-10deg);
     border-radius: 0 !important;
-    border-bottom: 2px solid #FFF000 !important;
     font-family: 'Brda', sans-serif !important;
     font-style: italic;
     text-transform: uppercase;
     letter-spacing: 1px;
+    box-shadow: 3px 2px 3px #320853 !important;
 }
 
 .hoverButton > * {
@@ -121,18 +124,23 @@ label {
 }
 
 .hoverButton:hover  {
-    background: linear-gradient(90deg, #6c009e, #8A2BE2) !important;
+    background-position: 0 0 !important;
     color: #FFF000 !important;
-    box-shadow: 4px 4px 0 #FFF000;
-    transform: skewX(-10deg) translateY(-2px);
+    box-shadow: 6px 5px 0 #FFF000 !important;
+    transform: skewX(-10deg) translateY(-2px) translateX(-2px) !important;
+}
+
+.hoverButton:active {
+    transform: skewX(-10deg) translateY(2px) translateX(2px) !important;
+    box-shadow: 4px 4px 5px #FFF000 !important;
+    transition: 0.15s !important;
 }
 
 .hoverButton:disabled {
     background: grey !important;
     color: #aaaaaa !important;
-    border-bottom: 2px solid #444 !important;
-    box-shadow: none !important;
-    transform: skewX(-10deg);
+    box-shadow: 3px 2px 3px #320853 !important;
+    transform: skewX(-10deg) !important;
 }
 
 /* A flowing animation that goes from left to right and keeps going in the same direction */
