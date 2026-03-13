@@ -147,22 +147,26 @@ window.addEventListener('DOMContentLoaded', () => {
       server: localStorage.getItem('currServer'),
       serverName: localStorage.getItem('currServerName'),
       serverType: localStorage.getItem('currServerType'),
-      authkey: props.authkey ? props.authkey : undefined
+      authkey: props.authkey ? props.authkey : undefined,
+      launchMode: localStorage.getItem('launchMode') || 'direct'
     })
-    props.setGameState('running')
 
-    const listener = (evt): void => {
-      switch (evt.data.type) {
-        case 'game-closed':
-          console.log('Game closed')
-          props.setGameState('installed')
-          // remove listener
-          window.removeEventListener('message', listener)
-          break
+    if (localStorage.getItem('launchMode') !== 'steam') {
+      props.setGameState('running')
+
+      const listener = (evt): void => {
+        switch (evt.data.type) {
+          case 'game-closed':
+            console.log('Game closed')
+            props.setGameState('installed')
+            // remove listener
+            window.removeEventListener('message', listener)
+            break
+        }
       }
-    }
 
-    window.addEventListener('message', listener)
+      window.addEventListener('message', listener)
+    }
   }
 
   // @ts-ignore (define in dts)

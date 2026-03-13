@@ -4,7 +4,7 @@ import fs from 'fs'
 import fse from 'fs-extra'
 import path from 'path'
 import { spawn, exec } from 'child_process'
-import axios from 'axios'
+import axios, { AxiosError } from 'axios'
 import os from 'os'
 import killProcess from 'tree-kill'
 import discordRPC from 'discord-rpc'
@@ -416,6 +416,44 @@ function createWindow(): void {
 
     let accToken: string | undefined
 
+    console.log(arg)
+
+    const preflight = arg.authey
+      ? await axios.get(`http://${arg.server}/stats/preflight`).catch((err: AxiosError) => {
+          console.log(err)
+          dialog.showMessageBox(win, {
+            type: 'error',
+            title: 'Connection Error',
+            message:
+              'Failed to connect to the selected server. Please make sure the server is online and try again.'
+          })
+          return null
+        })
+      : { data: { zeroStaticEnabled: false } }
+
+    if (preflight == null && arg.authey) {
+      event.returnValue = 'error'
+      return
+    }
+
+    if(arg.launchMode === 'steam' && preflight?.data.zeroStaticEnabled) {
+        dialog.showMessageBox(win, {
+          type: 'error',
+          title: 'Launch Mode Not Supported',
+          message: 'The selected server requires ZeroStatic, which is not supported in Steam launch mode. Please switch to Direct launch mode in the settings and try again.'
+        })
+
+        event.returnValue = 'error'
+        return
+    }
+
+    if(arg.launchMode === 'steam') {
+      shell.openExternal(`steam://rungameid/2915930//-backend=${arg.server} -username=${arg.authkey || arg.username} -lang=${arg.language || 'en'}`)
+
+      event.returnValue = 'launched'
+      return
+    }
+
     let statusUpdateInterval
     const playtimeInterval = setInterval(() => {
       if (!accToken) return
@@ -434,28 +472,10 @@ function createWindow(): void {
     }, 1000 * 60)
     const startTime = Date.now()
 
-    console.log(arg)
-
-    const preflight = await axios.get(`http://${arg.server}/stats/preflight`).catch((err) => {
-      console.log(err)
-      dialog.showMessageBox(win, {
-        type: 'error',
-        title: 'Connection Error',
-        message:
-          'Failed to connect to the selected server. Please make sure the server is online and try again.'
-      })
-      return null
-    })
-
-    if (preflight == null) {
-      event.returnValue = 'error'
-      return
-    }
-
     let zeroStaticProcess: any = null
     let zeroStaticHash: string | null = null
 
-    if (preflight.data.zeroStaticEnabled && arg.authkey) {
+    if (preflight?.data.zeroStaticEnabled && arg.authkey) {
       await new Promise<void>((resolveContext) => {
         dialog
           .showMessageBox(win, {
@@ -512,7 +532,7 @@ function createWindow(): void {
                   cwd: dir
                 }
               )
-            
+
               zeroStaticProcess.stdout.on('data', (data: Buffer) => {
                 const str = data.toString()
                 console.log('ZeroStatic:' + str)
@@ -541,7 +561,7 @@ function createWindow(): void {
 
     console.log('ZeroStatic Hash:' + zeroStaticHash)
 
-    if (preflight.data.zeroStaticEnabled && zeroStaticHash != null) {
+    if (preflight?.data.zeroStaticEnabled && zeroStaticHash != null) {
       await axios
         .post(`http://${arg.server}/zerostatic/init`, {
           username: arg.username,
@@ -900,8 +920,9 @@ if (gotTheLock) {
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    if (rpc && rpcSettings.enabled) {
-      rpc.destroy()
+    if (rpc) {
+      rpc.destroy().catch(console.error)
+      rpc = undefined
     }
     app.quit()
   }

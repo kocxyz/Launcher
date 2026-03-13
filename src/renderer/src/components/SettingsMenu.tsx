@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Divider,
+  Icon,
   MenuItem,
   Select,
   Stack,
@@ -21,6 +22,7 @@ import axios from 'axios'
 
 function SettingsMenu() {
   const [gameDirectory, setGameDirectory] = React.useState(localStorage.getItem('gameDirectory'))
+  const [launchMode, setLaunchMode] = React.useState(localStorage.getItem('launchMode') || 'direct')
 
   const { gameState, setGameState } = useGameState()
   const { setPopUpState } = useUIState()
@@ -39,6 +41,10 @@ function SettingsMenu() {
         localStorage.setItem('username', res.data.user.username)
       })
   }, [])
+
+  useEffect(() => {
+    localStorage.setItem('launchMode', launchMode)
+  }, [launchMode])
 
   return (
     <Box
@@ -153,6 +159,24 @@ function SettingsMenu() {
       </Stack>
 
       <Divider />
+
+      <Stack spacing={1}>
+        <label>Launch Mode</label>
+        <Select
+          variant="outlined"
+          defaultValue={launchMode || 'direct'}
+          onChange={(e): void => {
+            setLaunchMode(e.target.value)
+          }}
+        >
+          <MenuItem value="direct">Direct</MenuItem>
+          <MenuItem value="steam">Steam</MenuItem>
+        </Select>
+        <Typography variant="caption" color="textSecondary">
+          <strong>Direct:</strong> Launches the game directly. <br />
+          <strong>Steam:</strong> Launches the game through Steam, which can help with compatibility on some systems. (Recommended for Linux) This will disable discord rpc and playtime tracking.
+        </Typography>
+      </Stack>
 
       <Stack spacing={1}>
         <label>Game Directory</label>
