@@ -43,14 +43,15 @@ function ServersMenu() {
 
   return (
     <Box style={{ marginTop: '-10px' }}>
-      <Divider />
+      <Divider sx={{ backgroundColor: 'rgba(255,255,255,0.1)', mb: 1 }} />
       <Tabs
         variant="fullWidth"
         centered
         value={tab}
         onChange={(_, val): void => setTab(val)}
         style={{
-          padding: '0 20px'
+          padding: '0 20px',
+          fontFamily: 'Brda',
         }}
       >
         <Tab label="Public" />
@@ -103,7 +104,7 @@ function ServersMenu() {
 
             return (
               <>
-                <Table>
+                <Table sx={{ '& .MuiTableCell-root': { fontFamily: 'Azbuka, sans-serif', borderColor: 'rgba(255, 255, 255, 0.1)' } }}>
                   <TableHead>
                     <TableRow style={{ position: 'sticky' }}>
                       <TableCell
@@ -112,16 +113,17 @@ function ServersMenu() {
                           paddingRight: '0px'
                         }}
                       ></TableCell>
-                      <TableCell>Name</TableCell>
+                      <TableCell sx={{ fontFamily: 'Brda, sans-serif !important', fontStyle: 'italic', letterSpacing: '1px', color: '#FFF000' }}>Name</TableCell>
                       <TableCell
                         align="right"
                         style={{
                           paddingLeft: '0px'
                         }}
+                        sx={{ fontFamily: 'Brda, sans-serif !important', fontStyle: 'italic', letterSpacing: '1px', color: '#FFF000' }}
                       >
                         Region
                       </TableCell>
-                      <TableCell align="right">Players</TableCell>
+                      <TableCell align="right" sx={{ fontFamily: 'Brda, sans-serif !important', fontStyle: 'italic', letterSpacing: '1px', color: '#FFF000' }}>Players</TableCell>
                       <TableCell align="right" width="20px">
                         <IconButton
                           onClick={(): void => {
@@ -191,11 +193,11 @@ function ServersMenu() {
           })()}
         {tab === 1 && (
           <>
-            <Table>
+            <Table sx={{ '& .MuiTableCell-root': { fontFamily: 'Azbuka, sans-serif', borderColor: 'rgba(255, 255, 255, 0.1)' } }}>
               <TableHead>
                 <TableRow style={{ position: 'sticky' }}>
-                  <TableCell>Name</TableCell>
-                  <TableCell>IP</TableCell>
+                  <TableCell sx={{ fontFamily: 'Brda, sans-serif !important', fontStyle: 'italic', letterSpacing: '1px', color: '#FFF000' }}>Name</TableCell>
+                  <TableCell sx={{ fontFamily: 'Brda, sans-serif !important', fontStyle: 'italic', letterSpacing: '1px', color: '#FFF000' }}>IP</TableCell>
                   <TableCell align="right">
                     <IconButton
                       onClick={(): void => {

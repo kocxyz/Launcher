@@ -6,6 +6,23 @@
     user-select: none;
 }
 
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0,0,0,0.1);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #FFF000;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #e6d800;
+}
+
 .App {
     display: grid;
     grid-template-columns: 1.25fr 1fr;
@@ -15,6 +32,14 @@
 
 html, body {
     overflow: hidden;
+}
+
+label {
+    font-family: 'Brda', sans-serif;
+    font-style: italic;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #FFF000;
 }
 
 .bgImg {
@@ -79,19 +104,35 @@ html, body {
 
 
 .hoverButton {
-    transition: 1s !important;
-    background-color: #4B006E !important;
+    transition: 0.3s !important;
+    background: linear-gradient(90deg, #4B006E, #6c009e) !important;
     color: #ffffff !important;
+    transform: skewX(-10deg);
+    border-radius: 0 !important;
+    border-bottom: 2px solid #FFF000 !important;
+    font-family: 'Brda', sans-serif !important;
+    font-style: italic;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.hoverButton > * {
+    transform: skewX(10deg);
 }
 
 .hoverButton:hover  {
-    transition: 0.5s !important;
-    background-color: #690099 !important;
+    background: linear-gradient(90deg, #6c009e, #8A2BE2) !important;
+    color: #FFF000 !important;
+    box-shadow: 4px 4px 0 #FFF000;
+    transform: skewX(-10deg) translateY(-2px);
 }
 
 .hoverButton:disabled {
-    background-color: grey !important;
-    color: #ffffff !important;
+    background: grey !important;
+    color: #aaaaaa !important;
+    border-bottom: 2px solid #444 !important;
+    box-shadow: none !important;
+    transform: skewX(-10deg);
 }
 
 /* A flowing animation that goes from left to right and keeps going in the same direction */

@@ -117,10 +117,12 @@ function App() {
 
       <Box
         style={{
-          background: 'linear-gradient(135deg, rgba(55, 12, 88, 0.7), rgba(50, 8, 83, 0.75), rgba(45, 10, 75, 0.75))',
+          background: 'linear-gradient(135deg, rgba(75, 0, 110, 0.5), rgba(50, 8, 83, 0.6), rgba(35, 5, 60, 0.5))',
           padding: '20px',
           marginTop: '-3vh',
-          paddingBottom: '0px'
+          paddingBottom: '0px',
+          boxShadow: '-5px 0 15px rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(10px)'
         }}
       >
         <Tabs variant="fullWidth" centered value={tab} onChange={(_e, val): void => setTab(val)}>
