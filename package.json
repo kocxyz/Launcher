@@ -1,9 +1,9 @@
 {
   "name": "knockoutcitylauncher",
-  "version": "2.4.3",
+  "version": "2.4.4",
   "description": "Unofficial Knockout City Launcher",
   "main": "./out/main/index.js",
-  "author": "IPGsystems",
+  "author": "ipmake.dev Systems",
   "homepage": "https://kocity.xyz",
   "scripts": {
     "format": "prettier --write .",
