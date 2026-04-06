@@ -21,7 +21,7 @@ import {
   TextField,
   Tooltip
 } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 // Components
 import HostingSection from './HostingSection'
@@ -29,12 +29,7 @@ import HostingSection from './HostingSection'
 // states
 import { useGameState } from '../states/gameState'
 import { useSelectedServerState } from '../states/selectedServerState'
-
-// Temporary communities list until we fetch them from the api
-const communities = {
-  '1500': 'https://discord.gg/sX8xh3UH87',
-  '2005': 'https://discord.gg/KCHUCx9HQJ'
-}
+import axios from 'axios'
 
 function ServersMenu() {
   const { publicServers, setPublicServers, fetchPublicServers } = useGameState()
@@ -47,6 +42,18 @@ function ServersMenu() {
   const [addIp, setAddIp] = useState('')
 
   const [favServers, setFavServers] = useState(JSON.parse(localStorage.getItem('servers') || '[]'))
+
+  const [communities, setCommunities] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    const fetchCommunities = async () => {
+      const response = await axios.get("https://cdn.kocity.xyz/discord_servers.json");
+      setCommunities(response.data);
+      console.log(communities)
+    };
+
+    fetchCommunities();
+  }, []);
 
   return (
     <Box style={{ marginTop: '-10px' }}>
