@@ -60,11 +60,14 @@ jobs:
       - name: Install system dependencies for Linux targets
         run: |
           sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder fakeroot
+          sudo apt-get install -y flatpak flatpak-builder fakeroot libarchive-tools zip
           flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
       - name: Build Linux
         run: npm run build:linux
+
+      - name: Zip Linux Unpacked
+        run: cd dist && zip -r Knockoutcitylauncher.zip linux-unpacked/
 
       - name: Upload AppImage to release
         uses: svenstaro/upload-release-action@v2
@@ -90,6 +93,24 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: dist/koclauncher.pacman
           asset_name: Knockoutcitylauncher.pacman
+          tag: ${{ github.ref }}
+          overwrite: true
+
+      - name: Upload deb to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/koclauncher.deb
+          asset_name: Knockoutcitylauncher.deb
+          tag: ${{ github.ref }}
+          overwrite: true
+
+      - name: Upload zip to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/koclauncher.zip
+          asset_name: Knockoutcitylauncher.zip
           tag: ${{ github.ref }}
           overwrite: true
 
