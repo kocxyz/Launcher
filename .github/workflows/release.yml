@@ -34,6 +34,15 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
 
+      - name: Upload latest.yml to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/latest.yml
+          asset_name: latest.yml
+          tag: ${{ github.ref }}
+          overwrite: true
+
   build-linux:
     runs-on: ubuntu-latest
     steps:
@@ -48,17 +57,47 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Install system dependencies for Linux targets
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder fakeroot
+          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+
       - name: Build Linux
         run: npm run build:linux
 
-      - name: Rename Linux artifact
-        run: mv dist/koclauncher.AppImage Knockoutcitylauncher.AppImage
-
-      - name: Upload Linux binaries to release
+      - name: Upload AppImage to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: Knockoutcitylauncher.AppImage
+          file: dist/koclauncher.AppImage
           asset_name: Knockoutcitylauncher.AppImage
+          tag: ${{ github.ref }}
+          overwrite: true
+
+      - name: Upload flatpak to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/koclauncher.flatpak
+          asset_name: Knockoutcitylauncher.flatpak
+          tag: ${{ github.ref }}
+          overwrite: true
+
+      - name: Upload pacman to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/koclauncher.pacman
+          asset_name: Knockoutcitylauncher.pacman
+          tag: ${{ github.ref }}
+          overwrite: true
+
+      - name: Upload latest-linux.yml to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/latest-linux.yml
+          asset_name: latest-linux.yml
           tag: ${{ github.ref }}
           overwrite: true

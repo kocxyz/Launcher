@@ -5,6 +5,10 @@
   "main": "./out/main/index.js",
   "author": "ipmake.dev Systems",
   "homepage": "https://kocity.xyz",
+  "repository": {
+    "url": "https://github.com/kocxyz/Launcher",
+    "type": "git"
+  },
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",

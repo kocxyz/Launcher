@@ -75,10 +75,18 @@ nsis:
 linux:
   target:
     - AppImage
-    # - snap
-    # - deb
+    - flatpak
+    - pacman
   maintainer: kocity.xyz
   category: Game
+publish:
+  provider: github
+  owner: kocxyz
+  repo: Launcher
 appImage:
+  artifactName: koclauncher.${ext}
+flatpak:
+  artifactName: koclauncher.${ext}
+pacman:
   artifactName: koclauncher.${ext}
 npmRebuild: false
