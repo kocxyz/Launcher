@@ -21,7 +21,7 @@ Even so, I'm very thankful to Velan Studios for releasing the private server ver
 All the code will continue to stay open source and up on GitHub as a public archive even after the shutdown. <br>
 You can find all that here: <a onclick="window.launchURL('https://github.com/kocxyz')">https://github.com/kocxyz</a><br>
 <br>
-Alright, that would be it from me for now then. Thank you to everyone for all the great memories and experiences and may we meet again (Maybe in Knockout City 2 :eyes:, maybeee).`
+Alright, that would be it from me for now then. Thank you to everyone for all the great memories and experiences and may we meet again (Maybe in Knockout City 2 👀, maybeee).`
 
 function NewsMenuElm() {
   const [news,] = useState<Types.NewsArticle[]>([

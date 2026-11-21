@@ -24,8 +24,9 @@ function LaunchSection() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: '130px',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        marginTop: "auto",
+        marginBottom: "12px"
       }}
     >
       {((gameState) => {

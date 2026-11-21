@@ -71,13 +71,8 @@ const darkTheme = createTheme({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
-            borderRadius: 0,
-            transform: 'skewX(-5deg)',
             fontFamily: 'Azbuka, sans-serif'
           },
-          '& .MuiInputBase-input': {
-            transform: 'skewX(5deg)'
-          }
         }
       }
     }

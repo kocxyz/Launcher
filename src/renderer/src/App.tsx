@@ -22,15 +22,15 @@ import LogoImage from './images/logo.png'
 import AnimatedBackground from './components/AnimatedBackground'
 
 const boxes = { height: '97vh' }
-// const links = {
-//   fontSize: '20px',
-//   color: 'white',
-//   textDecoration: 'none',
-//   width: 'fit-content',
-//   fontFamily: 'Azbuka',
-//   fontWeight: 'bold',
-//   cursor: 'pointer'
-// }
+const links = {
+  fontSize: '20px',
+  color: 'white',
+  textDecoration: 'none',
+  width: 'fit-content',
+  fontFamily: 'Azbuka',
+  fontWeight: 'bold',
+  cursor: 'pointer'
+}
 
 function App() {
   const [tab, setTab] = useState(0)
@@ -52,17 +52,20 @@ function App() {
 
   return (
     <div className="App">
-      <Playtime />
       <Box style={{ position: 'absolute' }}>
         <PopUp />
       </Box>
 
       <AnimatedBackground />
 
-      <Box style={boxes}>
+      <Box style={boxes} sx={{
+        display: "flex",
+        flexDirection: "column",
+      }}>
         <Box>
           <img src={LogoImage} alt="logo" style={{ width: '300px', marginLeft: '35px' }} />
         </Box>
+
         <Box
           style={{
             marginTop: '20px',
@@ -71,6 +74,46 @@ function App() {
             flexDirection: 'column'
           }}
         >
+
+          <a
+            style={links}
+            className="hoverLink"
+            onClick={(): void => {
+              alert("Link removed for security reasons")
+            }}
+          >
+            XYZ WEBSITE
+          </a>{' '}
+          {/* eslint-disable-line */}
+          <a
+            style={links}
+            className="hoverLink"
+            onClick={(): void => {
+              window.launchURL('https://github.com/kocxyz')
+            }}
+          >
+            GITHUB
+          </a>{' '}
+          {/* eslint-disable-line */}
+          <a
+            style={links}
+            className="hoverLink"
+            onClick={(): void => {
+              alert("Link removed for security reasons")
+            }}
+          >
+            DISCORD
+          </a>{' '}
+          {/* eslint-disable-line */}
+          <a
+            style={links}
+            className="hoverLink"
+            onClick={(): void => {
+              alert("Link removed for security reasons")
+            }}
+          >
+            PATREON
+          </a>
         </Box>
 
         <LaunchSection />

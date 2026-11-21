@@ -110,7 +110,6 @@ label {
     background-position: 100% 0 !important;
     border: 2px solid transparent !important;
     color: #ffffff !important;
-    transform: skewX(-10deg);
     border-radius: 0 !important;
     font-family: 'Brda', sans-serif !important;
     font-style: italic;
@@ -119,19 +118,15 @@ label {
     box-shadow: 3px 2px 3px #320853 !important;
 }
 
-.hoverButton > * {
-    transform: skewX(10deg);
-}
-
 .hoverButton:hover  {
     background-position: 0 0 !important;
     color: #FFF000 !important;
     box-shadow: 6px 5px 0 #FFF000 !important;
-    transform: skewX(-10deg) translateY(-2px) translateX(-2px) !important;
+    transform: translateY(-2px) translateX(-2px) !important;
 }
 
 .hoverButton:active {
-    transform: skewX(-10deg) translateY(2px) translateX(2px) !important;
+    transform: translateY(2px) translateX(2px) !important;
     box-shadow: 4px 4px 5px #FFF000 !important;
     transition: 0.15s !important;
 }
@@ -140,7 +135,6 @@ label {
     background: grey !important;
     color: #aaaaaa !important;
     box-shadow: 3px 2px 3px #320853 !important;
-    transform: skewX(-10deg) !important;
 }
 
 /* A flowing animation that goes from left to right and keeps going in the same direction */

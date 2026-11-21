@@ -20,11 +20,6 @@ function Playtime() {
         width: '130px',
         height: '50px',
 
-        position: 'absolute',
-        bottom: '42px',
-        left: '-10px',
-        pl: '10px',
-
         backgroundColor: '#6c009e88',
         transform: 'skewX(-15deg)',
 
