@@ -22,15 +22,15 @@ import LogoImage from './images/logo.png'
 import AnimatedBackground from './components/AnimatedBackground'
 
 const boxes = { height: '97vh' }
-const links = {
-  fontSize: '20px',
-  color: 'white',
-  textDecoration: 'none',
-  width: 'fit-content',
-  fontFamily: 'Azbuka',
-  fontWeight: 'bold',
-  cursor: 'pointer'
-}
+// const links = {
+//   fontSize: '20px',
+//   color: 'white',
+//   textDecoration: 'none',
+//   width: 'fit-content',
+//   fontFamily: 'Azbuka',
+//   fontWeight: 'bold',
+//   cursor: 'pointer'
+// }
 
 function App() {
   const [tab, setTab] = useState(0)
@@ -71,45 +71,6 @@ function App() {
             flexDirection: 'column'
           }}
         >
-          <a
-            style={links}
-            className="hoverLink"
-            onClick={(): void => {
-              window.launchURL('https://kocity.xyz')
-            }}
-          >
-            XYZ WEBSITE
-          </a>{' '}
-          {/* eslint-disable-line */}
-          <a
-            style={links}
-            className="hoverLink"
-            onClick={(): void => {
-              window.launchURL('https://github.com/Ipmake/kocitylauncher')
-            }}
-          >
-            GITHUB
-          </a>{' '}
-          {/* eslint-disable-line */}
-          <a
-            style={links}
-            className="hoverLink"
-            onClick={(): void => {
-              window.launchURL('https://discord.gg/4kNPb4cRxN')
-            }}
-          >
-            DISCORD
-          </a>{' '}
-          {/* eslint-disable-line */}
-          <a
-            style={links}
-            className="hoverLink"
-            onClick={(): void => {
-              window.launchURL('https://www.patreon.com/kocxyz')
-            }}
-          >
-            PATREON
-          </a>
         </Box>
 
         <LaunchSection />

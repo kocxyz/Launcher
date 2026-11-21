@@ -476,87 +476,9 @@ function createWindow(): void {
     let zeroStaticHash: string | null = null
 
     if (preflight?.data.zeroStaticEnabled && arg.authkey) {
-      await new Promise<void>((resolveContext) => {
-        dialog
-          .showMessageBox(win, {
-            type: 'info',
-            title: 'This server requires ZeroStatic',
-            message:
-              'The server owner requires ZeroStatic AntiCheat to be running. It will be automatically installed and enabled. Do you want to continue?',
-            buttons: ['Yes', 'No']
-          })
-          .then(async ({ response }) => {
-            if (response === 0) {
-              // use current directory for files
-              const dir = path.join(app.getPath('userData'), 'zerostatic')
-              if (!fs.existsSync(dir)) fs.mkdirSync(dir)
-
-              const url =
-                {
-                  win32:
-                    'https://eu-central-1.ipmake.dev/api/storage/kocxyz/zerostatic/executables/ZeroStatic.exe',
-                  linux:
-                    'https://eu-central-1.ipmake.dev/api/storage/kocxyz/zerostatic/executables/ZeroStatic_linux'
-                }[os.platform()] || ''
-
-              const filePath = path.join(
-                dir,
-                os.platform() === 'win32' ? 'ZeroStatic.exe' : 'ZeroStatic_linux'
-              )
-
-              if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
-
-              const writer = fs.createWriteStream(filePath)
-
-              const response = await axios.get(url, {
-                responseType: 'stream'
-              })
-
-              response.data.pipe(writer)
-
-              await new Promise((resolve, reject) => {
-                writer.on('finish', () => resolve(null))
-                writer.on('error', reject)
-              })
-
-              if (os.platform() !== 'win32') {
-                fs.chmodSync(filePath, 0o755)
-              }
-
-              zeroStaticProcess = spawn(
-                filePath,
-                [`http://${arg.server}`, arg.authkey, arg.username],
-                {
-                  detached: false,
-                  stdio: ['ignore', 'pipe', 'pipe'],
-                  cwd: dir
-                }
-              )
-
-              zeroStaticProcess.stdout.on('data', (data: Buffer) => {
-                const str = data.toString()
-                console.log('ZeroStatic:' + str)
-                if (str.includes('Hash: ')) {
-                  zeroStaticHash = str.split('Hash: ')[1].trim()
-                  resolveContext()
-                }
-              })
-
-              zeroStaticProcess.stderr.on('data', (data: Buffer) => {
-                const str = data.toString()
-                console.log('ZeroStatic Error:' + str)
-              })
-
-              zeroStaticProcess.on('error', (err: Error) => {
-                console.log('ZeroStatic Process Error:' + err)
-              })
-            } else {
-              event.returnValue = 'error'
-              resolveContext()
-              return
-            }
-          })
-      })
+      dialog.showErrorBox("Server requires ZeroStatic", "The server you are trying to connect to requires the zero static anticheat to be present. Due to the kocxyz launcher being sunset, the anti cheat is no longer avaliable");
+      event.returnValue = 'error'
+      return
     }
 
     console.log('ZeroStatic Hash:' + zeroStaticHash)
@@ -575,7 +497,8 @@ function createWindow(): void {
             title: 'ZeroStatic Initialization Error',
             message: 'Failed to initialize ZeroStatic with the selected server. Please try again.'
           })
-          return null
+          event.returnValue = 'error'
+          return
         })
     }
 
@@ -814,102 +737,107 @@ if (gotTheLock) {
       app.quit()
     }
 
-    axios
-      .get('https://cdn.ipmake.dev/kocity/version', {
-        timeout: 5000
-      })
-      .then(async (res) => {
-        console.log('Checking for update')
-        // get the version of the app from electron
-        const version = app.getVersion().trim()
-        console.log(`${version} => ${res.data}`)
+    console.log("Update check disabled due to end of life patch")
+    createWindow();
+    return;
+    
+    // Removed for end of life patch
+    // axios
+    //   .get('https://cdn.ipmake.dev/kocity/version', {
+    //     timeout: 5000
+    //   })
+    //   .then(async (res) => {
+    //     console.log('Checking for update')
+    //     // get the version of the app from electron
+    //     const version = app.getVersion().trim()
+    //     console.log(`${version} => ${res.data}`)
 
-        if (res.data === undefined || res.data === null || String(res.data).trim().length >= 10) {
-          console.log('No update available')
-          createWindow()
-          return
-        }
+    //     if (res.data === undefined || res.data === null || String(res.data).trim().length >= 10) {
+    //       console.log('No update available')
+    //       createWindow()
+    //       return
+    //     }
 
-        if (`${res.data}`.trim() == `${version}`.trim()) {
-          createWindow()
-        } else {
-          if (!(os.platform() === 'win32')) {
-            dialog.showErrorBox(
-              'Update Available',
-              'There is an update available but auto updating is currently only supported on Windows. Please download the latest version from https://kocity.xyz'
-            )
-            createWindow()
-            return
-          }
-          const { response } = await dialog.showMessageBox({
-            type: 'info',
-            title: 'Update Available',
-            message: `An update is available for the Knockout City Launcher! Would you like to download it?`,
-            buttons: ['Yes', 'No']
-          })
-          if (response === 0) {
-            // open a small update window
-            const updateWindow = new BrowserWindow({
-              width: 500,
-              height: 250,
-              frame: false,
-              transparent: true,
-              alwaysOnTop: true,
-              skipTaskbar: true,
-              titleBarStyle: 'hidden',
-              movable: false,
-              resizable: false,
-              icon: './www/logo.png',
-              webPreferences: {
-                nodeIntegration: true
-              }
-            })
-            console.log('Update window opened!')
+    //     if (`${res.data}`.trim() == `${version}`.trim()) {
+    //       createWindow()
+    //     } else {
+    //       if (!(os.platform() === 'win32')) {
+    //         dialog.showErrorBox(
+    //           'Update Available',
+    //           'There is an update available but auto updating is currently only supported on Windows. Please download the latest version from https://kocity.xyz'
+    //         )
+    //         createWindow()
+    //         return
+    //       }
+    //       const { response } = await dialog.showMessageBox({
+    //         type: 'info',
+    //         title: 'Update Available',
+    //         message: `An update is available for the Knockout City Launcher! Would you like to download it?`,
+    //         buttons: ['Yes', 'No']
+    //       })
+    //       if (response === 0) {
+    //         // open a small update window
+    //         const updateWindow = new BrowserWindow({
+    //           width: 500,
+    //           height: 250,
+    //           frame: false,
+    //           transparent: true,
+    //           alwaysOnTop: true,
+    //           skipTaskbar: true,
+    //           titleBarStyle: 'hidden',
+    //           movable: false,
+    //           resizable: false,
+    //           icon: './www/logo.png',
+    //           webPreferences: {
+    //             nodeIntegration: true
+    //           }
+    //         })
+    //         console.log('Update window opened!')
 
-            if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-              updateWindow.loadFile(
-                path.join(process.env['ELECTRON_RENDERER_URL'], '../../resources/update.html')
-              )
-            } else {
-              updateWindow.loadFile(path.join(__dirname, '../../resources/update.html'))
-            }
+    //         if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    //           updateWindow.loadFile(
+    //             path.join(process.env['ELECTRON_RENDERER_URL'], '../../resources/update.html')
+    //           )
+    //         } else {
+    //           updateWindow.loadFile(path.join(__dirname, '../../resources/update.html'))
+    //         }
 
-            // download the exe file using axios
-            console.log('Downloading update...')
-            axios
-              .get(
-                `https://github.com/kocxyz/Launcher/releases/download/v${String(res.data).trim()}/Knockoutcitylauncher-Setup.exe`,
-                {
-                  responseType: 'arraybuffer'
-                }
-              )
-              .then(async (res) => {
-                console.log('Update complete!')
+    //         // download the exe file using axios
+    //         console.log('Downloading update...')
+    //         axios
+    //           .get(
+    //             `https://github.com/kocxyz/Launcher/releases/download/v${String(res.data).trim()}/Knockoutcitylauncher-Setup.exe`,
+    //             {
+    //               responseType: 'arraybuffer'
+    //             }
+    //           )
+    //           .then(async (res) => {
+    //             console.log('Update complete!')
 
-                // write it to the download folder
-                fs.writeFileSync(`${os.tmpdir()}/kocity-update.exe`, res.data)
+    //             // write it to the download folder
+    //             fs.writeFileSync(`${os.tmpdir()}/kocity-update.exe`, res.data)
 
-                // open the file
-                spawn(`${os.tmpdir()}/kocity-update.exe`, { detached: true, stdio: 'ignore' })
+    //             // open the file
+    //             spawn(`${os.tmpdir()}/kocity-update.exe`, { detached: true, stdio: 'ignore' })
 
-                setTimeout(() => {
-                  app.quit()
-                  process.exit(0)
-                }, 1000)
-              })
-          } else {
-            createWindow()
-          }
-        }
-      })
-      .catch((err) => {
-        console.error('Error checking for update:', err)
-        dialog.showErrorBox(
-          'Update Check Failed',
-          'Failed to check for updates. Please try again later.'
-        )
-        createWindow()
-      })
+    //             setTimeout(() => {
+    //               app.quit()
+    //               process.exit(0)
+    //             }, 1000)
+    //           })
+    //       } else {
+    //         createWindow()
+    //       }
+    //     }
+    //   })
+    //   .catch((err) => {
+    //     console.error('Error checking for update:', err)
+    //     dialog.showErrorBox(
+    //       'Update Check Failed',
+    //       'Failed to check for updates. Please try again later.'
+    //     )
+    //     createWindow()
+    //   })
   })
 } else {
   app.quit()

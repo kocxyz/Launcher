@@ -1,10 +1,18 @@
-import axios from 'axios'
 import { useEffect, useState } from 'react'
 
 interface Background {
-  url: string
+  url: any
   isActive: boolean
 }
+
+import imageBG1 from "../images/bgs/1.jpg";
+import imageBG2 from "../images/bgs/2.jpg";
+import imageBG3 from "../images/bgs/3.jpg";
+import imageBG4 from "../images/bgs/4.png";
+import imageBG5 from "../images/bgs/5.jpg";
+import imageBG6 from "../images/bgs/6.jpg";
+import imageBG7 from "../images/bgs/7.jpg";
+import imageBG8 from "../images/bgs/8.jpg";
 
 function AnimatedBackground() {
   const [backgrounds, setBackgrounds] = useState<Background[]>([])
@@ -12,29 +20,26 @@ function AnimatedBackground() {
 
   // Load backgrounds on mount
   useEffect(() => {
-    axios.get('https://cdn.kocity.xyz/launcher/assets/options.json')
-      .then((res) => {
-        const data = res.data as { activeBackgrounds: string[] }
-        const premiumLevel = '0'
-        
-        return axios.get(`${data.activeBackgrounds[premiumLevel]}/manifest`)
-          .then((manifestRes) => {
-            const backgroundList = manifestRes.data
-              .split('\n')
-              .filter((bg: string) => bg.trim())
-            
-            // Shuffle backgrounds
-            const shuffled = [...backgroundList].sort(() => Math.random() - 0.5)
-            
-            const loadedBackgrounds: Background[] = shuffled.map((bg: string, index: number) => ({
-              url: `${data.activeBackgrounds[premiumLevel]}/${bg}`,
-              isActive: index === 0
-            }))
-            
-            setBackgrounds(loadedBackgrounds)
-          })
-      })
-      .catch(err => console.error('Failed to load backgrounds:', err))
+    const backgroundList = [
+      imageBG1,
+      imageBG2,
+      imageBG3,
+      imageBG4,
+      imageBG5,
+      imageBG6,
+      imageBG7,
+      imageBG8
+    ]
+    
+    // Shuffle backgrounds
+    const shuffled = [...backgroundList].sort(() => Math.random() - 0.5)
+    
+    const loadedBackgrounds: Background[] = shuffled.map((bg: any, index: number) => ({
+      url: bg,
+      isActive: index === 0
+    }))
+    
+    setBackgrounds(loadedBackgrounds)
   }, [])
 
   // Auto-advance slides

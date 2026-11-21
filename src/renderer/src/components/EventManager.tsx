@@ -1,19 +1,18 @@
-import axios from 'axios'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import SnowFall from './SnowFall'
 
 export default function EventManager() {
-  const [currEvent, setCurrEvent] = useState('none')
+  const [currEvent, ] = useState('none')
 
-  useEffect(() => {
-    axios
-      .get('https://cdn.ipmake.dev/kocity/event', {
-        responseType: 'text'
-      })
-      .then((res) => {
-        setCurrEvent(res.data)
-      })
-  }, [])
+  // useEffect(() => {
+  //   axios
+  //     .get('https://cdn.ipmake.dev/kocity/event', {
+  //       responseType: 'text'
+  //     })
+  //     .then((res) => {
+  //       setCurrEvent(res.data)
+  //     })
+  // }, [])
 
   switch (currEvent) {
     case 'snow':
