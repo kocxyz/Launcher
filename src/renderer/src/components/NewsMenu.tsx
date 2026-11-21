@@ -24,7 +24,7 @@ You can find all that here: <a onclick="window.launchURL('https://github.com/koc
 Alright, that would be it from me for now then. Thank you to everyone for all the great memories and experiences and may we meet again (Maybe in Knockout City 2 :eyes:, maybeee).`
 
 function NewsMenuElm() {
-  const [news, setNews] = useState<Types.NewsArticle[]>([
+  const [news,] = useState<Types.NewsArticle[]>([
     {
       title: "Farewell, kocity.xyz",
       time: "2026-11-21T20:41:35.738Z",
